@@ -702,3 +702,70 @@ Unresolved issues / next phase priorities:
 - Could add actual ambient sound effects (currently UI-only toggle)
 - Could add export/import favourites feature
 - Could add share-to-social-media buttons
+
+---
+Task ID: 11
+Agent: Main Developer
+Task: Font refinement and layout cleanup — replace Playfair Display with Cormorant Garamond, remove redundant breadcrumb bar
+
+Work Log:
+- Read worklog.md (10 previous task entries) and all current code files
+- **Font refinement — replaced Playfair Display with Cormorant Garamond**:
+  - Updated Google Fonts @import URL: added Cormorant Garamond (400, 500, 600, 700 + italic 400, 500, 600)
+  - Added Space Grotesk weight 300 for lighter body text option
+  - Replaced ALL 8 instances of `font-family: 'Playfair Display', serif` with `font-family: 'Cormorant Garamond', serif` in globals.css
+  - Cormorant Garamond provides a more refined, archival serif feel that pairs better with Space Grotesk
+- **Font weight and sizing refinements**:
+  - `.vault-title`: Changed from Space Grotesk 700 → Cormorant Garamond 600, letter-spacing 0.05em → 0.08em
+  - `.vault-tagline`: Increased size 1.2rem → 1.25rem, line-height 1.6 → 1.7
+  - `.nav-logo`: Changed from Space Grotesk 700 → Cormorant Garamond 600, added letter-spacing 0.03em
+  - `.nav-logo span` ("Pete"): Added `font-style: italic` for elegant emphasis
+  - `.nav-logo-subtitle`: Changed from Share Tech Mono → Space Grotesk 500 for cleaner look
+  - `.nav-tab`: Increased size 0.6rem → 0.65rem, reduced letter-spacing 0.15em → 0.12em for readability
+  - `.room-title`: Changed from Space Grotesk 700 → Cormorant Garamond 600, added letter-spacing 0.02em
+  - `.room-eyebrow`: Changed from Share Tech Mono → Space Grotesk 500 for consistency
+  - `.room-desc`: Increased size 1.05rem → 1.1rem, line-height 1.5 → 1.6
+  - `.nameplate-title`: Changed weight 700 → 600
+  - `.enter-vault-btn`: Changed weight 700 → 600, size 0.78rem → 0.72rem
+  - `.list-card-title`: Changed from Playfair Display 700 → Cormorant Garamond 600, size 0.85rem → 0.9rem
+  - `.solo-title`: Changed from Playfair Display 700 → Cormorant Garamond 600
+  - Added `-webkit-font-smoothing: antialiased` and `-moz-osx-font-smoothing: grayscale` to body
+  - Added `font-family` and `font-weight` explicitly to `.stat-label`
+- **Removed redundant breadcrumb bar** ("THE VAULT → All Works"):
+  - Removed the `.room-breadcrumb` div from page.tsx JSX (lines 2007-2016)
+  - The breadcrumb was redundant: nav tabs already highlight the active room, and the room header below shows the room name with full description
+  - This eliminates a visual layer between the nav and the gallery content
+  - Tightened `.room-header` padding from `3rem 4rem 1.5rem` → `2rem 3rem 1.25rem` to compensate for the removed bar
+- **QA tested via agent-browser**:
+  - Entrance page: "THE VAULT" title uses Cormorant Garamond 600 at 112px — verified
+  - Gallery nav: breadcrumb completely removed, no "→" or "THE VAULT → All Works" text found
+  - Nav logo: Cormorant Garamond 600 with italic "Pete" span — verified
+  - Room header: "All Works" title uses Cormorant Garamond 600 at 56px — verified
+  - All fonts loaded: Cormorant Garamond (400-700 + italic), Space Grotesk (300-700), Share Tech Mono
+  - No Playfair Display references remain in active CSS
+  - Zero console errors
+- **Lint clean**, zero errors
+
+Stage Summary:
+- **Font refinement** — Playfair Display → Cormorant Garamond throughout (8 CSS instances)
+- **Weight refinement** — Reduced bold weights from 700 to 600 for more elegant hierarchy
+- **Nav logo** — Now uses Cormorant Garamond with italic "Pete" for distinctive branding
+- **Breadcrumb removed** — Eliminated redundant "THE VAULT → All Works" bar between nav and stats
+- **Room header tightened** — Reduced padding to compensate for removed breadcrumb
+- **Antialiased rendering** — Added font-smoothing for crisper text
+- **All 25+ features preserved** — backward compatible changes only
+- **Lint clean**, zero errors, zero console errors
+
+Current project status:
+- Stable and feature-complete with refined "The Vault" typography
+- Cormorant Garamond + Space Grotesk + Share Tech Mono font pairing
+- Cleaner layout without redundant breadcrumb bar
+- All 1212 images loading correctly
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Could add infinite scroll or pagination for large galleries (1212 images)
+- Light theme CSS overrides may need further refinement for Cormorant Garamond
+- Could add actual ambient sound effects (currently UI-only toggle)
+- Could add export/import favourites feature
+- Could add share-to-social-media buttons

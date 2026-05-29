@@ -2003,18 +2003,6 @@ export default function Home() {
       {/* Stats Bar */}
       {!immersiveMode && <StatsBar data={data} favCount={favCount} />}
 
-      {/* FEATURE 4: Breadcrumb / Room Indicator */}
-      <div className="room-breadcrumb">
-        <button
-          className="room-breadcrumb-link"
-          onClick={() => handleRoomChange("all")}
-        >
-          THE VAULT
-        </button>
-        <span className="room-breadcrumb-sep">→</span>
-        <span className="room-breadcrumb-current">{currentRoomName}</span>
-      </div>
-
       {/* Viewed Counter */}
       {!immersiveMode && <div className="viewed-counter">
         <Eye className="w-3 h-3" />
