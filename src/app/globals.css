@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=Space+Grotesk:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -161,7 +161,7 @@
   padding: 0.75rem 1.5rem;
   background: var(--vault-amber);
   color: var(--vault-bg);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -305,7 +305,7 @@ body {
 body {
   background: var(--vault-bg) !important;
   color: var(--vault-cream) !important;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -430,9 +430,9 @@ body {
 
 /* ── Warm logo ── */
 .nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.3rem;
-  font-weight: 600;
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  font-weight: 400;
   color: var(--vault-cream);
   margin-right: auto;
   white-space: nowrap;
@@ -457,8 +457,8 @@ body {
 
 .nav-logo-subtitle {
   display: block;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.55rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.58rem;
   font-weight: 500;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -475,7 +475,7 @@ body {
   padding: 0.15rem 0.5rem;
   border: 1px solid rgba(160,82,45,0.3);
   color: var(--vault-rust);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -499,10 +499,10 @@ body {
 
 /* ── Tab buttons — card catalog drawer labels ── */
 .nav-tab {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.65rem;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--vault-muted);
   border: none;
@@ -531,7 +531,7 @@ body {
 
 /* ── Count badge on tabs ── */
 .nav-tab-count {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   font-weight: 400;
   color: var(--vault-dim);
@@ -652,8 +652,8 @@ body {
   background: rgba(212,168,83,0.03) !important;
   border: 1px solid var(--vault-border) !important;
   color: var(--vault-cream) !important;
-  font-family: 'Share Tech Mono', monospace !important;
-  font-size: 0.8rem !important;
+  font-family: 'JetBrains Mono', monospace !important;
+  font-size: 0.78rem !important;
   padding: 0.35rem 0.8rem !important;
   width: 170px !important;
   height: auto !important;
@@ -680,7 +680,7 @@ body {
   align-items: center;
   gap: 0.4rem;
   padding: 0.4rem 1.5rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -709,7 +709,7 @@ body {
 }
 
 .recently-viewed-label {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -782,7 +782,7 @@ body {
 }
 
 .room-eyebrow {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.35em;
@@ -792,9 +792,9 @@ body {
 }
 
 .room-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   line-height: 1;
   letter-spacing: 0.02em;
@@ -808,7 +808,7 @@ body {
 .room-desc {
   margin-top: 0.8rem;
   color: var(--vault-muted);
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 1.1rem;
   font-weight: 400;
@@ -817,7 +817,7 @@ body {
 }
 
 .room-count {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -929,9 +929,9 @@ body {
 }
 
 .list-card-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   white-space: nowrap;
   overflow: hidden;
@@ -946,7 +946,7 @@ body {
 }
 
 .list-card-tag {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.1em;
   padding: 1px 5px;
@@ -978,7 +978,7 @@ body {
 }
 
 .list-card-gallery {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.1em;
   color: var(--vault-dim);
@@ -1052,14 +1052,14 @@ body {
 }
 
 .solo-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 1.4rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
 }
 
 .solo-gallery {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1125,7 +1125,7 @@ body {
 }
 
 .solo-nav-pos {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
   letter-spacing: 0.15em;
   color: var(--vault-dim);
@@ -1138,7 +1138,7 @@ body {
 }
 
 .all-room-label {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.4em;
   text-transform: uppercase;
@@ -1173,7 +1173,7 @@ body {
   left: -20px;
   top: 50%;
   transform: translateY(-50%) rotate(-90deg);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.5rem;
   letter-spacing: 0.15em;
   color: var(--vault-dim);
@@ -1335,7 +1335,7 @@ body {
   background: var(--vault-dark);
   color: var(--vault-dim);
   font-size: 0.65rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   padding: 1rem;
@@ -1348,7 +1348,7 @@ body {
   position: absolute;
   top: 6px;
   left: 12px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.15em;
   padding: 2px 6px;
@@ -1450,9 +1450,9 @@ body {
 }
 
 .nameplate-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   line-height: 1.3;
   display: -webkit-box;
@@ -1471,7 +1471,7 @@ body {
   position: absolute;
   bottom: 6px;
   right: 10px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.5rem;
   letter-spacing: 0.1em;
   color: var(--vault-amber);
@@ -1491,7 +1491,7 @@ body {
 
 .search-results-header {
   padding: 2rem 4rem 0.5rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -1501,7 +1501,7 @@ body {
 .search-results-header strong {
   color: var(--vault-amber);
   font-size: 1.1rem;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   letter-spacing: 0;
 }
 
@@ -1509,9 +1509,68 @@ body {
   padding: 4rem;
   text-align: center;
   color: var(--vault-muted);
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 1.2rem;
+}
+
+/* ── Showing indicator (pagination count) ── */
+.showing-indicator {
+  padding: 0.75rem 3rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.showing-indicator-sep {
+  color: var(--vault-border);
+}
+
+.showing-indicator-total {
+  color: var(--vault-amber);
+  font-weight: 500;
+}
+
+/* ── Load More button ── */
+.load-more-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 0 1rem;
+}
+
+.load-more-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 2rem;
+  background: transparent;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.3s, color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+
+.load-more-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.04);
+  box-shadow: 0 0 20px var(--vault-glow);
+}
+
+.load-more-remaining {
+  font-weight: 300;
+  opacity: 0.6;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1719,7 +1778,7 @@ body {
   bottom: 8px;
   left: 50%;
   transform: translateX(-50%);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1738,7 +1797,7 @@ body {
 
 /* ── EXIF-like film reference ── */
 .lb-exif-ref {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.15em;
   color: var(--vault-dim);
@@ -1755,7 +1814,7 @@ body {
 
 /* ── Gallery label ── */
 .lb-gallery-tag {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -1765,9 +1824,9 @@ body {
 
 /* ── Lightbox title ── */
 .lb-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 1.5rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   margin-bottom: 0.8rem;
   line-height: 1.3;
@@ -1775,7 +1834,7 @@ body {
 
 /* ── Position counter ── */
 .lb-position {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.75rem;
   color: var(--vault-muted);
   margin-bottom: 0.5rem;
@@ -1814,7 +1873,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-cream);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
   cursor: pointer;
@@ -1843,7 +1902,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-muted);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.68rem;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
@@ -1869,7 +1928,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-muted);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.68rem;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
@@ -1908,7 +1967,7 @@ body {
 
 /* ── Shortcut hint ── */
 .lb-shortcut-hint {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.1em;
   color: var(--vault-dim);
@@ -1921,13 +1980,13 @@ body {
   border: 1px solid var(--vault-border);
   background: var(--vault-card);
   color: var(--vault-muted);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
 }
 
 /* ── Open link ── */
 .lb-open-link {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1947,7 +2006,7 @@ body {
   background: rgba(212,168,83,0.1);
   border: 1px solid var(--vault-amber);
   color: var(--vault-amber);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -2036,7 +2095,7 @@ body {
 }
 
 .mobile-lb-bar-gallery {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -2044,9 +2103,9 @@ body {
 }
 
 .mobile-lb-bar-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   white-space: nowrap;
   overflow: hidden;
@@ -2054,7 +2113,7 @@ body {
 }
 
 .mobile-lb-bar-pos {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   color: var(--vault-dim);
 }
@@ -2091,7 +2150,7 @@ body {
 }
 
 .mobile-lb-nav-pos {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   color: var(--vault-muted);
 }
@@ -2129,7 +2188,7 @@ body {
 }
 
 .mobile-menu-title {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.3em;
   color: var(--vault-amber);
@@ -2163,7 +2222,7 @@ body {
   border: none;
   border-bottom: 1px solid var(--vault-border);
   color: var(--vault-cream);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -2186,7 +2245,7 @@ body {
 
 .mobile-menu-count {
   margin-left: auto;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   color: var(--vault-dim);
 }
@@ -2263,7 +2322,7 @@ body {
 }
 
 .stats-modal-label {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -2271,7 +2330,7 @@ body {
 }
 
 .stats-modal-value {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 1.1rem;
   color: var(--vault-amber);
 }
@@ -2287,7 +2346,7 @@ body {
 
 .stats-modal-accent {
   color: var(--vault-amber);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -2310,14 +2369,14 @@ body {
 }
 
 .stats-modal-gallery-name {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Outfit', sans-serif;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--vault-cream);
 }
 
 .stats-modal-gallery-count {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.8rem;
   color: var(--vault-amber);
 }
@@ -2385,9 +2444,9 @@ body {
 }
 
 .about-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 1.3rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
@@ -2395,15 +2454,15 @@ body {
 }
 
 .about-subtitle {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   margin-bottom: 0.5rem;
 }
 
 .about-desc {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 0.9rem;
   color: var(--vault-muted);
@@ -2427,7 +2486,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
   color: var(--vault-muted);
 }
@@ -2438,7 +2497,7 @@ body {
   border: 1px solid var(--vault-border);
   background: var(--vault-card);
   color: var(--vault-amber);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.65rem;
 }
 
@@ -2446,7 +2505,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   color: var(--vault-rust);
   text-decoration: none;
@@ -2470,7 +2529,7 @@ body {
   background: var(--vault-card);
   border: 1px solid var(--vault-amber);
   color: var(--vault-cream);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.1em;
   z-index: 9999;
@@ -2508,7 +2567,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -2522,14 +2581,14 @@ body {
 }
 
 .vault-footer-brand {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 0.8rem;
   color: var(--vault-dim);
 }
 
 .vault-footer-version {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.2em;
   color: var(--vault-border);
@@ -2774,7 +2833,7 @@ body {
 }
 
 .scroll-hint-text {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.55rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -2814,7 +2873,7 @@ body {
 }
 
 .immersive-room-name {
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.7rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
@@ -2829,7 +2888,7 @@ body {
   border: 1px solid var(--vault-border);
   background: none;
   color: var(--vault-muted);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'JetBrains Mono', monospace;
   font-size: 0.6rem;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -2884,9 +2943,9 @@ body {
 
 .quick-preview-title {
   padding: 0.5rem 0.75rem;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'DM Serif Display', serif;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--vault-cream);
   white-space: nowrap;
   overflow: hidden;

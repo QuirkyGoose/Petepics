@@ -1036,3 +1036,58 @@ Unresolved issues / next phase priorities:
 - Could add more micro-interactions
 - Could add infinite scroll or pagination improvements
 - Could add focus trap in lightbox modal for full keyboard accessibility
+
+---
+Task ID: 14
+Agent: Main Developer
+Task: Replace fonts with refined alternatives, fix "Showing" indicator styling
+
+Work Log:
+- Read worklog.md and assessed current project status
+- User complained about messy "Showing 60 · of 1212" indicator and not liking current fonts
+- **Font replacement** — Complete swap of all three fonts:
+  - Cormorant Garamond (serif) → **DM Serif Display** — elegant editorial, modern classic
+  - Space Grotesk (sans-serif) → **Outfit** — clean, refined, excellent weight range (100-900)
+  - Share Tech Mono (monospace) → **JetBrains Mono** — developer-favourite, refined, excellent readability
+- Updated Google Fonts @import URL in globals.css
+- Replaced all 65+ font-family references:
+  - 'Cormorant Garamond', serif → 'DM Serif Display', serif (14 instances)
+  - 'Space Grotesk', sans-serif → 'Outfit', sans-serif (12 instances)
+  - 'Share Tech Mono', monospace → 'JetBrains Mono', monospace (43 instances)
+- Fixed font-weight declarations for DM Serif Display (only supports 400, not 600):
+  - Changed all font-weight: 600 → 400 on DM Serif Display elements
+  - DM Serif Display is already a bold display font so 600 was redundant
+- **Font size adjustments** for new font rendering:
+  - .nav-logo: 1.3rem → 1.35rem (DM Serif Display slightly smaller at same size)
+  - .nav-logo-subtitle: 0.55rem → 0.58rem (Outfit renders tighter)
+  - .nav-tab: 0.65rem → 0.68rem, letter-spacing: 0.12em → 0.1em (Outfit renders tighter)
+  - .gallery-search: 0.8rem → 0.78rem (JetBrains Mono slightly wider)
+- **"Showing" indicator styling** — previously had no CSS at all:
+  - Added .showing-indicator with JetBrains Mono, proper padding, letter-spacing, flex layout
+  - Added .showing-indicator-sep with subtle border color for the · separator
+  - Added .showing-indicator-total with amber accent and medium weight for the total count
+- **"Load More" button styling** — previously only had focus-visible CSS:
+  - Added .load-more-wrap with centered flex layout and padding
+  - Added .load-more-btn with JetBrains Mono, amber border hover, glow effect
+  - Added .load-more-remaining with light weight and reduced opacity
+- QA tested with agent-browser:
+  - All three fonts correctly loaded and applied
+  - DM Serif Display gives editorial serif look to logo and titles
+  - Outfit provides clean sans-serif for nav and body
+  - JetBrains Mono gives crisp monospace to counts and labels
+  - Showing indicator and Load More button both look clean and well-styled
+  - Zero JavaScript errors
+- Lint passes clean with zero errors
+
+Stage Summary:
+- **Complete font swap** — Cormorant Garamond → DM Serif Display, Space Grotesk → Outfit, Share Tech Mono → JetBrains Mono
+- **Showing indicator fixed** — proper JetBrains Mono styling with amber total count accent
+- **Load More button styled** — clean mono button with amber hover glow
+- **Font weights corrected** — DM Serif Display set to 400 throughout
+- **Lint clean**, zero errors, no runtime errors
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Light theme CSS may need font-size adjustments for new fonts
+- Could add focus trap in lightbox modal
+- Could add more micro-interactions with new font aesthetic
