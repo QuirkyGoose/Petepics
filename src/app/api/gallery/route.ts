@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { readFileSync, writeFileSync, existsSync } from "fs";
+import { join } from "path";
 
 const GALLERY_DEFS = [
   { id: "pobots", name: "Pobots", albumHex: "VML2tRn" },
@@ -25,13 +27,10 @@ interface GalleryData {
   works: GalleryWork[];
 }
 
-interface CachedData {
-  timestamp: number;
-  data: {
-    galleries: Record<string, GalleryData>;
-    allWorks: GalleryWork[];
-    totalWorks: number;
-  };
+interface GalleryResponse {
+  galleries: Record<string, GalleryData>;
+  allWorks: GalleryWork[];
+  totalWorks: number;
 }
 
 const GALLERY_META: Record<string, { name: string; tagline: string; wallClass: string }> = {
@@ -41,6 +40,9 @@ const GALLERY_META: Record<string, { name: string; tagline: string; wallClass: s
   pisc: { name: "Pisc", tagline: "A miscellany. A cornucopia. A Pisc.", wallClass: "room-wall-4" },
   submissions: { name: "Submissions", tagline: "Community contributions — submit your own Pete Pics via the spreadsheet.", wallClass: "room-wall-submissions" },
 };
+
+const CACHE_FILE = join(process.cwd(), "db", "gallery-cache.json");
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes in-memory, 2 hours file
 
 function deriveTitle(name: string): string {
   try {
@@ -55,7 +57,7 @@ function deriveTitle(name: string): string {
 async function fetchGalleryPage(
   albumHex: string,
   page: number
-): Promise<{ images: Array<[string, string, string, string]>; hasMore: boolean }> {
+): Promise<{ images: Array<(string | number | boolean)[]>; hasMore: boolean }> {
   const apiUrl = `https://postimg.cc/json?action=list&page=${page}&album=${albumHex}`;
 
   const res = await fetch(apiUrl, {
@@ -63,8 +65,9 @@ async function fetchGalleryPage(
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       Accept: "application/json",
+      Referer: "https://postimg.cc/",
     },
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(15000),
   });
 
   if (!res.ok) {
@@ -72,22 +75,46 @@ async function fetchGalleryPage(
   }
 
   const data = await res.json();
+
+  if (data.error) {
+    throw new Error(`API error for ${albumHex}: ${data.error.message || JSON.stringify(data.error)}`);
+  }
+
   const images = data.images || [];
   const hasMore = data.has_page_next === true || data.has_page_next === "true";
 
   return { images, hasMore };
 }
 
-/* ── In-memory cache with 10-minute TTL ────────────────────── */
-let cachedData: CachedData | null = null;
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+/* ── File-based cache ─────────────────────────────────────── */
+function readCacheFile(): { data: GalleryResponse; timestamp: number } | null {
+  try {
+    if (!existsSync(CACHE_FILE)) return null;
+    const raw = readFileSync(CACHE_FILE, "utf-8");
+    const cached = JSON.parse(raw);
+    if (cached && cached.data && cached.timestamp) return cached;
+  } catch {}
+  return null;
+}
 
-async function fetchAllGalleries() {
+function writeCacheFile(data: GalleryResponse): void {
+  try {
+    writeFileSync(CACHE_FILE, JSON.stringify({ data, timestamp: Date.now() }), "utf-8");
+  } catch (err) {
+    console.warn("Failed to write gallery cache file:", err);
+  }
+}
+
+/* ── In-memory cache ──────────────────────────────────────── */
+let memoryCache: { data: GalleryResponse; timestamp: number } | null = null;
+
+async function fetchAllGalleries(): Promise<GalleryResponse> {
   const galleries: Record<string, GalleryData> = {};
   const allWorks: GalleryWork[] = [];
 
-  // Fetch galleries sequentially with retry to avoid rate-limiting from postimg.cc
-  for (const def of GALLERY_DEFS) {
+  // Fetch galleries sequentially with delays to avoid rate-limiting
+  for (let gi = 0; gi < GALLERY_DEFS.length; gi++) {
+    const def = GALLERY_DEFS[gi];
     const meta = GALLERY_META[def.id];
     let page = 1;
     let hasMore = true;
@@ -106,7 +133,7 @@ async function fetchAllGalleries() {
         const result = await fetchGalleryPage(def.albumHex, page);
 
         for (const img of result.images) {
-          const [id, , name, ext] = img;
+          const [id, , name, ext] = img as [string, string, string, string, ...unknown[]];
           const file = `${name.replace(/ /g, "-")}.${ext}`;
           const imageUrl = `https://i.postimg.cc/${id}/${file}`;
           const work: GalleryWork = {
@@ -124,14 +151,13 @@ async function fetchAllGalleries() {
 
         hasMore = result.hasMore;
         page++;
-        retries = 0; // Reset retries on success
-        // Small delay between pages to avoid rate-limiting
-        if (hasMore) await new Promise((r) => setTimeout(r, 500));
+        retries = 0;
+        if (hasMore) await new Promise((r) => setTimeout(r, 600));
       } catch (err) {
         retries++;
-        if (retries <= 3) {
+        if (retries <= 2) {
           console.warn(`Retry ${retries} for ${def.name} page ${page}:`, err);
-          await new Promise((r) => setTimeout(r, 3000 * retries));
+          await new Promise((r) => setTimeout(r, 2000 * retries));
         } else {
           console.warn(`Failed to fetch ${def.name} page ${page} after ${retries} retries:`, err);
           hasMore = false;
@@ -140,8 +166,8 @@ async function fetchAllGalleries() {
     }
 
     // Delay between galleries to avoid rate-limiting
-    if (GALLERY_DEFS.indexOf(def) < GALLERY_DEFS.length - 1) {
-      await new Promise((r) => setTimeout(r, 2000));
+    if (gi < GALLERY_DEFS.length - 1) {
+      await new Promise((r) => setTimeout(r, 1500));
     }
   }
 
@@ -150,27 +176,37 @@ async function fetchAllGalleries() {
 
 export async function GET(request: Request) {
   try {
-    // Check for force-refresh parameter
     const url = new URL(request.url);
     const forceRefresh = url.searchParams.get("refresh") === "true";
 
-    // Return cached data if still fresh (unless force-refresh requested)
-    if (!forceRefresh && cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
-      return NextResponse.json(cachedData.data);
+    // 1. Check memory cache (10-min TTL)
+    if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
+      return NextResponse.json(memoryCache.data);
     }
 
+    // 2. Check file cache (2-hour TTL — survives restarts)
+    if (!forceRefresh) {
+      const fileCache = readCacheFile();
+      if (fileCache && Date.now() - fileCache.timestamp < 2 * 60 * 60 * 1000) {
+        memoryCache = fileCache;
+        return NextResponse.json(fileCache.data);
+      }
+    }
+
+    // 3. Fetch fresh data
     const data = await fetchAllGalleries();
 
-    // Update cache
-    cachedData = { timestamp: Date.now(), data };
+    // Update both caches
+    memoryCache = { data, timestamp: Date.now() };
+    writeCacheFile(data);
 
     return NextResponse.json(data);
   } catch (error) {
     console.error("Gallery fetch error:", error);
-    // Return stale cache if available, otherwise error
-    if (cachedData) {
-      return NextResponse.json(cachedData.data);
-    }
+    // Return stale cache if available
+    if (memoryCache) return NextResponse.json(memoryCache.data);
+    const fileCache = readCacheFile();
+    if (fileCache) return NextResponse.json(fileCache.data);
     return NextResponse.json(
       { error: "Failed to fetch gallery data", galleries: {}, allWorks: [], totalWorks: 0 },
       { status: 500 }

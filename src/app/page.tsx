@@ -1883,6 +1883,31 @@ export default function Home() {
       <div className="flex-1">
         <div className="wainscot" />
 
+        {/* Loading Skeleton */}
+        {loading && (
+          <div className="gallery-wall">
+            <div className="loading-header">
+              <div className="loading-spinner" />
+              <span className="loading-text">Loading the vault archive…</span>
+            </div>
+            <div className="gallery-grid">
+              {Array.from({ length: 12 }).map((_, i) => (
+                <div key={i} className="skeleton-card">
+                  <div className="skeleton-frame">
+                    <div className="skeleton-image" />
+                  </div>
+                  <div className="skeleton-nameplate">
+                    <div className="skeleton-line skeleton-line-title" />
+                    <div className="skeleton-line skeleton-line-tag" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!loading && (
+        <>
         {/* FEATURE 7: Room transition animation line */}
         <AnimatePresence>
           <motion.div
@@ -2098,6 +2123,8 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
         </div>
+        </>
+        )}
       </div>
       </main>
 
