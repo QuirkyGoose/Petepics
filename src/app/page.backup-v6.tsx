@@ -32,8 +32,6 @@ import {
   Columns2,
   Volume2,
   VolumeX,
-  Upload,
-  DownloadCloud,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -87,8 +85,6 @@ const ROOMS = [
 ] as const;
 
 type ViewMode = "grid" | "list" | "solo";
-
-const PAGE_SIZE = 60;
 
 /* ── Twitch SVG Icon ──────────────────────────────────────── */
 function TwitchIcon({
@@ -910,73 +906,15 @@ function StatsModal({
   );
 }
 
-/* ── About Modal (with Export/Import Favourites) ───────────── */
+/* ── About Modal ──────────────────────────────────────────── */
 function AboutModal({
   isOpen,
   onClose,
-  showToast,
 }: {
   isOpen: boolean;
   onClose: () => void;
-  showToast: (msg: string) => void;
 }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   if (!isOpen) return null;
-
-  const handleExport = () => {
-    try {
-      const stored = localStorage.getItem(FAVS_STORAGE_KEY) || "[]";
-      const blob = new Blob([stored], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "petepics-favourites.json";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      showToast("Favourites exported successfully!");
-    } catch {
-      showToast("Export failed — could not read favourites");
-    }
-  };
-
-  const handleImport = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const text = ev.target?.result as string;
-        const parsed = JSON.parse(text);
-        if (!Array.isArray(parsed)) {
-          showToast("Invalid format — expected a JSON array of IDs");
-          return;
-        }
-        // Validate all items are strings
-        const validIds = parsed.filter((id: unknown) => typeof id === "string");
-        if (validIds.length === 0) {
-          showToast("No valid IDs found in the file");
-          return;
-        }
-        // Merge with existing
-        const existing = JSON.parse(localStorage.getItem(FAVS_STORAGE_KEY) || "[]");
-        const merged = Array.from(new Set([...existing, ...validIds]));
-        localStorage.setItem(FAVS_STORAGE_KEY, JSON.stringify(merged));
-        showToast(`Imported ${validIds.length} favourites! Reload to see changes.`);
-      } catch {
-        showToast("Import failed — invalid JSON file");
-      }
-    };
-    reader.readAsText(file);
-    // Reset the input so the same file can be re-imported
-    e.target.value = "";
-  };
 
   return (
     <AnimatePresence>
@@ -1056,28 +994,6 @@ function AboutModal({
             </div>
           </div>
           <div className="about-divider" />
-
-          {/* Favourites Management */}
-          <h4 className="about-subtitle">Favourites Management</h4>
-          <div className="favs-management-section">
-            <button className="favs-export-btn" onClick={handleExport}>
-              <DownloadCloud className="w-4 h-4" />
-              <span>Export Favourites</span>
-            </button>
-            <button className="favs-import-btn" onClick={handleImport}>
-              <Upload className="w-4 h-4" />
-              <span>Import Favourites</span>
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".json"
-              style={{ display: "none" }}
-              onChange={handleFileChange}
-            />
-          </div>
-
-          <div className="about-divider" />
           <a
             className="about-twitch-link"
             href={TWITCH_URL}
@@ -1136,8 +1052,6 @@ export default function Home() {
   const [ambientSound, setAmbientSound] = useState(false);
   const [vaultDoorOpen, setVaultDoorOpen] = useState(false);
   const [titleParallax, setTitleParallax] = useState({ x: 0, y: 0 });
-  const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
-  const [roomTransitionKey, setRoomTransitionKey] = useState(0);
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
@@ -1149,15 +1063,6 @@ export default function Home() {
     setToastMessage(msg);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
-  }, []);
-
-  /* FEATURE 1: Hash-Based Deep Linking — read hash on mount */
-  useEffect(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (hash && ROOMS.some((r) => r.id === hash)) {
-      setCurrentRoom(hash);
-      setPhase("gallery");
-    }
   }, []);
 
   /* Parallax effect on entrance title */
@@ -1218,22 +1123,15 @@ export default function Home() {
     setTimeout(() => {
       setPhase("gallery");
       setVaultDoorOpen(false);
-      // FEATURE 1: Set hash when entering gallery
-      window.location.hash = "all";
     }, 600);
   }, []);
 
-  /* Room change handler — FEATURE 1: update hash, FEATURE 2: reset pagination */
+  /* Room change handler */
   const handleRoomChange = useCallback((room: string) => {
     setCurrentRoom(room);
     setSearchQuery("");
     setMobileMenuOpen(false);
-    setDisplayCount(PAGE_SIZE); // FEATURE 2: reset pagination on room switch
     window.scrollTo({ top: 56, behavior: "smooth" });
-    // FEATURE 1: Update URL hash
-    window.location.hash = room;
-    // FEATURE 7: Room transition animation key
-    setRoomTransitionKey((k) => k + 1);
   }, []);
 
   /* Lightbox navigation */
@@ -1440,12 +1338,6 @@ export default function Home() {
   }, [data, currentRoom, searchQuery, favs]);
 
   const visibleWorks = getVisibleWorks();
-
-  // FEATURE 2: Pagination — show limited number unless searching
-  const isSearching = searchQuery.trim().length > 0;
-  const displayedWorks = isSearching ? visibleWorks : visibleWorks.slice(0, displayCount);
-  const remaining = isSearching ? 0 : Math.max(0, visibleWorks.length - displayCount);
-
   const currentLightboxWork = lightboxItems[lightboxIndex];
   const nextLightboxWork = lightboxItems[(lightboxIndex + 1) % lightboxItems.length];
 
@@ -1464,15 +1356,6 @@ export default function Home() {
 
   /* Solo view current work */
   const soloWork = viewMode === "solo" && visibleWorks.length > 0 ? visibleWorks[0] : null;
-
-  /* FEATURE 4: Get current room display name */
-  const currentRoomName = currentRoom === "all"
-    ? "All Works"
-    : currentRoom === "favourites"
-    ? "Your Favourites"
-    : currentRoom === "nacky"
-    ? "The Nacky Nook"
-    : data?.galleries[currentRoom]?.name || currentRoom;
 
   /* ────── ENTRANCE — "The Vault Door" ────── */
   if (phase === "entrance") {
@@ -1632,7 +1515,7 @@ export default function Home() {
       <nav className="gallery-nav">
         <button
           className="nav-back-btn"
-          onClick={() => { setPhase("entrance"); window.location.hash = ""; }}
+          onClick={() => setPhase("entrance")}
           aria-label="Back to entrance"
           title="Back to Entrance"
         >
@@ -1884,18 +1767,6 @@ export default function Home() {
       {/* Stats Bar */}
       <StatsBar data={data} favCount={favCount} />
 
-      {/* FEATURE 4: Breadcrumb / Room Indicator */}
-      <div className="room-breadcrumb">
-        <button
-          className="room-breadcrumb-link"
-          onClick={() => handleRoomChange("all")}
-        >
-          THE VAULT
-        </button>
-        <span className="room-breadcrumb-sep">→</span>
-        <span className="room-breadcrumb-current">{currentRoomName}</span>
-      </div>
-
       {/* Viewed Counter */}
       <div className="viewed-counter">
         <Eye className="w-3 h-3" />
@@ -1939,7 +1810,13 @@ export default function Home() {
               : "VAULT CHAMBER"}
           </div>
           <h2 className="room-title">
-            {currentRoomName}
+            {currentRoom === "all"
+              ? "All Works"
+              : currentRoom === "favourites"
+              ? "Your Favourites"
+              : currentRoom === "nacky"
+              ? "The Nacky Nook"
+              : data?.galleries[currentRoom]?.name || currentRoom}
           </h2>
           {(currentRoom === "favourites" || currentRoom === "nacky") && (
             <p className="room-desc">
@@ -1959,29 +1836,10 @@ export default function Home() {
       <main className="flex-1">
         <div className="wainscot" />
 
-        {/* FEATURE 7: Room transition animation line */}
-        <AnimatePresence>
-          <motion.div
-            key={roomTransitionKey}
-            className="room-transition-line"
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1, opacity: [1, 1, 0] }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
-        </AnimatePresence>
-
         {/* Search results header */}
         {searchQuery && (
           <div className="search-results-header">
             Found <strong>{visibleWorks.length}</strong> works matching &quot;{searchQuery}&quot;
-          </div>
-        )}
-
-        {/* FEATURE 2: Showing indicator */}
-        {!isSearching && visibleWorks.length > PAGE_SIZE && (
-          <div className="showing-indicator">
-            Showing {displayedWorks.length} <span className="showing-indicator-sep">·</span> of <span className="showing-indicator-total">{visibleWorks.length}</span>
           </div>
         )}
 
@@ -2020,7 +1878,7 @@ export default function Home() {
               ) : viewMode === "list" ? (
                 /* ── LIST VIEW ── */
                 <div className="gallery-list">
-                  {displayedWorks.map((work, i) => (
+                  {visibleWorks.map((work, i) => (
                     <ListCard
                       key={work.id}
                       work={work}
@@ -2089,7 +1947,7 @@ export default function Home() {
               ) : (
                 /* ── GRID VIEW (default) ── */
                 <div className="gallery-grid">
-                  {displayedWorks.map((work, i) => (
+                  {visibleWorks.map((work, i) => (
                     <ArtworkCard
                       key={work.id}
                       work={work}
@@ -2101,19 +1959,6 @@ export default function Home() {
                   ))}
                 </div>
               )}
-
-              {/* FEATURE 2: Load More button */}
-              {remaining > 0 && !isSearching && (
-                <div className="load-more-wrap">
-                  <button
-                    className="load-more-btn"
-                    onClick={() => setDisplayCount((c) => c + PAGE_SIZE)}
-                  >
-                    <span>LOAD MORE</span>
-                    <span className="load-more-remaining">· {remaining} WORKS REMAINING</span>
-                  </button>
-                </div>
-              )}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -2121,14 +1966,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="vault-footer">
-        <div className="vault-footer-filmstrip" aria-hidden="true" />
         <div className="vault-footer-inner">
-          <div className="vault-footer-brand">
-            Built with ❤️ by the Pete Pics community
-          </div>
-          <div className="vault-footer-emblem" aria-hidden="true">
-            <Film className="w-5 h-5" />
-          </div>
           <div className="vault-footer-links">
             <a
               className="footer-link"
@@ -2148,7 +1986,10 @@ export default function Home() {
               📊 Pete Pics Spreadsheet
             </a>
           </div>
-          <div className="vault-footer-version">v7.0</div>
+          <div className="vault-footer-brand">
+            Built with ❤️ by the Pete Pics community
+          </div>
+          <div className="vault-footer-version">v6.0</div>
         </div>
       </footer>
 
@@ -2178,8 +2019,8 @@ export default function Home() {
         onGoToIndex={goToIndex}
       />
 
-      {/* About Modal — with Export/Import Favourites */}
-      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} showToast={showToast} />
+      {/* About Modal */}
+      <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
 
       {/* Stats Modal */}
       <StatsModal

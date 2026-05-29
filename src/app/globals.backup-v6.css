@@ -1,0 +1,3050 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Space+Grotesk:wght@400;500;700&family=Share+Tech+Mono&display=swap');
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* ── The Vault — Retro-Futuristic Film Archive Variables ─── */
+  --vault-bg: #1a1814;
+  --vault-dark: #211e18;
+  --vault-card: #2a2520;
+  --vault-amber: #d4a853;
+  --vault-cream: #e8dcc8;
+  --vault-muted: #8a7d6a;
+  --vault-dim: #5a5245;
+  --vault-red: #c4473a;
+  --vault-rust: #a0522d;
+  --vault-sage: #6b7c5e;
+  --vault-rose: #b5707e;
+  --vault-border: #3d352a;
+  --vault-glow: rgba(212,168,83,0.15);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ── Light theme overrides for The Vault ── */
+[data-theme="light"] {
+  --vault-bg: #f5f0e6;
+  --vault-dark: #e8e0d0;
+  --vault-card: #ede7da;
+  --vault-cream: #2a2520;
+  --vault-muted: #6b6355;
+  --vault-dim: #9a9183;
+  --vault-border: #d0c8b8;
+  --vault-glow: rgba(212,168,83,0.1);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PETE PICS — THE VAULT
+   Retro-Futuristic Film Archive — v6
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── CUSTOM SCROLLBAR — Warm vault styled ────────────── */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--vault-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--vault-card);
+  border: 1px solid var(--vault-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vault-amber);
+  border-color: var(--vault-amber);
+}
+
+/* ── GLOBAL BODY OVERRIDES ─────────────────────── */
+
+body {
+  background: var(--vault-bg) !important;
+  color: var(--vault-cream) !important;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ── KEYFRAME ANIMATIONS ───────────────────────── */
+
+/* Shimmer for loading states */
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* Spinner rotation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pulsing opacity */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 1;   }
+}
+
+/* Film reel spin */
+@keyframes reelSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Film grain noise */
+@keyframes filmGrain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-1%, -1%); }
+  20% { transform: translate(1%, 0%); }
+  30% { transform: translate(-1%, 1%); }
+  40% { transform: translate(1%, -1%); }
+  50% { transform: translate(-1%, 0%); }
+  60% { transform: translate(0%, 1%); }
+  70% { transform: translate(1%, 0%); }
+  80% { transform: translate(-1%, -1%); }
+  90% { transform: translate(0%, 1%); }
+}
+
+/* Vault door heavy open glow */
+@keyframes vaultGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px var(--vault-glow), 0 0 20px rgba(212,168,83,0.08);
+  }
+  50% {
+    box-shadow: 0 0 15px var(--vault-glow), 0 0 35px rgba(212,168,83,0.15), 0 0 50px rgba(212,168,83,0.05);
+  }
+}
+
+/* Typing cursor blink */
+@keyframes cursorBlink {
+  0%, 50%  { border-color: var(--vault-amber); }
+  51%, 100% { border-color: transparent; }
+}
+
+/* Subtle flicker for projector feel */
+@keyframes projectorFlicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.92; }
+  94% { opacity: 1; }
+  97% { opacity: 0.96; }
+  98% { opacity: 1; }
+}
+
+/* REC indicator blink */
+@keyframes recBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Ken Burns slow pan + zoom */
+@keyframes kenBurns {
+  0% { transform: scale(1) translate(0, 0); }
+  25% { transform: scale(1.04) translate(-1%, -0.5%); }
+  50% { transform: scale(1.06) translate(0.5%, -1%); }
+  75% { transform: scale(1.03) translate(-0.5%, 0.5%); }
+  100% { transform: scale(1) translate(0, 0); }
+}
+
+/* Typewriter animation for nameplate */
+@keyframes typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+/* Film strip scroll */
+@keyframes filmStripScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-20px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ENTRANCE SECTION — "The Vault Door"
+   ═══════════════════════════════════════════════════════════ */
+
+.entrance-section {
+  min-height: 100vh;
+  background: var(--vault-bg);
+  background-image:
+    radial-gradient(ellipse at 50% 20%, rgba(212,168,83,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 70%, rgba(160,82,45,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 80%, rgba(107,124,94,0.03) 0%, transparent 40%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Film grain texture overlay */
+.entrance-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  animation: filmGrain 0.5s steps(4) infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Amber light cone from top-center */
+.entrance-light-cone {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 300px;
+  height: 60vh;
+  background: linear-gradient(
+    180deg,
+    rgba(212,168,83,0.06) 0%,
+    rgba(212,168,83,0.02) 40%,
+    transparent 100%
+  );
+  clip-path: polygon(35% 0%, 65% 0%, 100% 100%, 0% 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.entrance-inner {
+  padding: 4rem 2rem;
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ── Film reel badge — spinning reel animation ── */
+.vault-reel-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 110px;
+  height: 110px;
+  border: 3px solid var(--vault-amber);
+  border-radius: 50%;
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.04);
+  margin-bottom: 2.5rem;
+  animation: vaultGlow 4s ease-in-out infinite;
+  position: relative;
+}
+
+.vault-reel-badge::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border: 2px solid var(--vault-border);
+  border-top-color: var(--vault-amber);
+  border-radius: 50%;
+  animation: reelSpin 6s linear infinite;
+}
+
+/* Film reel sprocket holes around the badge */
+.vault-reel-badge::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: 1px dashed rgba(212,168,83,0.2);
+  border-radius: 50%;
+  animation: reelSpin 10s linear infinite reverse;
+}
+
+/* ── THE VAULT title — massive brutalist with parallax ── */
+.vault-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(3.5rem, 10vw, 7rem);
+  font-weight: 700;
+  color: var(--vault-cream);
+  letter-spacing: 0.05em;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+  text-shadow:
+    0 0 15px rgba(212,168,83,0.2),
+    0 0 30px rgba(212,168,83,0.08),
+    0 2px 0 var(--vault-border);
+  position: relative;
+  transition: text-shadow 0.3s;
+}
+
+.vault-title span {
+  color: var(--vault-amber);
+}
+
+.vault-title:hover {
+  text-shadow:
+    0 0 20px rgba(212,168,83,0.4),
+    0 0 40px rgba(212,168,83,0.15),
+    0 2px 0 var(--vault-border);
+}
+
+/* ── Monospace subtitle with typing cursor ── */
+.vault-subtitle {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.4em;
+  color: var(--vault-amber);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  padding-right: 4px;
+  border-right: 2px solid var(--vault-amber);
+  animation: cursorBlink 1s step-end infinite;
+  display: inline-block;
+}
+
+/* ── Italic tagline in Playfair Display ── */
+.vault-tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--vault-muted);
+  margin-bottom: 3.5rem;
+  max-width: 480px;
+  margin-inline: auto;
+  line-height: 1.6;
+}
+
+/* ── ACCESS THE VAULT button — heavy brutalist ── */
+.enter-vault-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.9rem 3.5rem;
+  border: 2px solid var(--vault-amber);
+  color: var(--vault-amber);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  cursor: pointer;
+  background: transparent;
+  transition: color 0.3s, box-shadow 0.3s, background 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Film-strip-like notched edges */
+.enter-vault-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 6px,
+    var(--vault-amber) 6px,
+    var(--vault-amber) 10px,
+    transparent 10px,
+    transparent 16px
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.enter-vault-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 4px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 6px,
+    var(--vault-amber) 6px,
+    var(--vault-amber) 10px,
+    transparent 10px,
+    transparent 16px
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.enter-vault-btn:hover {
+  color: var(--vault-bg);
+  background: var(--vault-amber);
+  box-shadow:
+    0 0 25px var(--vault-glow),
+    0 0 50px rgba(212,168,83,0.1);
+}
+
+.enter-vault-btn:hover::before,
+.enter-vault-btn:hover::after {
+  opacity: 0.5;
+}
+
+/* ── Arrow icon inside button ── */
+.enter-vault-btn-arrow {
+  transition: transform 0.3s ease;
+}
+
+.enter-vault-btn:hover .enter-vault-btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ── Spinning film reel loading indicator ── */
+.vault-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+}
+
+.vault-loading-reel {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--vault-border);
+  border-top-color: var(--vault-amber);
+  border-radius: 50%;
+  animation: reelSpin 1s linear infinite;
+}
+
+/* ── Bottom count display ── */
+.vault-count {
+  position: absolute;
+  bottom: 2rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--vault-dim);
+  text-transform: uppercase;
+  z-index: 3;
+}
+
+/* ── Twitch link card with rust/amber ── */
+.twitch-vault-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(160,82,45,0.4);
+  color: var(--vault-rust);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  background: rgba(160,82,45,0.06);
+  cursor: pointer;
+  transition: border-color 0.3s, background 0.3s, color 0.3s, box-shadow 0.3s;
+}
+
+.twitch-vault-card:hover {
+  border-color: var(--vault-rust);
+  background: rgba(160,82,45,0.12);
+  color: var(--vault-amber);
+  box-shadow:
+    0 0 20px rgba(160,82,45,0.2),
+    inset 0 0 10px rgba(160,82,45,0.03);
+}
+
+.twitch-vault-card svg {
+  flex-shrink: 0;
+}
+
+/* Boot sequence line */
+.boot-sequence {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  margin-bottom: 1.5rem;
+}
+
+/* ── Film strip decoration lines (top/bottom of entrance) ── */
+.film-strip-decoration {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--vault-border) 0px,
+    var(--vault-border) 12px,
+    transparent 12px,
+    transparent 20px,
+    var(--vault-border) 20px,
+    var(--vault-border) 24px,
+    transparent 24px,
+    transparent 40px
+  );
+  opacity: 0.3;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.film-strip-top {
+  top: 0;
+}
+
+.film-strip-bottom {
+  bottom: 0;
+}
+
+/* ── REC indicator ── */
+.rec-indicator {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: var(--vault-red);
+  z-index: 4;
+}
+
+.rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vault-red);
+  animation: recBlink 1.5s ease-in-out infinite;
+}
+
+/* ── Vault door opening overlay ── */
+.vault-door-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--vault-amber);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION — Sticky warm dark nav with amber accents
+   ═══════════════════════════════════════════════════════════ */
+
+.gallery-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--vault-dark);
+  border-bottom: 2px solid var(--vault-amber);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.4), 0 1px 0 rgba(212,168,83,0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  height: 56px;
+  gap: 0;
+  backdrop-filter: blur(12px);
+}
+
+/* ── Back button with warm hover ── */
+.nav-back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-muted);
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+  margin-right: 0.75rem;
+}
+
+.nav-back-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+  box-shadow: 0 0 12px var(--vault-glow);
+}
+
+/* ── Warm logo ── */
+.nav-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.nav-logo span {
+  color: var(--vault-amber);
+}
+
+.nav-logo-subtitle {
+  display: block;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  margin-top: -2px;
+}
+
+/* ── Twitch badge with rust color ── */
+.nav-twitch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: 0.75rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid rgba(160,82,45,0.3);
+  color: var(--vault-rust);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.nav-twitch-badge:hover {
+  border-color: var(--vault-rust);
+  color: var(--vault-amber);
+  background: rgba(160,82,45,0.08);
+  box-shadow: 0 0 12px rgba(160,82,45,0.2);
+}
+
+/* ── Tab container — card catalog drawer style ── */
+.nav-tabs {
+  display: flex;
+  gap: 0;
+  height: 100%;
+}
+
+/* ── Tab buttons — card catalog drawer labels ── */
+.nav-tab {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0 0.8rem;
+  height: 100%;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.nav-tab:hover {
+  color: var(--vault-cream);
+}
+
+/* ── Active tab with amber highlight line, slightly raised ── */
+.nav-tab.active {
+  color: var(--vault-amber);
+  border-bottom-color: var(--vault-amber);
+  box-shadow: 0 2px 8px var(--vault-glow);
+}
+
+/* ── Count badge on tabs ── */
+.nav-tab-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: var(--vault-dim);
+  background: rgba(212,168,83,0.06);
+  padding: 0.1rem 0.4rem;
+  line-height: 1;
+}
+
+.nav-tab.active .nav-tab-count {
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.12);
+}
+
+/* ── Special rust style for Nacky Nook tab ── */
+.nav-tab-nacky {
+  color: rgba(160,82,45,0.6) !important;
+}
+
+.nav-tab-nacky:hover {
+  color: var(--vault-rust) !important;
+}
+
+.nav-tab-nacky.active {
+  color: var(--vault-rust) !important;
+  border-bottom-color: var(--vault-rust) !important;
+  box-shadow: 0 2px 8px rgba(160,82,45,0.2) !important;
+}
+
+/* ── Special red style for Favourites tab ── */
+.nav-tab-fav {
+  color: rgba(196,71,58,0.5) !important;
+}
+
+.nav-tab-fav:hover {
+  color: var(--vault-red) !important;
+}
+
+.nav-tab-fav.active {
+  color: var(--vault-red) !important;
+  border-bottom-color: var(--vault-red) !important;
+  box-shadow: 0 2px 8px rgba(196,71,58,0.2) !important;
+}
+
+/* ── Action buttons container ── */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: 1rem;
+}
+
+/* ── Square icon buttons with amber border hover ── */
+.nav-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-muted);
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.nav-action-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+  box-shadow: 0 0 12px var(--vault-glow);
+}
+
+/* ── View mode toggle group ── */
+.nav-view-toggle {
+  display: flex;
+  border: 1px solid var(--vault-border);
+  overflow: hidden;
+}
+
+.nav-view-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  border-right: 1px solid var(--vault-border);
+  color: var(--vault-dim);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+.nav-view-btn:last-child {
+  border-right: none;
+}
+
+.nav-view-btn:hover {
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+.nav-view-btn-active {
+  color: var(--vault-amber) !important;
+  background: rgba(212,168,83,0.1) !important;
+}
+
+/* ── Search container ── */
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: 1rem;
+}
+
+/* ── Input with amber border focus effect ── */
+.gallery-search {
+  background: rgba(212,168,83,0.03) !important;
+  border: 1px solid var(--vault-border) !important;
+  color: var(--vault-cream) !important;
+  font-family: 'Share Tech Mono', monospace !important;
+  font-size: 0.8rem !important;
+  padding: 0.35rem 0.8rem !important;
+  width: 170px !important;
+  height: auto !important;
+  outline: none !important;
+  transition: border-color 0.2s, width 0.3s, box-shadow 0.2s !important;
+}
+
+.gallery-search:focus {
+  border-color: var(--vault-amber) !important;
+  width: 210px !important;
+  box-shadow: 0 0 12px var(--vault-glow) !important;
+}
+
+.gallery-search::placeholder {
+  color: var(--vault-dim) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS BAR — Card catalog entries
+   ═══════════════════════════════════════════════════════════ */
+
+.stats-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.6rem 2rem;
+  background: var(--vault-dark);
+  border-bottom: 1px solid var(--vault-border);
+  font-family: 'Space Grotesk', sans-serif;
+  overflow-x: auto;
+}
+
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.stat-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--vault-amber);
+}
+
+.stat-count-fav {
+  color: var(--vault-red);
+}
+
+.stat-count-total {
+  font-size: 1.3rem;
+  color: var(--vault-amber);
+}
+
+.stat-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+}
+
+.stat-item-total .stat-label {
+  color: var(--vault-dim);
+}
+
+.stat-divider {
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(to bottom, transparent, var(--vault-amber), transparent);
+  opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VIEWED COUNTER
+   ═══════════════════════════════════════════════════════════ */
+
+.viewed-counter {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 1.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  background: var(--vault-dark);
+  border-bottom: 1px solid var(--vault-border);
+}
+
+.viewed-mode {
+  color: var(--vault-amber);
+  opacity: 0.5;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RECENTLY VIEWED STRIP
+   ═══════════════════════════════════════════════════════════ */
+
+.recently-viewed-strip {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1.5rem;
+  background: var(--vault-dark);
+  border-bottom: 1px solid var(--vault-border);
+  overflow: hidden;
+}
+
+.recently-viewed-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recently-viewed-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: none;
+}
+
+.recently-viewed-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.recently-viewed-thumb {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--vault-border);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--vault-card);
+  padding: 0;
+}
+
+.recently-viewed-thumb:hover {
+  border-color: var(--vault-amber);
+  box-shadow: 0 0 8px var(--vault-glow);
+}
+
+.recently-viewed-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ROOM HEADER
+   ═══════════════════════════════════════════════════════════ */
+
+.room-header {
+  position: relative;
+  padding: 3rem 4rem 1.5rem;
+  border-bottom: 1px solid var(--vault-border);
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+}
+
+.room-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--vault-amber), transparent);
+  opacity: 0.3;
+}
+
+.room-header-left {
+  flex: 1;
+}
+
+.room-eyebrow {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+  margin-bottom: 0.5rem;
+}
+
+.room-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: var(--vault-cream);
+  line-height: 1;
+}
+
+.room-title em {
+  color: var(--vault-amber);
+  font-style: italic;
+}
+
+.room-desc {
+  margin-top: 0.8rem;
+  color: var(--vault-muted);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+.room-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+  flex-shrink: 0;
+}
+
+.room-count strong {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: var(--vault-amber);
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* ── Room wall colour tints — warm gradients ── */
+.room-wall-1 {
+  background: linear-gradient(180deg, rgba(212,168,83,0.04) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-2 {
+  background: linear-gradient(180deg, rgba(160,82,45,0.04) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-3 {
+  background: linear-gradient(180deg, rgba(181,112,126,0.04) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-4 {
+  background: linear-gradient(180deg, rgba(107,124,94,0.04) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-nacky {
+  background: linear-gradient(180deg, rgba(160,82,45,0.06) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-fav {
+  background: linear-gradient(180deg, rgba(196,71,58,0.05) 0%, var(--vault-bg) 400px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   GALLERY — Main content area
+   ═══════════════════════════════════════════════════════════ */
+
+.wainscot {
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(212,168,83,0.15) 15%,
+    rgba(212,168,83,0.4) 50%,
+    rgba(212,168,83,0.15) 85%,
+    transparent 100%
+  );
+}
+
+.gallery-wall {
+  padding: 3rem 3rem 5rem;
+}
+
+.gallery-grid {
+  columns: 4 220px;
+  column-gap: 1.8rem;
+}
+
+/* ── List View ── */
+.gallery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.list-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--vault-card);
+  border: 1px solid var(--vault-border);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.list-card:hover {
+  border-color: rgba(212,168,83,0.3);
+  background: rgba(212,168,83,0.04);
+  box-shadow: 0 0 12px var(--vault-glow);
+}
+
+.list-card-thumb {
+  width: 80px;
+  height: 60px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--vault-border);
+}
+
+.list-card-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.list-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.list-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+}
+
+.list-card-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  padding: 1px 5px;
+  border-left: 2px solid;
+}
+
+.list-card-tag.tag-amber {
+  color: var(--vault-amber);
+  border-left-color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+.list-card-tag.tag-rust {
+  color: var(--vault-rust);
+  border-left-color: var(--vault-rust);
+  background: rgba(160,82,45,0.06);
+}
+
+.list-card-tag.tag-rose {
+  color: var(--vault-rose);
+  border-left-color: var(--vault-rose);
+  background: rgba(181,112,126,0.06);
+}
+
+.list-card-tag.tag-sage {
+  color: var(--vault-sage);
+  border-left-color: var(--vault-sage);
+  background: rgba(107,124,94,0.06);
+}
+
+.list-card-gallery {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: var(--vault-dim);
+}
+
+.list-card-fav {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--vault-border);
+  border-radius: 50%;
+  color: var(--vault-dim);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.list-card-fav:hover {
+  color: var(--vault-red);
+  border-color: var(--vault-red);
+  background: rgba(196,71,58,0.06);
+}
+
+.list-card-fav-active {
+  color: var(--vault-red) !important;
+  border-color: rgba(196,71,58,0.5) !important;
+  background: rgba(196,71,58,0.08) !important;
+}
+
+/* ── Solo View ── */
+.solo-view {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.solo-card {
+  max-width: 700px;
+  width: 100%;
+  text-align: center;
+}
+
+.solo-image-wrap {
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  border: 4px solid var(--vault-amber);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px var(--vault-glow);
+  overflow: hidden;
+}
+
+.solo-image-wrap img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.4s;
+}
+
+.solo-image-wrap:hover img {
+  transform: scale(1.02);
+}
+
+.solo-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.solo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+}
+
+.solo-gallery {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+}
+
+.solo-fav {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--vault-border);
+  border-radius: 50%;
+  color: var(--vault-dim);
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.solo-fav:hover {
+  color: var(--vault-red);
+  border-color: var(--vault-red);
+  background: rgba(196,71,58,0.06);
+}
+
+.solo-fav-active {
+  color: var(--vault-red) !important;
+  border-color: rgba(196,71,58,0.5) !important;
+  background: rgba(196,71,58,0.08) !important;
+}
+
+.solo-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.solo-nav-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-cream);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.solo-nav-btn:hover:not(:disabled) {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+.solo-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.solo-nav-pos {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: var(--vault-dim);
+}
+
+.all-room {
+  border-top: 1px solid var(--vault-border);
+  margin-top: 3rem;
+  padding-top: 2rem;
+}
+
+.all-room-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+  padding: 0 3rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.all-room-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(212,168,83,0.25), transparent);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ARTWORK CARD — Film strip style
+   ═══════════════════════════════════════════════════════════ */
+
+.artwork-card {
+  break-inside: avoid;
+  margin-bottom: 1.8rem;
+  cursor: pointer;
+  position: relative;
+}
+
+/* ── Sprocket number (rotated on left side) ── */
+.sprocket-number {
+  position: absolute;
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  color: var(--vault-dim);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.artwork-card:hover .sprocket-number {
+  opacity: 0.6;
+}
+
+/* ── Film strip frame with perforations on sides ── */
+.frame {
+  padding: 3px;
+  background: var(--vault-border);
+  box-shadow:
+    0 6px 24px rgba(0,0,0,0.4),
+    0 0 10px var(--vault-glow);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+/* Film strip perforations on left side */
+.frame::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--vault-bg) 0px,
+    var(--vault-bg) 3px,
+    transparent 3px,
+    transparent 10px,
+    var(--vault-bg) 10px,
+    var(--vault-bg) 13px,
+    transparent 13px,
+    transparent 20px
+  );
+}
+
+/* Film strip perforations on right side */
+.frame::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 8px;
+  bottom: 8px;
+  width: 6px;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--vault-bg) 0px,
+    var(--vault-bg) 3px,
+    transparent 3px,
+    transparent 10px,
+    var(--vault-bg) 10px,
+    var(--vault-bg) 13px,
+    transparent 13px,
+    transparent 20px
+  );
+}
+
+.artwork-card:hover .frame {
+  transform: translateY(-6px) scale(1.01) perspective(800px) rotateY(-1deg);
+  box-shadow:
+    0 24px 64px rgba(0,0,0,0.5),
+    0 0 25px var(--vault-glow),
+    0 0 50px rgba(212,168,83,0.06);
+}
+
+/* ── Different frame border color variants ── */
+.frame-oak {
+  background: var(--vault-amber);
+}
+
+.frame-gold {
+  background: var(--vault-rust);
+}
+
+.frame-ebony {
+  background: var(--vault-red);
+}
+
+.frame-silver {
+  background: var(--vault-sage);
+}
+
+/* ── Image container with viewfinder corner marks ── */
+.frame-inner {
+  border: none;
+  overflow: hidden;
+  position: relative;
+  min-height: 80px;
+  background: var(--vault-dark);
+}
+
+/* Viewfinder corner marks (L-shaped corners) */
+.frame-inner::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border: none;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, var(--vault-amber), var(--vault-amber)) 0 0 / 14px 1px no-repeat,
+    linear-gradient(to bottom, var(--vault-amber), var(--vault-amber)) 0 0 / 1px 14px no-repeat,
+    linear-gradient(to left, var(--vault-amber), var(--vault-amber)) 100% 0 / 14px 1px no-repeat,
+    linear-gradient(to bottom, var(--vault-amber), var(--vault-amber)) 100% 0 / 1px 14px no-repeat,
+    linear-gradient(to right, var(--vault-amber), var(--vault-amber)) 0 100% / 14px 1px no-repeat,
+    linear-gradient(to top, var(--vault-amber), var(--vault-amber)) 0 100% / 1px 14px no-repeat,
+    linear-gradient(to left, var(--vault-amber), var(--vault-amber)) 100% 100% / 14px 1px no-repeat,
+    linear-gradient(to top, var(--vault-amber), var(--vault-amber)) 100% 100% / 1px 14px no-repeat;
+  opacity: 0.35;
+  transition: opacity 0.4s;
+}
+
+.artwork-card:hover .frame-inner::before {
+  opacity: 0.7;
+}
+
+/* ── Hover projection light effect ── */
+.spotlight-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 20%, rgba(212,168,83,0.1) 0%, transparent 65%);
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.artwork-card:hover .spotlight-overlay {
+  opacity: 1;
+}
+
+/* ── Warm loading shimmer ── */
+.img-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #1e1b15 25%, #2a2520 50%, #1e1b15 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  z-index: 1;
+}
+
+/* ── Error state ── */
+.img-error {
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vault-dark);
+  color: var(--vault-dim);
+  font-size: 0.65rem;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 1rem;
+  text-align: center;
+  border: 1px dashed var(--vault-border);
+}
+
+/* ── Gallery tag — small tab/folder label ── */
+.card-gallery-tag {
+  position: absolute;
+  top: 6px;
+  left: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  padding: 2px 6px;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.artwork-card:hover .card-gallery-tag {
+  opacity: 1;
+}
+
+.tag-amber {
+  color: var(--vault-amber);
+  background: rgba(26,24,20,0.85);
+  border-left: 2px solid var(--vault-amber);
+}
+
+.tag-rust {
+  color: var(--vault-rust);
+  background: rgba(26,24,20,0.85);
+  border-left: 2px solid var(--vault-rust);
+}
+
+.tag-rose {
+  color: var(--vault-rose);
+  background: rgba(26,24,20,0.85);
+  border-left: 2px solid var(--vault-rose);
+}
+
+.tag-sage {
+  color: var(--vault-sage);
+  background: rgba(26,24,20,0.85);
+  border-left: 2px solid var(--vault-sage);
+}
+
+/* ── Heart badge with warm red ── */
+.fav-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26,24,20,0.8);
+  border: 1px solid var(--vault-border);
+  border-radius: 50%;
+  color: var(--vault-dim);
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  z-index: 5;
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+.artwork-card:hover .fav-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.fav-badge:hover {
+  background: rgba(26,24,20,0.95);
+  border-color: var(--vault-red);
+  color: var(--vault-red);
+  transform: scale(1.15) !important;
+  box-shadow: 0 0 12px rgba(196,71,58,0.3);
+}
+
+.fav-badge-active {
+  opacity: 1 !important;
+  transform: scale(1) !important;
+  color: var(--vault-red);
+  border-color: rgba(196,71,58,0.5);
+  background: rgba(196,71,58,0.1);
+  box-shadow: 0 0 10px rgba(196,71,58,0.2);
+}
+
+/* ── Nameplate — aged paper look with typewriter on hover ── */
+.nameplate {
+  margin-top: 8px;
+  background: linear-gradient(180deg, #3d352a 0%, #352f25 100%);
+  border: 1px solid var(--vault-border);
+  border-top: 2px solid var(--vault-amber);
+  padding: 8px 10px;
+  text-align: center;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+[data-theme="light"] .nameplate {
+  background: linear-gradient(180deg, #f0e8d8 0%, #e8e0d0 100%);
+  border-top-color: var(--vault-amber);
+}
+
+.artwork-card:hover .nameplate {
+  border-color: rgba(212,168,83,0.3);
+  box-shadow: 0 0 8px var(--vault-glow);
+}
+
+.nameplate-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: letter-spacing 0.3s;
+}
+
+.artwork-card:hover .nameplate-title {
+  letter-spacing: 0.02em;
+}
+
+/* ── Frame number ── */
+.frame-number {
+  position: absolute;
+  bottom: 6px;
+  right: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  color: var(--vault-amber);
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.artwork-card:hover .frame-number {
+  opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SEARCH RESULTS
+   ═══════════════════════════════════════════════════════════ */
+
+.search-results-header {
+  padding: 2rem 4rem 0.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+}
+
+.search-results-header strong {
+  color: var(--vault-amber);
+  font-size: 1.1rem;
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: 0;
+}
+
+.no-results {
+  padding: 4rem;
+  text-align: center;
+  color: var(--vault-muted);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 1.2rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CUSTOM LIGHTBOX — Projection Screen
+   ═══════════════════════════════════════════════════════════ */
+
+.lb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(20,18,14,0.96);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+/* Film grain on lightbox overlay */
+.lb-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+  pointer-events: none;
+  z-index: 1;
+  animation: filmGrain 0.5s steps(4) infinite;
+}
+
+/* ── Close button ── */
+.lb-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(212,168,83,0.04);
+  border: 1px solid var(--vault-border);
+  color: var(--vault-muted);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.lb-close:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.08);
+  box-shadow: 0 0 15px var(--vault-glow);
+}
+
+/* ── Content layout ── */
+.lb-content {
+  display: flex;
+  gap: 3rem;
+  max-width: 1200px;
+  width: 95%;
+  max-height: 85vh;
+  align-items: flex-start;
+  padding: 2rem;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Image frame with film strip border ── */
+.lb-frame {
+  flex: 0 1 auto;
+  max-width: 70%;
+  min-width: 300px;
+  padding: 4px;
+  background: var(--vault-amber);
+  box-shadow:
+    0 40px 120px rgba(0,0,0,0.8),
+    0 0 30px var(--vault-glow);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Compare mode: side-by-side */
+.lb-frame-compare {
+  flex-direction: row !important;
+  max-width: 90%;
+}
+
+.lb-frame-compare .lb-frame-inner {
+  width: 50%;
+}
+
+/* Film strip perforations on lightbox frame */
+.lb-frame::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 10px;
+  bottom: 10px;
+  width: 8px;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(20,18,14,0.9) 0px,
+    rgba(20,18,14,0.9) 4px,
+    transparent 4px,
+    transparent 14px,
+    rgba(20,18,14,0.9) 14px,
+    rgba(20,18,14,0.9) 18px,
+    transparent 18px,
+    transparent 28px
+  );
+}
+
+.lb-frame::after {
+  content: '';
+  position: absolute;
+  right: 2px;
+  top: 10px;
+  bottom: 10px;
+  width: 8px;
+  z-index: 4;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(20,18,14,0.9) 0px,
+    rgba(20,18,14,0.9) 4px,
+    transparent 4px,
+    transparent 14px,
+    rgba(20,18,14,0.9) 14px,
+    rgba(20,18,14,0.9) 18px,
+    transparent 18px,
+    transparent 28px
+  );
+}
+
+/* ── Projection light cone ── */
+.lb-spotlight {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 80px;
+  background: linear-gradient(to bottom, rgba(212,168,83,0.5), transparent);
+  pointer-events: none;
+}
+
+.lb-spotlight::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0; height: 0;
+  border-left: 60px solid transparent;
+  border-right: 60px solid transparent;
+  border-top: 80px solid rgba(212,168,83,0.06);
+}
+
+/* ── Inner frame ── */
+.lb-frame-inner {
+  border: none;
+  overflow: hidden;
+  background: var(--vault-dark);
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
+  position: relative;
+}
+
+.lb-compare-image {
+  border-left: 2px solid var(--vault-amber);
+}
+
+.lb-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(85vh - 200px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: projectorFlicker 4s ease-in-out infinite;
+}
+
+.lb-image-zoomed {
+  transform: scale(1.8);
+  cursor: zoom-out;
+}
+
+/* Ken Burns effect for slideshow */
+.lb-image-kenburns {
+  animation: kenBurns 20s ease-in-out infinite, projectorFlicker 4s ease-in-out infinite;
+}
+
+/* ── Zoom hint ── */
+.lb-zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-dim);
+  background: rgba(20,18,14,0.8);
+  padding: 3px 10px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lb-frame-inner:hover .lb-zoom-hint {
+  opacity: 1;
+}
+
+/* ── EXIF-like film reference ── */
+.lb-exif-ref {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  color: var(--vault-dim);
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+/* ── Info panel ── */
+.lb-info {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1rem;
+}
+
+/* ── Gallery label ── */
+.lb-gallery-tag {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+  margin-bottom: 0.5rem;
+}
+
+/* ── Lightbox title ── */
+.lb-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
+}
+
+/* ── Position counter ── */
+.lb-position {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--vault-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Progress bar — amber fill ── */
+.lb-progress-track {
+  height: 3px;
+  background: var(--vault-border);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.lb-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--vault-amber), var(--vault-rust));
+  box-shadow: 0 0 6px var(--vault-glow);
+  transition: width 0.3s ease;
+}
+
+/* ── Nav buttons ── */
+.lb-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.lb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--vault-border);
+  background: transparent;
+  color: var(--vault-cream);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.lb-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+/* ── Action buttons row ── */
+.lb-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.lb-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--vault-border);
+  background: transparent;
+  color: var(--vault-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.lb-action-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+.lb-action-btn-active {
+  color: var(--vault-red) !important;
+  border-color: var(--vault-red) !important;
+  background: rgba(196,71,58,0.08) !important;
+}
+
+.lb-action-btn-slideshow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.8rem;
+  border: 1px solid var(--vault-border);
+  background: transparent;
+  color: var(--vault-muted);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.lb-action-btn-slideshow:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+  background: rgba(212,168,83,0.06);
+}
+
+.lb-action-btn-slideshow.active {
+  color: var(--vault-amber);
+  border-color: var(--vault-amber);
+  background: rgba(212,168,83,0.08);
+}
+
+/* ── Small action buttons (mobile) ── */
+.lb-action-btn-sm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--vault-border);
+  background: transparent;
+  color: var(--vault-muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.lb-action-btn-sm:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+}
+
+/* ── Shortcut hint ── */
+.lb-shortcut-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: var(--vault-dim);
+  margin-bottom: 0.5rem;
+}
+
+.lb-shortcut-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border: 1px solid var(--vault-border);
+  background: var(--vault-card);
+  color: var(--vault-muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+}
+
+/* ── Open link ── */
+.lb-open-link {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-rust);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.lb-open-link:hover {
+  color: var(--vault-amber);
+}
+
+/* ── Slideshow REEL indicator ── */
+.slideshow-indicator {
+  display: inline-block;
+  padding: 1px 6px;
+  background: rgba(212,168,83,0.1);
+  border: 1px solid var(--vault-amber);
+  color: var(--vault-amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-left: 0.5rem;
+}
+
+/* ── Film strip timeline at bottom of lightbox ── */
+.lb-filmstrip {
+  position: fixed;
+  bottom: 70px;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0.5rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.lb-filmstrip-inner {
+  display: flex;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 4px;
+  background: rgba(20,18,14,0.8);
+  border: 1px solid var(--vault-border);
+  max-width: 90vw;
+}
+
+.lb-filmstrip-thumb {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--vault-border);
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 0;
+  background: var(--vault-card);
+}
+
+.lb-filmstrip-thumb:hover {
+  border-color: var(--vault-amber);
+  box-shadow: 0 0 6px var(--vault-glow);
+}
+
+.lb-filmstrip-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.lb-filmstrip-active {
+  border-color: var(--vault-amber) !important;
+  box-shadow: 0 0 8px var(--vault-glow) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE LIGHTBOX BAR
+   ═══════════════════════════════════════════════════════════ */
+
+.mobile-lb-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--vault-dark);
+  border-top: 1px solid var(--vault-border);
+  padding: 0.75rem 1rem;
+  z-index: 1000;
+}
+
+.mobile-lb-bar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.mobile-lb-bar-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.mobile-lb-bar-gallery {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+}
+
+.mobile-lb-bar-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-lb-bar-pos {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--vault-dim);
+}
+
+.mobile-lb-bar-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: 1rem;
+}
+
+.mobile-lb-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.mobile-lb-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--vault-border);
+  background: transparent;
+  color: var(--vault-cream);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.mobile-lb-nav-btn:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+}
+
+.mobile-lb-nav-pos {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--vault-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE MENU — Slide-in from right
+   ═══════════════════════════════════════════════════════════ */
+
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 200;
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: var(--vault-dark);
+  border-left: 2px solid var(--vault-amber);
+  z-index: 201;
+  overflow-y: auto;
+  box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+}
+
+.mobile-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--vault-border);
+}
+
+.mobile-menu-title {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  color: var(--vault-amber);
+}
+
+.mobile-menu-close {
+  background: none;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-muted);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.mobile-menu-close:hover {
+  color: var(--vault-amber);
+  border-color: var(--vault-amber);
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.85rem 1.25rem;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--vault-border);
+  color: var(--vault-cream);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mobile-menu-item:hover {
+  background: rgba(212,168,83,0.06);
+  color: var(--vault-amber);
+}
+
+.mobile-menu-item-active {
+  color: var(--vault-amber) !important;
+  background: rgba(212,168,83,0.08) !important;
+  border-left: 3px solid var(--vault-amber);
+}
+
+.mobile-menu-count {
+  margin-left: auto;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--vault-dim);
+}
+
+.mobile-menu-twitch {
+  color: var(--vault-rust) !important;
+}
+
+.mobile-menu-divider {
+  height: 1px;
+  background: var(--vault-border);
+  margin: 0.5rem 0;
+}
+
+.mobile-menu-view-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SCROLL-TO-TOP BUTTON
+   ═══════════════════════════════════════════════════════════ */
+
+.scroll-top-btn {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vault-dark);
+  border: 1px solid var(--vault-border);
+  color: var(--vault-amber);
+  cursor: pointer;
+  z-index: 90;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.scroll-top-btn:hover {
+  border-color: var(--vault-amber);
+  box-shadow: 0 0 15px var(--vault-glow);
+  background: rgba(212,168,83,0.08);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   STATS MODAL — Vault Manifest
+   ═══════════════════════════════════════════════════════════ */
+
+.stats-modal {
+  background: linear-gradient(180deg, #3d352a 0%, #352f25 100%);
+  border: 1px solid var(--vault-border);
+  border-top: 3px solid var(--vault-amber);
+  padding: 2rem;
+  max-width: 480px;
+  width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+[data-theme="light"] .stats-modal {
+  background: linear-gradient(180deg, #f5f0e6 0%, #ede7da 100%);
+}
+
+.stats-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.stats-modal-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+}
+
+.stats-modal-value {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1.1rem;
+  color: var(--vault-amber);
+}
+
+.stats-modal-total {
+  font-size: 1.6rem;
+  font-weight: 400;
+}
+
+.stats-modal-fav {
+  color: var(--vault-red);
+}
+
+.stats-modal-accent {
+  color: var(--vault-amber);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.stats-modal-divider {
+  height: 1px;
+  background: var(--vault-border);
+  margin: 0.75rem 0;
+}
+
+.stats-modal-gallery {
+  margin-bottom: 0.75rem;
+}
+
+.stats-modal-gallery-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.3rem;
+}
+
+.stats-modal-gallery-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--vault-cream);
+}
+
+.stats-modal-gallery-count {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--vault-amber);
+}
+
+.stats-modal-bar-track {
+  height: 4px;
+  background: var(--vault-border);
+  overflow: hidden;
+}
+
+.stats-modal-bar-fill {
+  height: 100%;
+  background: var(--vault-amber);
+  transition: width 0.5s ease;
+  box-shadow: 0 0 4px var(--vault-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ABOUT MODAL — Manila folder / archival document
+   ═══════════════════════════════════════════════════════════ */
+
+.about-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(20,18,14,0.9);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.about-modal {
+  background: var(--vault-card);
+  border: 1px solid var(--vault-border);
+  border-top: 3px solid var(--vault-amber);
+  padding: 2rem;
+  max-width: 480px;
+  width: 95%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.about-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-muted);
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.about-close:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+}
+
+.about-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--vault-cream);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--vault-border);
+}
+
+.about-subtitle {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--vault-cream);
+  margin-bottom: 0.5rem;
+}
+
+.about-desc {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--vault-muted);
+  line-height: 1.5;
+  margin-bottom: 0.5rem;
+}
+
+.about-divider {
+  height: 1px;
+  background: var(--vault-border);
+  margin: 1rem 0;
+}
+
+.about-shortcuts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.about-shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--vault-muted);
+}
+
+.about-shortcut-row kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border: 1px solid var(--vault-border);
+  background: var(--vault-card);
+  color: var(--vault-amber);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+}
+
+.about-twitch-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--vault-rust);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.about-twitch-link:hover {
+  color: var(--vault-amber);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+   ═══════════════════════════════════════════════════════════ */
+
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.6rem 1.5rem;
+  background: var(--vault-card);
+  border: 1px solid var(--vault-amber);
+  color: var(--vault-cream);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  z-index: 9999;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 15px var(--vault-glow);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════════════════════════ */
+
+.vault-footer {
+  border-top: 2px solid var(--vault-amber);
+  background: var(--vault-dark);
+  margin-top: auto;
+}
+
+.vault-footer-inner {
+  padding: 1.5rem 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.vault-footer-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: var(--vault-amber);
+}
+
+.vault-footer-brand {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--vault-dim);
+}
+
+.vault-footer-version {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  color: var(--vault-border);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PARTICLES
+   ═══════════════════════════════════════════════════════════ */
+
+.particles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--vault-amber);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile overrides
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 900px) {
+  .nav-tabs {
+    display: none;
+  }
+
+  .search-wrap {
+    display: none;
+  }
+
+  .nav-view-toggle {
+    display: none;
+  }
+
+  .mobile-lb-bar {
+    display: block;
+  }
+
+  .lb-filmstrip {
+    bottom: 170px;
+  }
+
+  .lb-content {
+    flex-direction: column;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .lb-frame {
+    max-width: 100%;
+    min-width: auto;
+  }
+
+  .lb-frame-compare {
+    flex-direction: column !important;
+    max-width: 100%;
+  }
+
+  .lb-frame-compare .lb-frame-inner {
+    width: 100%;
+  }
+
+  .lb-image {
+    max-height: 40vh;
+  }
+
+  .lb-info {
+    display: none;
+  }
+
+  .room-header {
+    padding: 1.5rem 1.5rem 1rem;
+  }
+
+  .gallery-wall {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .gallery-grid {
+    columns: 2 150px;
+    column-gap: 1rem;
+  }
+
+  .sprocket-number {
+    display: none;
+  }
+
+  .entrance-inner {
+    padding: 3rem 1.5rem;
+  }
+
+  .film-strip-decoration {
+    height: 12px;
+  }
+
+  .recently-viewed-strip {
+    padding: 0.4rem 1rem;
+  }
+
+  .recently-viewed-thumb {
+    width: 28px;
+    height: 28px;
+  }
+
+  .stats-modal {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .gallery-grid {
+    columns: 2 130px;
+  }
+
+  .list-card-thumb {
+    width: 60px;
+    height: 45px;
+  }
+
+  .solo-card {
+    max-width: 100%;
+  }
+
+  .nav-actions {
+    gap: 0.2rem;
+    margin-left: 0.5rem;
+  }
+
+  .nav-action-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .gallery-search {
+    width: 120px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .gallery-search:focus {
+    width: 150px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT THEME REFINEMENTS
+   ═══════════════════════════════════════════════════════════ */
+
+[data-theme="light"] .entrance-grain {
+  opacity: 0.03;
+}
+
+[data-theme="light"] .entrance-section::after {
+  opacity: 0.02;
+}
+
+[data-theme="light"] .particles-container .particle {
+  opacity: 0.05;
+}
+
+[data-theme="light"] .vault-title {
+  text-shadow: 0 2px 0 rgba(208,200,184,0.5);
+}
+
+[data-theme="light"] .frame {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+[data-theme="light"] .nameplate {
+  background: linear-gradient(180deg, #f0e8d8 0%, #e8e0d0 100%);
+  border-top-color: var(--vault-amber);
+}
+
+[data-theme="light"] .img-shimmer {
+  background: linear-gradient(90deg, #ede7da 25%, #f5f0e6 50%, #ede7da 75%);
+  background-size: 200% 100%;
+}
+
+[data-theme="light"] .stat-divider {
+  background: linear-gradient(to bottom, transparent, var(--vault-amber), transparent);
+}
+
+[data-theme="light"] .scroll-top-btn {
+  background: var(--vault-card);
+}
+
+[data-theme="light"] .toast-notification {
+  background: var(--vault-card);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1), 0 0 15px var(--vault-glow);
+}
+
+[data-theme="light"] .stats-modal {
+  background: linear-gradient(180deg, #f5f0e6 0%, #ede7da 100%);
+}
+
+[data-theme="light"] .list-card {
+  background: var(--vault-card);
+}
+
+[data-theme="light"] .solo-fav,
+[data-theme="light"] .list-card-fav {
+  background: var(--vault-card);
+}
+
+[data-theme="light"] .film-strip-decoration {
+  opacity: 0.15;
+}
+
+[data-theme="light"] .rec-indicator {
+  color: var(--vault-red);
+}
+
+[data-theme="light"] .mobile-menu {
+  background: var(--vault-dark);
+}
+
+[data-theme="light"] .vault-door-overlay {
+  background: var(--vault-amber);
+}
