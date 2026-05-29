@@ -371,6 +371,8 @@ function ArtworkCard({
         duration: 0.5,
         ease: "easeOut",
       }}
+      role="article"
+      aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
     >
       <span className="sprocket-number" aria-hidden="true">{sprocketNum}</span>
       <div className={`frame ${frameStyle}`} onClick={onClick}>
@@ -436,6 +438,8 @@ function ListCard({
       viewport={{ once: true, margin: "-30px" }}
       transition={{ delay: Math.min(index * 0.02, 0.3), duration: 0.4 }}
       onClick={onClick}
+      role="article"
+      aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
     >
       <div className="list-card-thumb">
         <img src={work.imageUrl} alt={work.title} loading="lazy" />
@@ -1127,6 +1131,8 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
           transition={{ duration: 0.2 }}
+          role="alert"
+          aria-live="assertive"
         >
           {message}
         </motion.div>
@@ -1137,7 +1143,7 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
 
 /* ── Main Page ────────────────────────────────────────────── */
 export default function Home() {
-  const [phase, setPhase] = useState<"entrance" | "gallery">("entrance");
+  const [phase, setPhase] = useState<"entrance" | "gallery">("gallery");
   const [data, setData] = useState<GalleryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchStatus, setFetchStatus] = useState("Connecting to archive…");
@@ -1698,7 +1704,7 @@ export default function Home() {
 
   /* ────── GALLERY ────── */
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--vault-bg)]">
+    <div className="min-h-screen flex flex-col bg-[var(--vault-bg)]" suppressHydrationWarning>
       {/* Scroll Progress Bar */}
       {phase === "gallery" && !immersiveMode && (
         <div
@@ -1734,18 +1740,15 @@ export default function Home() {
         </motion.div>
       )}
 
+      {/* Skip to content link for accessibility */}
+      <a href="#gallery-main" className="skip-to-content">
+        Skip to gallery content
+      </a>
+
       {/* Navigation */}
       {!immersiveMode && (
-      <nav className="gallery-nav">
-        <button
-          className="nav-back-btn"
-          onClick={() => { setPhase("entrance"); window.location.hash = ""; }}
-          aria-label="Back to entrance"
-          title="Back to Entrance"
-        >
-          <DoorOpen className="w-4 h-4" />
-        </button>
-        <div className="nav-logo">
+      <nav className="gallery-nav" role="navigation" aria-label="Main navigation">
+        <div className="nav-logo" role="banner">
           <span>Pete</span> Pics
           <a
             className="nav-twitch-badge"
@@ -1891,14 +1894,16 @@ export default function Home() {
         </div>
 
         {/* Search */}
-        <div className="search-wrap">
-          <Search className="w-4 h-4 text-[var(--vault-amber)] opacity-50" />
+        <div className="search-wrap" role="search">
+          <Search className="w-4 h-4 text-[var(--vault-amber)] opacity-50" aria-hidden="true" />
           <Input
             type="search"
             placeholder="Search works…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="gallery-search"
+            aria-label="Search gallery works by title"
+            role="searchbox"
           />
         </div>
       </nav>
@@ -2000,15 +2005,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Stats Bar */}
-      {!immersiveMode && <StatsBar data={data} favCount={favCount} />}
-
-      {/* Viewed Counter */}
-      {!immersiveMode && <div className="viewed-counter">
-        <Eye className="w-3 h-3" />
-        <span>{viewedCount} works viewed</span>
-        <span className="viewed-mode">· {viewMode.toUpperCase()} VIEW</span>
-      </div>}
+      {/* Stats Bar removed — stats available in Vault Manifest modal */}
 
       {/* Recently Viewed strip */}
       {!immersiveMode && recentWorks.length > 0 && (
@@ -2032,6 +2029,9 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Main Content */}
+      <main id="gallery-main" role="main" aria-label={`${currentRoomName} gallery`}>
 
       {/* Room Header */}
       <header className="room-header">
@@ -2063,7 +2063,7 @@ export default function Home() {
       </header>
 
       {/* Gallery Content */}
-      <main className="flex-1">
+      <div className="flex-1">
         <div className="wainscot" />
 
         {/* FEATURE 7: Room transition animation line */}
@@ -2080,7 +2080,7 @@ export default function Home() {
 
         {/* Search results header */}
         {searchQuery && (
-          <div className="search-results-header">
+          <div className="search-results-header" role="status" aria-live="polite">
             Found <strong>{visibleWorks.length}</strong> works matching &quot;{searchQuery}&quot;
           </div>
         )}
@@ -2224,6 +2224,7 @@ export default function Home() {
             </motion.div>
           </AnimatePresence>
         </div>
+      </div>
       </main>
 
       {/* Footer */}
