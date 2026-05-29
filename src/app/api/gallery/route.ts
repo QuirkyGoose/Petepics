@@ -5,6 +5,7 @@ const GALLERY_DEFS = [
   { id: "prestlers", name: "Prestlers", albumHex: "RFbFrht" },
   { id: "cultural", name: "Cultural Pics", albumHex: "HVYDkG8" },
   { id: "pisc", name: "Pisc", albumHex: "Yt9J3Xt" },
+  { id: "submissions", name: "Submissions", albumHex: "nMN0w4j" },
 ];
 
 interface GalleryWork {
@@ -38,6 +39,7 @@ const GALLERY_META: Record<string, { name: string; tagline: string; wallClass: s
   prestlers: { name: "Prestlers", tagline: "Pete meets the squared circle and beyond.", wallClass: "room-wall-2" },
   cultural: { name: "Cultural Pics", tagline: "Art, culture, and things that are Pete.", wallClass: "room-wall-3" },
   pisc: { name: "Pisc", tagline: "A miscellany. A cornucopia. A Pisc.", wallClass: "room-wall-4" },
+  submissions: { name: "Submissions", tagline: "Community contributions — submit your own Pete Pics via the spreadsheet.", wallClass: "room-wall-submissions" },
 };
 
 function deriveTitle(name: string): string {
