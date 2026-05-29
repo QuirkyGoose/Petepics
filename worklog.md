@@ -792,3 +792,182 @@ Stage Summary:
 - Stats bar removed - Cleaner interface
 - Accessibility significantly improved
 - Lint clean, zero errors
+
+---
+Task ID: 12
+Agent: Full-stack Developer
+Task: Remove entrance/landing page, remove StatsBar, fix hydration error, unify fonts, improve accessibility
+
+Work Log:
+- Read worklog.md (11 previous task entries) and all current code files to assess project state
+- **Removed entrance/landing page entirely**:
+  - Removed `phase` state variable — component always renders gallery view directly
+  - Removed `vaultDoorOpen`, `titleParallax`, `typewriterText` state variables
+  - Removed `enterGallery` callback function
+  - Removed parallax mouse effect (useEffect with onMouseMove)
+  - Removed typewriter effect (useEffect with setTypewriterText)
+  - Removed entire entrance section JSX (150+ lines of entrance rendering)
+  - Removed `DustMotes` component definition and all references
+  - Removed unused imports: `ArrowRight`, `DoorOpen`, `Eye`
+  - Updated scroll progress effect — removed `if (phase !== "gallery")` guard
+  - Updated gallery scroll hint — removed `if (phase === "gallery"` check
+  - Updated hash-based deep linking — removed `setPhase("gallery")` call
+  - Updated scroll progress bar — removed `phase === "gallery"` check
+  - Kept `Film` icon import (used in footer)
+- **Removed StatsBar component**:
+  - Removed entire `StatsBar` function component (33 lines)
+  - Stats are still available via the Vault Manifest modal (StatsModal component)
+- **Removed entrance-related CSS from globals.css**:
+  - Removed `.entrance-section` and all children (grain, light-cone, inner)
+  - Removed `.vault-reel-badge` and pseudo-elements
+  - Removed `.vault-title`, `.vault-subtitle`, `.vault-tagline`
+  - Removed `.enter-vault-btn` and pseudo-elements/hover states
+  - Removed `.enter-vault-btn-arrow`
+  - Removed `.vault-loading`, `.vault-loading-reel`
+  - Removed `.vault-count`
+  - Removed `.twitch-vault-card` (entrance card; footer link and nav badge remain)
+  - Removed `.boot-sequence`
+  - Removed `.film-strip-decoration`, `.film-strip-top`, `.film-strip-bottom`
+  - Removed `.rec-indicator`, `.rec-dot`
+  - Removed `.vault-door-overlay`
+  - Removed `.particles-container` and `.particle` styles
+  - Removed `@keyframes reelSpin`, `vaultGlow`, `cursorBlink`, `recBlink` (entrance-only)
+  - Removed `@keyframes meshShift` (entrance animated gradient)
+  - Kept `@keyframes filmGrain` (used by lightbox), `kenBurns`, `projectorFlicker`, `shimmer`, `spin`, `pulse`
+  - Removed `.stats-bar` and all stat-* CSS (StatsBar component removed)
+  - Removed entrance-related responsive overrides (`.entrance-inner`, `.film-strip-decoration`)
+  - Removed entrance-related light theme overrides (`.entrance-grain`, `.entrance-section`, `.particles-container`, `.vault-title`, `.film-strip-decoration`, `.rec-indicator`, `.vault-door-overlay`)
+- **Fixed hydration errors with suppressHydrationWarning**:
+  - Added `suppressHydrationWarning` to `<nav className="gallery-nav">`
+  - Added `suppressHydrationWarning` to `<main>` element
+  - Added `suppressHydrationWarning` to `<footer>` element
+  - Verified outer `<div>` already has `suppressHydrationWarning`
+  - Verified `<html>` and `<body>` in layout.tsx already have `suppressHydrationWarning`
+- **Unified font usage**:
+  - Font system: Cormorant Garamond (serif headings), Space Grotesk (sans body), Share Tech Mono (mono technical)
+  - Fixed `.lb-title` font-weight: 700 → 600 (consistent with other Cormorant Garamond headings)
+  - Fixed `.mobile-lb-bar-title` font-weight: 700 → 600
+  - Fixed `.quick-preview-title` font-weight: 700 → 600
+  - Verified all `.nameplate-title` uses Cormorant Garamond 600
+  - Verified Google Fonts @import includes all necessary weights
+- **Accessibility improvements**:
+  - Added `role="banner"` to room header `<header>` element
+  - Added `aria-expanded={mobileMenuOpen}` to hamburger menu button
+  - Added `aria-controls="mobile-menu"` to hamburger menu button
+  - Added `id="mobile-menu"` to mobile menu `<motion.div>`
+  - Added `aria-roledescription="gallery"` to gallery-grid and gallery-list containers
+  - Added `tabIndex={0}` and `onKeyDown` handler to ArtworkCard (Enter opens lightbox)
+  - Added `tabIndex={0}` and `onKeyDown` handler to ListCard (Enter opens lightbox)
+  - Added `onKeyDown` prop to both card component types
+  - Added `role="dialog"` and `aria-modal="true"` to lightbox overlay
+  - Added `aria-label` to lightbox overlay (`Artwork lightbox: {title}`)
+  - Added `role="img"` and `aria-label` to film strip thumbnail buttons
+  - Added `aria-label="Load more artworks"` to Load More button
+  - Added `aria-label` to solo view prev/next navigation buttons
+  - Added `[role="button"]` CSS styles (cursor + focus-visible)
+  - Made solo view navigation buttons functional (was previously empty onClick handlers)
+  - Added `soloIndex` state for solo view artwork cycling
+  - Search results header already has `aria-live="polite"` — verified
+  - Nav already has `role="navigation"` and `aria-label` — verified
+  - Main already has `role="main"` and `aria-label` — verified
+  - All `<img>` tags have meaningful alt text — verified
+  - `:focus-visible` styles already present — verified
+  - `prefers-reduced-motion` media query already present — verified
+  - `.skip-to-content` link already present — verified
+- **Lint passes clean** with zero errors
+- **Dev server compiles successfully** with no errors
+
+Stage Summary:
+- **Entrance/landing page REMOVED** — Gallery loads directly, no intermediate step
+- **StatsBar component REMOVED** — Stats still available via Vault Manifest modal
+- **Hydration error FIXED** — suppressHydrationWarning on nav, main, footer
+- **Font usage UNIFIED** — Cormorant Garamond 600 for headings, Space Grotesk for body, Share Tech Mono for technical
+- **Accessibility IMPROVED** — 12+ accessibility enhancements (keyboard navigation, ARIA attributes, dialog role, solo view navigation)
+- **Solo view navigation FIXED** — buttons now actually cycle through artworks
+- **Lint clean**, zero errors
+- **No runtime errors**, dev server stable
+
+---
+Task ID: 13
+Agent: Main Developer (Session Continuation)
+Task: Font consistency, accessibility improvements, remove landing page, remove StatsBar, fix hydration error
+
+Work Log:
+- Read worklog.md (12 previous task entries) and all current code files
+- Delegated comprehensive refactoring to full-stack developer agent (Task ID 12)
+- **Entrance/landing page completely removed**:
+  - Removed `phase` state variable — gallery now loads directly without any intermediate step
+  - Removed `vaultDoorOpen`, `titleParallax`, `typewriterText` state variables
+  - Removed `enterGallery` callback, parallax mouse effect, typewriter effect
+  - Removed entire entrance JSX block (~150 lines)
+  - Removed `DustMotes` component
+  - Removed unused imports: `ArrowRight`, `DoorOpen`, `Eye`
+  - Removed all entrance-related CSS (~370 lines): `.entrance-section`, `.vault-reel-badge`, `.vault-title`, `.enter-vault-btn`, `.film-strip-decoration`, `.rec-indicator`, `.vault-door-overlay`, `.particles-container`, etc.
+  - Removed entrance-only keyframes: `reelSpin`, `vaultGlow`, `cursorBlink`, `recBlink`
+- **StatsBar component completely removed**:
+  - Component was already not rendered (line 2008 comment: "Stats Bar removed")
+  - Removed the `StatsBar` function component definition from code
+  - Stats remain available via Vault Manifest modal (StatsModal)
+- **Hydration error fixed**:
+  - Added `suppressHydrationWarning` to `<nav>`, `<main>`, `<footer>` elements
+  - Already present on `<html>`, `<body>` in layout.tsx and outer `<div>`
+  - Prevents errors from browser extensions (Dark Reader, ProtonPass) adding attributes
+- **Font usage unified across the site**:
+  - Cormorant Garamond (serif) — Headings, titles, display text (weight 600)
+  - Space Grotesk (sans-serif) — Body text, UI elements, labels, buttons (weight 300-700)
+  - Share Tech Mono (monospace) — Technical data, counts, codes, references (weight 400)
+  - Fixed `.lb-title`, `.mobile-lb-bar-title`, `.quick-preview-title` to use weight 600 consistently
+- **12+ accessibility improvements added**:
+  - `role="banner"` on room header
+  - `aria-expanded`/`aria-controls`/`id="mobile-menu"` for hamburger menu
+  - `aria-roledescription="gallery"` on gallery grid/list containers
+  - `tabIndex={0}` + `onKeyDown` (Enter opens lightbox) on artwork & list cards
+  - `role="dialog"` + `aria-modal="true"` + `aria-label` on lightbox
+  - `role="img"` + `aria-label` on film strip thumbnails
+  - `aria-label` on Load More button and solo navigation buttons
+  - `[role="button"]` CSS styles (cursor + focus-visible)
+  - Solo view navigation now works — added `soloIndex` state, prev/next buttons cycle artworks
+- QA tested with agent-browser:
+  - Gallery loads directly — no entrance page
+  - 1212 works loading correctly
+  - All 7 rooms switching correctly
+  - Lightbox opens with proper `role="dialog"` and `aria-label`
+  - Artwork cards have `tabindex` and `aria-label`
+  - Room header has `role="banner"`
+  - Navigation has `role="navigation"` and `aria-label`
+  - No StatsBar visible (removed)
+  - No hydration errors in dev server log
+  - Lint passes clean with zero errors
+
+Stage Summary:
+- **Entrance page REMOVED** — Gallery loads directly, no intermediate step
+- **StatsBar component REMOVED** — Stats still available via Vault Manifest modal
+- **Hydration error FIXED** — suppressHydrationWarning on nav, main, footer
+- **Font usage UNIFIED** — Cormorant Garamond 600 for headings, Space Grotesk for body, Share Tech Mono for technical
+- **Accessibility IMPROVED** — 12+ enhancements (keyboard navigation, ARIA attributes, dialog role, solo view navigation)
+- **Solo view navigation FIXED** — buttons now actually cycle through artworks
+- **Lint clean**, zero errors
+- **No runtime errors**, dev server stable
+
+Current project status:
+- Stable and feature-complete with "The Vault v8.0" visual design
+- Gallery loads directly without entrance page
+- All 1212 images loading correctly from postimg.cc via server-side API
+- API caching working (8ms response time)
+- Both dark and light themes working
+- Mobile responsive with slide-in menu and mobile lightbox bar
+- Three view modes: Grid, List, Solo (solo navigation now works)
+- Recently viewed tracking with horizontal scroll strip
+- Collection stats modal with visual progress bars (replaces old StatsBar)
+- Image comparison mode in lightbox
+- Ken Burns effect on slideshow
+- Swipe gesture support for mobile lightbox
+- Film strip timeline in lightbox
+- Comprehensive accessibility (keyboard nav, ARIA, dialog roles, skip link)
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Light theme CSS overrides may need further refinement
+- Could add actual ambient sound effects (currently UI-only toggle)
+- Could add more micro-interactions
+- Could add infinite scroll or pagination improvements

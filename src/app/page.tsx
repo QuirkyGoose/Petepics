@@ -7,13 +7,10 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  ArrowRight,
   Menu,
   X,
   ArrowUp,
-  DoorOpen,
   Grid3X3,
-  Eye,
   Shuffle,
   Heart,
   Share2,
@@ -238,49 +235,7 @@ function useRecentlyViewed() {
   return { recent, addRecent, mounted };
 }
 
-/* ── Dust Motes (deterministic) — particles in projector beam ── */
-function DustMotes() {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        x: (i * 37 + 13) % 100,
-        y: (i * 53 + 7) % 100,
-        size: (i % 3) + 1,
-        duration: (i % 20) + 18,
-        delay: i % 8,
-      })),
-    []
-  );
 
-  return (
-    <div className="particles-container" aria-hidden="true">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="particle"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-          }}
-          animate={{
-            y: [0, -20, 0, 15, 0],
-            x: [0, 10, -8, 5, 0],
-            opacity: [0.05, 0.25, 0.1, 0.3, 0.05],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
 
 /* ── Lazy Image Component ─────────────────────────────────── */
 function LazyImage({ src, alt }: { src: string; alt: string }) {
@@ -341,12 +296,14 @@ function ArtworkCard({
   onClick,
   isFav,
   onToggleFav,
+  onKeyDown,
 }: {
   work: GalleryWork;
   index: number;
   onClick: () => void;
   isFav: boolean;
   onToggleFav: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }) {
   const frameStyle = FRAME_STYLES[index % FRAME_STYLES.length];
   const tagClass =
@@ -373,6 +330,8 @@ function ArtworkCard({
       }}
       role="article"
       aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
     >
       <span className="sprocket-number" aria-hidden="true">{sprocketNum}</span>
       <div className={`frame ${frameStyle}`} onClick={onClick}>
@@ -414,12 +373,14 @@ function ListCard({
   onClick,
   isFav,
   onToggleFav,
+  onKeyDown,
 }: {
   work: GalleryWork;
   index: number;
   onClick: () => void;
   isFav: boolean;
   onToggleFav: () => void;
+  onKeyDown?: (e: React.KeyboardEvent) => void;
 }) {
   const tagClass =
     work.gallery === "pobots"
@@ -440,6 +401,8 @@ function ListCard({
       onClick={onClick}
       role="article"
       aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
     >
       <div className="list-card-thumb">
         <img src={work.imageUrl} alt={work.title} loading="lazy" />
@@ -524,6 +487,9 @@ function Lightbox({
       <motion.div
         className="lb-overlay"
         key={currentWorkId}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Artwork lightbox: ${work.title}`}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -707,8 +673,10 @@ function Lightbox({
                   className={`lb-filmstrip-thumb ${actualIdx === position ? "lb-filmstrip-active" : ""}`}
                   onClick={() => onGoToIndex(actualIdx)}
                   title={w.title}
+                  role="img"
+                  aria-label={`${w.title} — thumbnail ${actualIdx + 1}`}
                 >
-                  <img src={w.imageUrl} alt={w.title} />
+                  <img src={w.imageUrl} alt="" />
                 </button>
               );
             })}
@@ -804,39 +772,7 @@ function ScrollToTop() {
   );
 }
 
-/* ── Stats Bar ────────────────────────────────────────────── */
-function StatsBar({
-  data,
-  favCount,
-}: {
-  data: GalleryResponse | null;
-  favCount: number;
-}) {
-  if (!data) return null;
-  const galleries = Object.values(data.galleries);
 
-  return (
-    <div className="stats-bar">
-      {galleries.map((g) => (
-        <div key={g.id} className="stat-item">
-          <span className="stat-count">{g.works.length}</span>
-          <span className="stat-label">{g.name}</span>
-        </div>
-      ))}
-      {favCount > 0 && (
-        <div className="stat-item">
-          <span className="stat-count stat-count-fav">{favCount}</span>
-          <span className="stat-label">Favs</span>
-        </div>
-      )}
-      <div className="stat-divider" />
-      <div className="stat-item stat-item-total">
-        <span className="stat-count stat-count-total">{data.totalWorks}</span>
-        <span className="stat-label">Total Works</span>
-      </div>
-    </div>
-  );
-}
 
 /* ── Collection Stats Modal ───────────────────────────────── */
 function StatsModal({
@@ -1143,7 +1079,6 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
 
 /* ── Main Page ────────────────────────────────────────────── */
 export default function Home() {
-  const [phase, setPhase] = useState<"entrance" | "gallery">("gallery");
   const [data, setData] = useState<GalleryResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [fetchStatus, setFetchStatus] = useState("Connecting to archive…");
@@ -1159,12 +1094,9 @@ export default function Home() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
   const [slideshowActive, setSlideshowActive] = useState(false);
-  const [typewriterText, setTypewriterText] = useState("");
   const [compareActive, setCompareActive] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
   const [ambientSound, setAmbientSound] = useState(false);
-  const [vaultDoorOpen, setVaultDoorOpen] = useState(false);
-  const [titleParallax, setTitleParallax] = useState({ x: 0, y: 0 });
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [roomTransitionKey, setRoomTransitionKey] = useState(0);
   const [immersiveMode, setImmersiveMode] = useState(false);
@@ -1186,7 +1118,6 @@ export default function Home() {
 
   /* Scroll progress tracking */
   useEffect(() => {
-    if (phase !== "gallery") return;
     function onScroll() {
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
@@ -1194,15 +1125,15 @@ export default function Home() {
     }
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [phase]);
+  }, []);
 
   /* Gallery scroll hint — show once when gallery loads */
   useEffect(() => {
-    if (phase === "gallery" && data) {
+    if (data) {
       const timer = setTimeout(() => setShowScrollHint(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, [phase, data]);
+  }, [data]);
 
   useEffect(() => {
     if (showScrollHint) {
@@ -1232,38 +1163,7 @@ export default function Home() {
     const hash = window.location.hash.replace("#", "");
     if (hash && ROOMS.some((r) => r.id === hash)) {
       setCurrentRoom(hash);
-      setPhase("gallery");
     }
-  }, []);
-
-  /* Parallax effect on entrance title */
-  useEffect(() => {
-    if (phase !== "entrance") return;
-    function onMouseMove(e: MouseEvent) {
-      const x = (e.clientX / window.innerWidth - 0.5) * 12;
-      const y = (e.clientY / window.innerHeight - 0.5) * 8;
-      setTitleParallax({ x, y });
-    }
-    window.addEventListener("mousemove", onMouseMove);
-    return () => window.removeEventListener("mousemove", onMouseMove);
-  }, [phase]);
-
-  /* Typewriter effect for subtitle */
-  useEffect(() => {
-    const target = "PETE PICS ARCHIVE · EST. 2024";
-    let i = 0;
-    const timeout = setTimeout(() => {
-      const interval = setInterval(() => {
-        if (i < target.length) {
-          setTypewriterText(target.slice(0, i + 1));
-          i++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 60);
-      return () => clearInterval(interval);
-    }, 800);
-    return () => clearTimeout(timeout);
   }, []);
 
   /* Fetch gallery data on mount */
@@ -1286,17 +1186,6 @@ export default function Home() {
       }
     }
     fetchData();
-  }, []);
-
-  /* Open gallery with vault door animation */
-  const enterGallery = useCallback(() => {
-    setVaultDoorOpen(true);
-    setTimeout(() => {
-      setPhase("gallery");
-      setVaultDoorOpen(false);
-      // FEATURE 1: Set hash when entering gallery
-      window.location.hash = "all";
-    }, 600);
   }, []);
 
   /* Room change handler — FEATURE 1: update hash, FEATURE 2: reset pagination */
@@ -1540,7 +1429,8 @@ export default function Home() {
     : 0;
 
   /* Solo view current work */
-  const soloWork = viewMode === "solo" && visibleWorks.length > 0 ? visibleWorks[0] : null;
+  const [soloIndex, setSoloIndex] = useState(0);
+  const soloWork = viewMode === "solo" && visibleWorks.length > 0 ? visibleWorks[soloIndex % visibleWorks.length] : null;
 
   /* FEATURE 4: Get current room display name */
   const currentRoomName = currentRoom === "all"
@@ -1551,162 +1441,11 @@ export default function Home() {
     ? "The Nacky Nook"
     : data?.galleries[currentRoom]?.name || currentRoom;
 
-  /* ────── ENTRANCE — "The Vault Door" ────── */
-  if (phase === "entrance") {
-    return (
-      <section className="entrance-section">
-        {/* Film grain overlay */}
-        <div className="entrance-grain" aria-hidden="true" />
-        {/* Amber light cone */}
-        <div className="entrance-light-cone" aria-hidden="true" />
-        {/* Dust motes */}
-        <DustMotes />
-
-        {/* Film strip decoration - top */}
-        <div className="film-strip-decoration film-strip-top" aria-hidden="true" />
-
-        {/* REC indicator */}
-        <div className="rec-indicator" aria-hidden="true">
-          <span className="rec-dot" />
-          <span>REC</span>
-        </div>
-
-        {/* Vault door opening overlay */}
-        <AnimatePresence>
-          {vaultDoorOpen && (
-            <motion.div
-              className="vault-door-overlay"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.6 }}
-            />
-          )}
-        </AnimatePresence>
-
-        <motion.div
-          className="entrance-inner"
-          initial={{ opacity: 0, y: -30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.4, ease: "easeOut" }}
-        >
-          {/* Film reel badge */}
-          <motion.div
-            className="vault-reel-badge"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <Film className="w-10 h-10" />
-          </motion.div>
-
-          {/* THE VAULT title with parallax */}
-          <motion.h1
-            className="vault-title"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0, x: titleParallax.x, y: titleParallax.y }}
-            transition={{ delay: 0.3, duration: 0.8 }}
-          >
-            <span>THE</span> VAULT
-          </motion.h1>
-
-          {/* Monospace subtitle with typing cursor */}
-          <motion.p
-            className="vault-subtitle"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.8 }}
-          >
-            {typewriterText}
-            <span className="typing-cursor" />
-          </motion.p>
-
-          {/* Italic tagline */}
-          <motion.p
-            className="vault-tagline"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.9, duration: 0.8 }}
-          >
-            A permanent collection dedicated to the finest Pete-adjacent artwork,
-            Pobots, Prestlers, and Cultural Artefacts of Our Time.
-          </motion.p>
-
-          {/* Boot sequence line */}
-          <motion.div
-            className="boot-sequence"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 2.5, duration: 1 }}
-          >
-            ARCHIVE://VAULT.ONLINE · {data?.totalWorks || 1212}_WORKS.DAT · STATUS: ACTIVE
-          </motion.div>
-
-          {/* Twitch link card */}
-          <motion.a
-            className="twitch-vault-card"
-            href={TWITCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.05, duration: 0.6 }}
-          >
-            <TwitchIcon size={18} />
-            <span>Watch AGoodPete on Twitch</span>
-          </motion.a>
-
-          {/* Access the vault button */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2, duration: 0.6 }}
-          >
-            <button className="enter-vault-btn" onClick={enterGallery}>
-              ACCESS THE VAULT
-              <ArrowRight className="enter-vault-btn-arrow" />
-            </button>
-          </motion.div>
-
-          {/* Spinning film reel loading indicator */}
-          {loading && (
-            <motion.div
-              className="vault-loading"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.5 }}
-            >
-              <div className="vault-loading-reel" />
-              <span>{fetchStatus}</span>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* Film strip decoration - bottom */}
-        <div className="film-strip-decoration film-strip-bottom" aria-hidden="true" />
-
-        {/* Bottom count display */}
-        <motion.div
-          className="vault-count"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.8, duration: 1 }}
-        >
-          {!loading && data
-            ? `${data.totalWorks} works in the permanent collection`
-            : !loading
-            ? "Collection unavailable"
-            : null}
-        </motion.div>
-      </section>
-    );
-  }
-
   /* ────── GALLERY ────── */
   return (
     <div className="min-h-screen flex flex-col bg-[var(--vault-bg)]" suppressHydrationWarning>
       {/* Scroll Progress Bar */}
-      {phase === "gallery" && !immersiveMode && (
+      {!immersiveMode && (
         <div
           className="scroll-progress-bar"
           style={{ width: `${scrollProgress}%` }}
@@ -1747,7 +1486,7 @@ export default function Home() {
 
       {/* Navigation */}
       {!immersiveMode && (
-      <nav className="gallery-nav" role="navigation" aria-label="Main navigation">
+      <nav className="gallery-nav" role="navigation" aria-label="Main navigation" suppressHydrationWarning>
         <div className="nav-logo" role="banner">
           <span>Pete</span> Pics
           <a
@@ -1884,6 +1623,8 @@ export default function Home() {
             className="nav-action-btn nav-menu-btn"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             {mobileMenuOpen ? (
               <X className="w-4 h-4" />
@@ -1924,6 +1665,7 @@ export default function Home() {
             />
             <motion.div
               className="mobile-menu"
+              id="mobile-menu"
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
@@ -2005,7 +1747,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Stats Bar removed — stats available in Vault Manifest modal */}
+      {/* Stats available in Vault Manifest modal */}
 
       {/* Recently Viewed strip */}
       {!immersiveMode && recentWorks.length > 0 && (
@@ -2031,10 +1773,10 @@ export default function Home() {
       )}
 
       {/* Main Content */}
-      <main id="gallery-main" role="main" aria-label={`${currentRoomName} gallery`}>
+      <main id="gallery-main" role="main" aria-label={`${currentRoomName} gallery`} suppressHydrationWarning>
 
       {/* Room Header */}
-      <header className="room-header">
+      <header className="room-header" role="banner">
         <div className="room-header-left">
           <div className="room-eyebrow">
             {currentRoom === "all"
@@ -2126,7 +1868,7 @@ export default function Home() {
                 </div>
               ) : viewMode === "list" ? (
                 /* ── LIST VIEW ── */
-                <div className="gallery-list">
+                <div className="gallery-list" aria-roledescription="gallery">
                   {displayedWorks.map((work, i) => (
                     <ListCard
                       key={work.id}
@@ -2135,6 +1877,9 @@ export default function Home() {
                       onClick={() => openLightbox(visibleWorks, i)}
                       isFav={isFav(work.id)}
                       onToggleFav={() => toggleFav(work.id)}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter") openLightbox(visibleWorks, i);
+                      }}
                     />
                   ))}
                 </div>
@@ -2173,18 +1918,18 @@ export default function Home() {
                         <div className="solo-nav">
                           <button
                             className="solo-nav-btn"
-                            onClick={() => {
-                              const newWorks = [...visibleWorks.slice(1), visibleWorks[0]];
-                              // rotate by updating visible display
-                            }}
+                            onClick={() => setSoloIndex((i) => (i - 1 + visibleWorks.length) % visibleWorks.length)}
                             disabled={visibleWorks.length <= 1}
+                            aria-label="Previous artwork"
                           >
                             <ChevronLeft className="w-6 h-6" />
                           </button>
-                          <span className="solo-nav-pos">1 / {visibleWorks.length}</span>
+                          <span className="solo-nav-pos">{(soloIndex % visibleWorks.length) + 1} / {visibleWorks.length}</span>
                           <button
                             className="solo-nav-btn"
+                            onClick={() => setSoloIndex((i) => (i + 1) % visibleWorks.length)}
                             disabled={visibleWorks.length <= 1}
+                            aria-label="Next artwork"
                           >
                             <ChevronRight className="w-6 h-6" />
                           </button>
@@ -2195,7 +1940,7 @@ export default function Home() {
                 </div>
               ) : (
                 /* ── GRID VIEW (default) ── */
-                <div className="gallery-grid">
+                <div className="gallery-grid" aria-roledescription="gallery">
                   {displayedWorks.map((work, i) => (
                     <ArtworkCard
                       key={work.id}
@@ -2204,6 +1949,9 @@ export default function Home() {
                       onClick={() => openLightbox(visibleWorks, i)}
                       isFav={isFav(work.id)}
                       onToggleFav={() => toggleFav(work.id)}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === "Enter") openLightbox(visibleWorks, i);
+                      }}
                     />
                   ))}
                 </div>
@@ -2215,6 +1963,7 @@ export default function Home() {
                   <button
                     className="load-more-btn"
                     onClick={() => setDisplayCount((c) => c + PAGE_SIZE)}
+                    aria-label="Load more artworks"
                   >
                     <span>LOAD MORE</span>
                     <span className="load-more-remaining">· {remaining} WORKS REMAINING</span>
@@ -2229,7 +1978,7 @@ export default function Home() {
 
       {/* Footer */}
       {!immersiveMode && (
-      <footer className="vault-footer">
+      <footer className="vault-footer" suppressHydrationWarning>
         <div className="vault-footer-filmstrip" aria-hidden="true" />
         <div className="vault-footer-inner">
           <div className="vault-footer-brand">
