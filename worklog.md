@@ -329,3 +329,191 @@ Unresolved issues / next phase priorities:
 - Could add image carousel/slideshow with Ken Burns effect
 - Could add "Recently Added" section
 - Could add masonry layout animation on room switch
+
+---
+Task ID: 6
+Agent: Main Developer
+Task: Ground-up visual redesign — "The Vault" concept (Retro-Futuristic Film Archive)
+
+Work Log:
+- Backed up current neon-themed files as page.neon-backup.tsx and globals.neon-backup.css
+- Analyzed all existing features (16+) to ensure nothing is lost in the redesign
+- **Complete visual redesign from Neon Arcade Gallery to The Vault (Retro-Futuristic Film Archive)**:
+  - Replaced neon cyberpunk palette with warm vault palette (amber #d4a853, rust #a0522d, sage #6b7c5e, rose #b5707e, red #c4473a)
+  - Replaced CSS variable names from --neon-* to --vault-*
+  - Replaced class names from arcade-* to vault-*
+  - Kept Google Fonts: Space Grotesk (headings), Share Tech Mono (monospace), Playfair Display (serif nameplates)
+  - New entrance "The Vault Door" with film grain texture overlay (CSS animation)
+  - New amber light cone effect from top-center (radial gradient)
+  - New spinning film reel badge animation (replaced neon pulsing badge)
+  - New "THE VAULT" title in massive bold Space Grotesk with amber accent
+  - New subtitle "PETE PICS ARCHIVE · EST. 2024" with typing cursor
+  - New "ACCESS THE VAULT" button with heavy border, film-strip edge notches on hover
+  - New boot sequence line: "ARCHIVE://VAULT.ONLINE · 1212_WORKS.DAT · STATUS: ACTIVE"
+  - New spinning film reel loading indicator (replaced retro pixel bars)
+  - New dust motes particles (replaced floating particles, warm amber tones)
+  - New Twitch card with rust/amber styling (replaced purple neon)
+  - New card catalog drawer-style navigation tabs
+  - New nav logo with "THE VAULT" subtitle in small mono
+  - New film strip perforations on artwork cards (CSS pseudo-elements on both sides)
+  - New viewfinder corner marks on images (L-shaped amber corners)
+  - New gallery tags as folder/label tabs (amber, rust, rose, sage colors)
+  - New aged paper nameplates with gradient background and amber top border
+  - New projection screen lightbox with film strip borders and projector flicker animation
+  - New "REEL" indicator for slideshow (replaced "AUTO")
+  - New warm amber progress bar with glow
+  - New film grain overlay on lightbox (subtle noise texture)
+  - New manila folder about modal with warm amber top border
+  - New warm custom scrollbar with amber hover
+  - New vault-styled toast notification
+  - New warm mobile menu with vault styling
+  - New footer with amber top border and "THE VAULT" branding
+  - Comprehensive light theme CSS overrides (warm cream background #f5f0e6)
+  - Warm room wall tints with amber/rust/rose/sage gradients
+  - Room headers with amber eyebrow labels and serif descriptions
+- **All 16+ features preserved**:
+  1. 4 galleries from /api/gallery (Pobots, Prestlers, Cultural Pics, Pisc) — 1212 total works
+  2. Twitch integration (entrance card, nav badge, footer link, mobile card) — now with rust/amber styling
+  3. Spreadsheet link in footer
+  4. Nacky Nook (every 7th item) — now with rust-themed styling
+  5. Favourites with localStorage + heart badges — warm red styling
+  6. Random artwork button (R shortcut)
+  7. Theme toggle (Dark/Light) with localStorage — warm light theme
+  8. About modal with keyboard shortcuts — manila folder styling
+  9. Custom lightbox with zoom, favourite, share, prev/next, download, slideshow
+  10. Search filtering by title
+  11. Scroll-to-top button
+  12. Stats bar with gallery counts — card catalog entry style
+  13. Viewed counter
+  14. Toast notifications
+  15. Mobile responsive (hamburger menu, mobile lightbox bar)
+  16. All keyboard shortcuts (R, T, Z, F, S, D, ?, Esc, ← →)
+- Lint passes clean with zero errors
+- Dev server compiles and serves pages successfully
+- API route fetches all 1212 works correctly
+
+Stage Summary:
+- **COMPLETE VISUAL REDESIGN** — Neon Arcade Gallery → The Vault (Retro-Futuristic Film Archive)
+- **New aesthetic** — Film noir, brutalist architecture, vintage card catalog, projection room vibes
+- **All features preserved** — 16+ features carried over from previous version
+- **New visual effects** — Film grain, film reel animation, projector flicker, viewfinder corners, film strip perforations, dust motes
+- **Warm color palette** — Amber, rust, sage, rose, cream on dark charcoal
+- **Light theme** — Warm cream background with dark brown text
+- **Lint clean**, no errors
+- **Backup files** saved as page.neon-backup.tsx and globals.neon-backup.css
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to gallery rooms
+- Could add infinite scroll or pagination for large galleries
+- Could add Ken Burns effect on slideshow
+- Light theme CSS overrides may need further refinement
+- Could add more film projector sound effects or micro-interactions
+
+---
+Task ID: 7
+Agent: CSS Polish Agent
+Task: Add enhanced CSS animations, visual polish, frame numbers, and fix room-header positioning
+
+Work Log:
+- Read worklog.md and reviewed current project state (Task 6, The Vault v5 redesign)
+- **Appended v5.1 CSS Visual Enhancements** to end of globals.css (APPEND, not overwrite):
+  - Enhanced vault-title with layered text-shadow (3 layers: glow, offset, depth)
+  - Card hover amber glow ring with inset glow on .frame
+  - Nav tab active indicator with amber glow text-shadow
+  - Stats bar amber glow gradient separator
+  - Room header amber accent bar (::after pseudo-element with gradient line)
+  - Lightbox frame enhanced amber glow (3-layer box-shadow)
+  - Footer amber gradient top border (border-image)
+  - Nameplate hover amber glow with gradient background override
+  - Favourite badge warm red glow
+  - Scroll-top button with amber hover and glow
+  - Enter button enhanced glow (3-layer box-shadow)
+  - Search focus enhanced glow with inset shadow
+  - Mobile menu warm separator
+  - About modal warm amber top border
+  - Wainscot divider with subtle glow
+  - Progress bar animated gradient (amber to rust)
+  - All room label neon amber accent
+  - Particles container and particle styles
+  - Projector flicker animation on lightbox image
+  - Slideshow indicator styling
+  - Toast notification styling
+  - Light theme refinements (grain, overlay, particles, title, frame, nameplate, shimmer, stat-divider, scroll-top, toast)
+  - Film frame number overlay (.frame-number)
+  - Enhanced mobile lightbox bar and navigation styles
+  - Footer styling with footer-link and footer-brand
+  - Keyboard shortcut key styling (kbd element)
+  - Typing cursor styling
+- **Added frame-number overlay** to ArtworkCard in page.tsx:
+  - Added `<span className="frame-number">#{index + 1}</span>` before the gallery tag in frame-inner div
+  - Frame numbers appear on hover with opacity transition (0 → 0.6)
+  - Positioned bottom-right with Share Tech Mono font
+- **Fixed room-header positioning** in globals.css:
+  - Added `position: relative` to `.room-header` CSS rule
+  - Required for the `::after` pseudo-element (amber accent bar) to position correctly
+- **Lint check**: `bun run lint` passes clean with zero errors
+- Dev server compiling and serving pages successfully
+
+Stage Summary:
+- **v5.1 CSS Polish** — 30+ visual enhancements appended to globals.css
+- **Frame number overlay** — Shows #1, #2, etc. on artwork card hover
+- **Room header fix** — position: relative added for ::after pseudo-element
+- **Lint clean**, no errors
+- **All existing features preserved** — backward compatible changes only
+
+---
+Task ID: 8
+Agent: Main Developer (Session Continuation)
+Task: Assess project status, QA testing, ground-up visual redesign, add features, CSS polish
+
+Work Log:
+- Read worklog.md (5 previous task entries) and all current code files to assess project status
+- QA tested with agent-browser — entrance loads, gallery loads with 1236 artwork cards, no page errors
+- Backed up current Neon Arcade Gallery files (page.neon-backup.tsx, globals.neon-backup.css)
+- **Delegated ground-up visual redesign** to full-stack developer agent:
+  - Complete redesign from "Neon Arcade Gallery" → "The Vault" (Retro-Futuristic Film Archive)
+  - Warm amber/rust/sage/rose/cream color palette on dark charcoal background
+  - Film noir, brutalist architecture, vintage card catalog, projection room aesthetic
+  - Film strip perforations on artwork cards, viewfinder corner marks
+  - Spinning film reel entrance badge, film grain overlay, dust motes
+  - "THE VAULT" title, "ACCESS THE VAULT" button, "PETE PICS ARCHIVE · EST. 2024" subtitle
+  - Projection screen lightbox with film strip borders and projector flicker
+  - Aged paper nameplates, card catalog drawer navigation
+  - All 16+ features preserved across the redesign
+- **Delegated CSS polish** to developer agent:
+  - Added 30+ visual enhancements (v5.1 CSS Visual Enhancements)
+  - Added frame number overlay (#1, #2, etc.) on artwork cards
+  - Fixed room-header positioning for ::after pseudo-element
+  - Enhanced mobile lightbox, footer, and light theme refinements
+- Final QA testing with agent-browser:
+  - Entrance page: "THE VAULT" title, film reel badge, "ACCESS THE VAULT" button — all working
+  - Gallery: 1212 artwork cards, all 7 rooms (All Works 1212, Pobots 347, Prestlers 351, Cultural Pics 69, Pisc 445, Favourites, Nacky Nook 174)
+  - Lightbox: opens correctly, shows title, actions (Favourite/Share/Download/Slideshow), progress bar
+  - Footer: Twitch + Spreadsheet links present
+  - Stats bar: shows all gallery counts
+  - No page errors, no console errors
+  - Lint passes clean with zero errors
+
+Stage Summary:
+- **COMPLETE GROUND-UP REDESIGN** — "The Vault" (Retro-Futuristic Film Archive) replaces "Neon Arcade Gallery"
+- **All 16+ features preserved** across redesign
+- **30+ CSS visual enhancements** added in v5.1 polish pass
+- **Frame number overlays** on artwork cards
+- **Lint clean**, zero errors
+- **No runtime errors**, dev server stable
+- **Backup files** saved: page.neon-backup.tsx, globals.neon-backup.css
+
+Current project status:
+- Stable and feature-complete with "The Vault" visual design
+- All 1212 images loading correctly from postimg.cc via server-side API
+- API caching working (9ms response time)
+- Both dark and light themes working
+- Mobile responsive with hamburger menu and mobile lightbox bar
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Could add infinite scroll or pagination for large galleries
+- Could add Ken Burns effect on slideshow images
+- Could add "Recently Viewed" section
+- Light theme CSS may need further refinement for warm vault aesthetic
+- Could add more micro-interactions (hover sound effects, tactile feedback)
