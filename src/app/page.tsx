@@ -7,7 +7,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
-  Palette,
   ArrowRight,
   Menu,
   X,
@@ -26,6 +25,13 @@ import {
   Pause,
   Download,
   Film,
+  LayoutGrid,
+  List,
+  Maximize,
+  BarChart3,
+  Columns2,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -54,7 +60,6 @@ interface GalleryResponse {
 }
 
 /* ── Constants ────────────────────────────────────────────── */
-const GALLERY_ORDER = ["pobots", "prestlers", "cultural", "pisc"];
 const GALLERY_ABBREVIATIONS: Record<string, string> = {
   pobots: "PBT",
   prestlers: "PST",
@@ -66,6 +71,8 @@ const TWITCH_URL = "https://twitch.tv/AGoodPete";
 const SPREADSHEET_URL =
   "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
 const FAVS_STORAGE_KEY = "petepics_favourites";
+const VIEWMODE_STORAGE_KEY = "petepics_viewmode";
+const RECENT_STORAGE_KEY = "petepics_recently_viewed";
 
 const ROOMS = [
   { id: "all", label: "All Works", icon: Grid3X3 },
@@ -76,6 +83,8 @@ const ROOMS = [
   { id: "favourites", label: "Favourites", icon: Heart },
   { id: "nacky", label: "Nacky Nook", icon: Sparkles },
 ] as const;
+
+type ViewMode = "grid" | "list" | "solo";
 
 /* ── Twitch SVG Icon ──────────────────────────────────────── */
 function TwitchIcon({
@@ -162,6 +171,65 @@ function useTheme() {
   const toggle = useCallback(() => setDark((d) => !d), []);
 
   return { dark, toggle, mounted };
+}
+
+/* ── View Mode Hook (hydration-safe) ──────────────────────── */
+function useViewMode() {
+  const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate from localStorage
+    setMounted(true);
+    try {
+      const stored = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
+      if (stored && ["grid", "list", "solo"].includes(stored)) setViewMode(stored);
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    try {
+      localStorage.setItem(VIEWMODE_STORAGE_KEY, viewMode);
+    } catch {}
+  }, [viewMode, mounted]);
+
+  const cycleView = useCallback(() => {
+    setViewMode((prev) => {
+      if (prev === "grid") return "list";
+      if (prev === "list") return "solo";
+      return "grid";
+    });
+  }, []);
+
+  return { viewMode, setViewMode, cycleView };
+}
+
+/* ── Recently Viewed Hook (hydration-safe) ────────────────── */
+function useRecentlyViewed() {
+  const [recent, setRecent] = useState<string[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate from localStorage
+    setMounted(true);
+    try {
+      const stored = localStorage.getItem(RECENT_STORAGE_KEY);
+      if (stored) setRecent(JSON.parse(stored));
+    } catch {}
+  }, []);
+
+  const addRecent = useCallback((id: string) => {
+    setRecent((prev) => {
+      const next = [id, ...prev.filter((r) => r !== id)].slice(0, 20);
+      try {
+        localStorage.setItem(RECENT_STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  return { recent, addRecent, mounted };
 }
 
 /* ── Dust Motes (deterministic) — particles in projector beam ── */
@@ -284,6 +352,8 @@ function ArtworkCard({
       ? "tag-rose"
       : "tag-sage";
 
+  const sprocketNum = String(index + 1).padStart(3, "0");
+
   return (
     <motion.div
       className="artwork-card break-inside-avoid mb-6 cursor-pointer group"
@@ -296,6 +366,7 @@ function ArtworkCard({
         ease: "easeOut",
       }}
     >
+      <span className="sprocket-number" aria-hidden="true">{sprocketNum}</span>
       <div className={`frame ${frameStyle}`} onClick={onClick}>
         <div className="frame-inner">
           <LazyImage src={work.imageUrl} alt={work.title} />
@@ -328,6 +399,64 @@ function ArtworkCard({
   );
 }
 
+/* ── List Card (for List view) ────────────────────────────── */
+function ListCard({
+  work,
+  index,
+  onClick,
+  isFav,
+  onToggleFav,
+}: {
+  work: GalleryWork;
+  index: number;
+  onClick: () => void;
+  isFav: boolean;
+  onToggleFav: () => void;
+}) {
+  const tagClass =
+    work.gallery === "pobots"
+      ? "tag-amber"
+      : work.gallery === "prestlers"
+      ? "tag-rust"
+      : work.gallery === "cultural"
+      ? "tag-rose"
+      : "tag-sage";
+
+  return (
+    <motion.div
+      className="list-card"
+      initial={{ opacity: 0, x: -20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ delay: Math.min(index * 0.02, 0.3), duration: 0.4 }}
+      onClick={onClick}
+    >
+      <div className="list-card-thumb">
+        <img src={work.imageUrl} alt={work.title} loading="lazy" />
+      </div>
+      <div className="list-card-info">
+        <div className="list-card-title">{work.title}</div>
+        <div className="list-card-meta">
+          <span className={`list-card-tag ${tagClass}`}>
+            {GALLERY_ABBREVIATIONS[work.gallery] || work.gallery.slice(0, 3).toUpperCase()}
+          </span>
+          <span className="list-card-gallery">{work.galleryName}</span>
+        </div>
+      </div>
+      <button
+        className={`list-card-fav ${isFav ? "list-card-fav-active" : ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFav();
+        }}
+        aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
+      >
+        <Heart className="w-4 h-4" fill={isFav ? "currentColor" : "none"} />
+      </button>
+    </motion.div>
+  );
+}
+
 /* ── Custom Lightbox ──────────────────────────────────────── */
 function Lightbox({
   isOpen,
@@ -345,6 +474,11 @@ function Lightbox({
   slideshowActive,
   onToggleSlideshow,
   onDownload,
+  compareActive,
+  onToggleCompare,
+  nextWork,
+  allItems,
+  onGoToIndex,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -361,10 +495,19 @@ function Lightbox({
   slideshowActive: boolean;
   onToggleSlideshow: () => void;
   onDownload: () => void;
+  compareActive: boolean;
+  onToggleCompare: () => void;
+  nextWork: GalleryWork | null;
+  allItems: GalleryWork[];
+  onGoToIndex: (idx: number) => void;
 }) {
   const currentWorkId = work?.id ?? "";
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   if (!isOpen || !work) return null;
+
+  const filmRef = `Film: ${GALLERY_ABBREVIATIONS[work.gallery] || "UNK"}-${String(position + 1).padStart(3, "0")}`;
 
   return (
     <AnimatePresence>
@@ -377,6 +520,17 @@ function Lightbox({
         transition={{ duration: 0.25 }}
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose();
+        }}
+        onTouchStart={(e) => {
+          touchStartX.current = e.touches[0].clientX;
+        }}
+        onTouchEnd={(e) => {
+          touchEndX.current = e.changedTouches[0].clientX;
+          const diff = touchStartX.current - touchEndX.current;
+          if (Math.abs(diff) > 60) {
+            if (diff > 0) onNext();
+            else onPrev();
+          }
         }}
       >
         <button
@@ -394,23 +548,33 @@ function Lightbox({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          <div className="lb-frame">
+          <div className={`lb-frame ${compareActive ? "lb-frame-compare" : ""}`}>
             <div className="lb-spotlight" aria-hidden="true" />
             <div className="lb-frame-inner" onClick={onToggleZoom}>
               <img
                 src={work.imageUrl}
                 alt={work.title}
-                className={`lb-image ${isZoomed ? "lb-image-zoomed" : ""}`}
+                className={`lb-image ${isZoomed ? "lb-image-zoomed" : ""} ${slideshowActive ? "lb-image-kenburns" : ""}`}
               />
               <div className="lb-zoom-hint">
                 {isZoomed ? "Click to zoom out" : "Click to zoom in"}
               </div>
             </div>
+            {compareActive && nextWork && (
+              <div className="lb-frame-inner lb-compare-image" onClick={onToggleZoom}>
+                <img
+                  src={nextWork.imageUrl}
+                  alt={nextWork.title}
+                  className="lb-image"
+                />
+              </div>
+            )}
           </div>
 
           <div className="lb-info">
             <div className="lb-gallery-tag">{work.galleryName}</div>
             <h2 className="lb-title">{work.title}</h2>
+            <div className="lb-exif-ref">{filmRef}</div>
             <div className="lb-position">
               {position + 1} / {total}
               {slideshowActive && (
@@ -465,6 +629,14 @@ function Lightbox({
                 <span>Download</span>
               </button>
               <button
+                className={`lb-action-btn ${compareActive ? "lb-action-btn-active" : ""}`}
+                onClick={onToggleCompare}
+                title="Compare with next (C)"
+              >
+                <Columns2 className="w-4 h-4" />
+                <span>Compare</span>
+              </button>
+              <button
                 className={`lb-action-btn-slideshow ${slideshowActive ? "active" : ""}`}
                 onClick={onToggleSlideshow}
                 title={slideshowActive ? "Pause slideshow" : "Start slideshow"}
@@ -481,7 +653,8 @@ function Lightbox({
             <div className="lb-shortcut-hint">
               <kbd>←</kbd> <kbd>→</kbd> Navigate &nbsp; <kbd>Z</kbd> Zoom
               &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>S</kbd> Slideshow
-              &nbsp; <kbd>D</kbd> Download &nbsp; <kbd>Esc</kbd> Close
+              &nbsp; <kbd>C</kbd> Compare &nbsp; <kbd>D</kbd> Download
+              &nbsp; <kbd>Esc</kbd> Close
             </div>
 
             <a
@@ -494,6 +667,25 @@ function Lightbox({
             </a>
           </div>
         </motion.div>
+
+        {/* Film strip timeline at bottom */}
+        <div className="lb-filmstrip">
+          <div className="lb-filmstrip-inner">
+            {allItems.slice(Math.max(0, position - 5), position + 15).map((w, i) => {
+              const actualIdx = Math.max(0, position - 5) + i;
+              return (
+                <button
+                  key={w.id}
+                  className={`lb-filmstrip-thumb ${actualIdx === position ? "lb-filmstrip-active" : ""}`}
+                  onClick={() => onGoToIndex(actualIdx)}
+                  title={w.title}
+                >
+                  <img src={w.imageUrl} alt={w.title} />
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         {/* Mobile lightbox bar */}
         <div className="mobile-lb-bar">
@@ -618,6 +810,102 @@ function StatsBar({
   );
 }
 
+/* ── Collection Stats Modal ───────────────────────────────── */
+function StatsModal({
+  isOpen,
+  onClose,
+  data,
+  favCount,
+  recentCount,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  data: GalleryResponse | null;
+  favCount: number;
+  recentCount: number;
+}) {
+  if (!isOpen || !data) return null;
+
+  const galleries = Object.values(data.galleries);
+  const maxCount = Math.max(...galleries.map((g) => g.works.length));
+  const mostViewedGallery = galleries.reduce((a, b) =>
+    a.works.length > b.works.length ? a : b
+  );
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="about-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        <motion.div
+          className="stats-modal"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 30, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="about-close"
+            onClick={onClose}
+            aria-label="Close stats"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <h3 className="about-title">Vault Manifest</h3>
+
+          <div className="stats-modal-row">
+            <span className="stats-modal-label">Total Works</span>
+            <span className="stats-modal-value stats-modal-total">{data.totalWorks}</span>
+          </div>
+
+          <div className="stats-modal-divider" />
+
+          {galleries.map((g) => (
+            <div key={g.id} className="stats-modal-gallery">
+              <div className="stats-modal-gallery-header">
+                <span className="stats-modal-gallery-name">{g.name}</span>
+                <span className="stats-modal-gallery-count">{g.works.length}</span>
+              </div>
+              <div className="stats-modal-bar-track">
+                <div
+                  className="stats-modal-bar-fill"
+                  style={{ width: `${(g.works.length / maxCount) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+
+          <div className="stats-modal-divider" />
+
+          <div className="stats-modal-row">
+            <span className="stats-modal-label">Favourites</span>
+            <span className="stats-modal-value stats-modal-fav">{favCount}</span>
+          </div>
+
+          <div className="stats-modal-row">
+            <span className="stats-modal-label">Recently Viewed</span>
+            <span className="stats-modal-value">{recentCount}</span>
+          </div>
+
+          <div className="stats-modal-divider" />
+
+          <div className="stats-modal-row">
+            <span className="stats-modal-label">Most Collected Gallery</span>
+            <span className="stats-modal-value stats-modal-accent">{mostViewedGallery.name}</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 /* ── About Modal ──────────────────────────────────────────── */
 function AboutModal({
   isOpen,
@@ -687,6 +975,12 @@ function AboutModal({
               <kbd>T</kbd> <span>Toggle theme</span>
             </div>
             <div className="about-shortcut-row">
+              <kbd>V</kbd> <span>Cycle view mode (Grid/List/Solo)</span>
+            </div>
+            <div className="about-shortcut-row">
+              <kbd>C</kbd> <span>Toggle compare mode in lightbox</span>
+            </div>
+            <div className="about-shortcut-row">
               <kbd>?</kbd> <span>Show this shortcuts panel</span>
             </div>
             <div className="about-shortcut-row">
@@ -753,9 +1047,16 @@ export default function Home() {
   const [toastVisible, setToastVisible] = useState(false);
   const [slideshowActive, setSlideshowActive] = useState(false);
   const [typewriterText, setTypewriterText] = useState("");
+  const [compareActive, setCompareActive] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [ambientSound, setAmbientSound] = useState(false);
+  const [vaultDoorOpen, setVaultDoorOpen] = useState(false);
+  const [titleParallax, setTitleParallax] = useState({ x: 0, y: 0 });
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
+  const { viewMode, setViewMode, cycleView } = useViewMode();
+  const { recent, addRecent, mounted: recentMounted } = useRecentlyViewed();
 
   /* Show toast */
   const showToast = useCallback((msg: string) => {
@@ -763,6 +1064,18 @@ export default function Home() {
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
   }, []);
+
+  /* Parallax effect on entrance title */
+  useEffect(() => {
+    if (phase !== "entrance") return;
+    function onMouseMove(e: MouseEvent) {
+      const x = (e.clientX / window.innerWidth - 0.5) * 12;
+      const y = (e.clientY / window.innerHeight - 0.5) * 8;
+      setTitleParallax({ x, y });
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, [phase]);
 
   /* Typewriter effect for subtitle */
   useEffect(() => {
@@ -804,9 +1117,13 @@ export default function Home() {
     fetchData();
   }, []);
 
-  /* Open gallery */
+  /* Open gallery with vault door animation */
   const enterGallery = useCallback(() => {
-    setPhase("gallery");
+    setVaultDoorOpen(true);
+    setTimeout(() => {
+      setPhase("gallery");
+      setVaultDoorOpen(false);
+    }, 600);
   }, []);
 
   /* Room change handler */
@@ -824,16 +1141,20 @@ export default function Home() {
       setLightboxIndex(index);
       setLightboxOpen(true);
       setIsZoomed(false);
+      setCompareActive(false);
       setViewedCount((c) => c + 1);
       document.body.style.overflow = "hidden";
+      const work = items[index];
+      if (work) addRecent(work.id);
     },
-    []
+    [addRecent]
   );
 
   const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
     setIsZoomed(false);
     setSlideshowActive(false);
+    setCompareActive(false);
     document.body.style.overflow = "";
   }, []);
 
@@ -845,6 +1166,14 @@ export default function Home() {
       setIsZoomed(false);
     },
     [lightboxItems.length]
+  );
+
+  const goToIndex = useCallback(
+    (idx: number) => {
+      setLightboxIndex(idx);
+      setIsZoomed(false);
+    },
+    []
   );
 
   /* Slideshow auto-advance */
@@ -859,6 +1188,11 @@ export default function Home() {
   /* Toggle slideshow */
   const toggleSlideshow = useCallback(() => {
     setSlideshowActive((prev) => !prev);
+  }, []);
+
+  /* Toggle compare */
+  const toggleCompare = useCallback(() => {
+    setCompareActive((prev) => !prev);
   }, []);
 
   /* Download handler */
@@ -907,6 +1241,10 @@ export default function Home() {
         setAboutOpen(false);
         return;
       }
+      if (e.key === "Escape" && statsOpen) {
+        setStatsOpen(false);
+        return;
+      }
 
       if (lightboxOpen) {
         if (e.key === "ArrowRight" || e.key === "ArrowDown") lbNav(1);
@@ -919,11 +1257,13 @@ export default function Home() {
         }
         if (e.key === "s" || e.key === "S") toggleSlideshow();
         if (e.key === "d" || e.key === "D") handleDownload();
+        if (e.key === "c" || e.key === "C") toggleCompare();
         return;
       }
 
       if (e.key === "r" || e.key === "R") handleRandom();
       if (e.key === "t" || e.key === "T") toggleTheme();
+      if (e.key === "v" || e.key === "V") cycleView();
     }
 
     window.addEventListener("keydown", handleKey);
@@ -933,6 +1273,7 @@ export default function Home() {
     lbNav,
     closeLightbox,
     aboutOpen,
+    statsOpen,
     lightboxItems,
     lightboxIndex,
     toggleFav,
@@ -940,6 +1281,8 @@ export default function Home() {
     handleRandom,
     toggleSlideshow,
     handleDownload,
+    toggleCompare,
+    cycleView,
   ]);
 
   /* Share handler */
@@ -996,11 +1339,23 @@ export default function Home() {
 
   const visibleWorks = getVisibleWorks();
   const currentLightboxWork = lightboxItems[lightboxIndex];
+  const nextLightboxWork = lightboxItems[(lightboxIndex + 1) % lightboxItems.length];
+
+  /* Recently viewed works for the strip */
+  const recentWorks = useMemo(() => {
+    if (!data || !recentMounted) return [];
+    return recent
+      .map((id) => data.allWorks.find((w) => w.id === id))
+      .filter((w): w is GalleryWork => !!w);
+  }, [data, recent, recentMounted]);
 
   /* Nacky Nook info */
   const nackyCount = data
     ? data.allWorks.filter((_, i) => i % 7 === 0).length
     : 0;
+
+  /* Solo view current work */
+  const soloWork = viewMode === "solo" && visibleWorks.length > 0 ? visibleWorks[0] : null;
 
   /* ────── ENTRANCE — "The Vault Door" ────── */
   if (phase === "entrance") {
@@ -1012,6 +1367,28 @@ export default function Home() {
         <div className="entrance-light-cone" aria-hidden="true" />
         {/* Dust motes */}
         <DustMotes />
+
+        {/* Film strip decoration - top */}
+        <div className="film-strip-decoration film-strip-top" aria-hidden="true" />
+
+        {/* REC indicator */}
+        <div className="rec-indicator" aria-hidden="true">
+          <span className="rec-dot" />
+          <span>REC</span>
+        </div>
+
+        {/* Vault door opening overlay */}
+        <AnimatePresence>
+          {vaultDoorOpen && (
+            <motion.div
+              className="vault-door-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.6 }}
+            />
+          )}
+        </AnimatePresence>
 
         <motion.div
           className="entrance-inner"
@@ -1029,11 +1406,11 @@ export default function Home() {
             <Film className="w-10 h-10" />
           </motion.div>
 
-          {/* THE VAULT title */}
+          {/* THE VAULT title with parallax */}
           <motion.h1
             className="vault-title"
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={{ opacity: 1, y: 0, x: titleParallax.x, y: titleParallax.y }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <span>THE</span> VAULT
@@ -1068,7 +1445,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 2.5, duration: 1 }}
           >
-            ARCHIVE://VAULT.ONLINE · 1212_WORKS.DAT · STATUS: ACTIVE
+            ARCHIVE://VAULT.ONLINE · {data?.totalWorks || 1212}_WORKS.DAT · STATUS: ACTIVE
           </motion.div>
 
           {/* Twitch link card */}
@@ -1110,6 +1487,9 @@ export default function Home() {
             </motion.div>
           )}
         </motion.div>
+
+        {/* Film strip decoration - bottom */}
+        <div className="film-strip-decoration film-strip-bottom" aria-hidden="true" />
 
         {/* Bottom count display */}
         <motion.div
@@ -1183,6 +1563,34 @@ export default function Home() {
 
         {/* Action buttons */}
         <div className="nav-actions">
+          {/* View mode toggle */}
+          <div className="nav-view-toggle">
+            <button
+              className={`nav-view-btn ${viewMode === "grid" ? "nav-view-btn-active" : ""}`}
+              onClick={() => setViewMode("grid")}
+              title="Grid view"
+              aria-label="Grid view"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+            </button>
+            <button
+              className={`nav-view-btn ${viewMode === "list" ? "nav-view-btn-active" : ""}`}
+              onClick={() => setViewMode("list")}
+              title="List view"
+              aria-label="List view"
+            >
+              <List className="w-3.5 h-3.5" />
+            </button>
+            <button
+              className={`nav-view-btn ${viewMode === "solo" ? "nav-view-btn-active" : ""}`}
+              onClick={() => setViewMode("solo")}
+              title="Solo view"
+              aria-label="Solo view"
+            >
+              <Maximize className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
           <button
             className="nav-action-btn"
             onClick={handleRandom}
@@ -1190,6 +1598,15 @@ export default function Home() {
             aria-label="View random artwork"
           >
             <Shuffle className="w-4 h-4" />
+          </button>
+
+          <button
+            className="nav-action-btn"
+            onClick={() => setStatsOpen(true)}
+            title="Vault Manifest"
+            aria-label="Collection stats"
+          >
+            <BarChart3 className="w-4 h-4" />
           </button>
 
           <button
@@ -1202,6 +1619,19 @@ export default function Home() {
               <Sun className="w-4 h-4" />
             ) : (
               <Moon className="w-4 h-4" />
+            )}
+          </button>
+
+          <button
+            className="nav-action-btn"
+            onClick={() => setAmbientSound((p) => !p)}
+            title={ambientSound ? "Mute ambient" : "Ambient sound (UI only)"}
+            aria-label="Toggle ambient sound"
+          >
+            {ambientSound ? (
+              <Volume2 className="w-4 h-4" />
+            ) : (
+              <VolumeX className="w-4 h-4" />
             )}
           </button>
 
@@ -1240,102 +1670,182 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Mobile menu dropdown */}
+      {/* Mobile menu — slide-in from right */}
       <AnimatePresence>
         {mobileMenuOpen && (
-          <motion.div
-            className="mobile-menu"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {ROOMS.map((room) => {
-              const count =
-                room.id === "all"
-                  ? data?.totalWorks || 0
-                  : room.id === "favourites"
-                  ? favCount
-                  : room.id === "nacky"
-                  ? nackyCount
-                  : data?.galleries[room.id]?.works.length || 0;
-              return (
+          <>
+            <motion.div
+              className="mobile-menu-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              className="mobile-menu"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            >
+              <div className="mobile-menu-header">
+                <span className="mobile-menu-title">THE VAULT</span>
                 <button
-                  key={room.id}
-                  className={`mobile-menu-item ${currentRoom === room.id ? "active" : ""} ${room.id === "favourites" ? "mobile-menu-item-fav" : ""} ${room.id === "nacky" ? "mobile-menu-item-nacky" : ""}`}
-                  onClick={() => handleRoomChange(room.id)}
+                  className="mobile-menu-close"
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Close menu"
                 >
-                  {room.id === "nacky" && <Sparkles className="w-4 h-4" />}
-                  {room.id === "favourites" && <Heart className="w-4 h-4" />}
-                  {room.label}
-                  {count > 0 && (
-                    <span className="nav-tab-count">{count}</span>
-                  )}
+                  <X className="w-5 h-5" />
                 </button>
-              );
-            })}
-            <div className="mobile-menu-divider" />
-            <button
-              className="mobile-menu-item"
-              onClick={() => {
-                handleRandom();
-                setMobileMenuOpen(false);
-              }}
-            >
-              <Shuffle className="w-4 h-4" /> Random
-            </button>
-            <button
-              className="mobile-menu-item"
-              onClick={() => {
-                toggleTheme();
-                setMobileMenuOpen(false);
-              }}
-            >
-              {themeMounted && dark ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
-              Theme
-            </button>
-            <button
-              className="mobile-menu-item"
-              onClick={() => {
-                setAboutOpen(true);
-                setMobileMenuOpen(false);
-              }}
-            >
-              <Info className="w-4 h-4" /> Shortcuts
-            </button>
-            <div className="mobile-menu-divider" />
-            <a
-              className="mobile-twitch-card"
-              href={TWITCH_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <TwitchIcon size={16} />
-              Watch AGoodPete on Twitch
-            </a>
-          </motion.div>
+              </div>
+              {ROOMS.map((room) => {
+                const count =
+                  room.id === "all"
+                    ? data?.totalWorks || 0
+                    : room.id === "favourites"
+                    ? favCount
+                    : room.id === "nacky"
+                    ? nackyCount
+                    : data?.galleries[room.id]?.works.length || 0;
+                return (
+                  <button
+                    key={room.id}
+                    className={`mobile-menu-item ${currentRoom === room.id ? "mobile-menu-item-active" : ""}`}
+                    onClick={() => handleRoomChange(room.id)}
+                  >
+                    {room.id === "nacky" && <Sparkles className="w-4 h-4" />}
+                    {room.id === "favourites" && <Heart className="w-4 h-4" />}
+                    {room.label}
+                    <span className="mobile-menu-count">{count}</span>
+                  </button>
+                );
+              })}
+              <div className="mobile-menu-divider" />
+              <a
+                className="mobile-menu-item mobile-menu-twitch"
+                href={TWITCH_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <TwitchIcon size={16} />
+                AGoodPete on Twitch
+              </a>
+              <a
+                className="mobile-menu-item"
+                href={SPREADSHEET_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                📊 Pete Pics Spreadsheet
+              </a>
+              <div className="mobile-menu-divider" />
+              <div className="mobile-menu-view-toggle">
+                <button
+                  className={`nav-view-btn ${viewMode === "grid" ? "nav-view-btn-active" : ""}`}
+                  onClick={() => { setViewMode("grid"); setMobileMenuOpen(false); }}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  className={`nav-view-btn ${viewMode === "list" ? "nav-view-btn-active" : ""}`}
+                  onClick={() => { setViewMode("list"); setMobileMenuOpen(false); }}
+                >
+                  <List className="w-4 h-4" />
+                </button>
+                <button
+                  className={`nav-view-btn ${viewMode === "solo" ? "nav-view-btn-active" : ""}`}
+                  onClick={() => { setViewMode("solo"); setMobileMenuOpen(false); }}
+                >
+                  <Maximize className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
-      {/* Stats bar */}
+      {/* Stats Bar */}
       <StatsBar data={data} favCount={favCount} />
 
-      {/* Viewed counter */}
-      {viewedCount > 0 && (
-        <div className="viewed-counter">
-          <Eye className="w-3 h-3" />
-          <span>{viewedCount} viewed</span>
+      {/* Viewed Counter */}
+      <div className="viewed-counter">
+        <Eye className="w-3 h-3" />
+        <span>{viewedCount} works viewed</span>
+        <span className="viewed-mode">· {viewMode.toUpperCase()} VIEW</span>
+      </div>
+
+      {/* Recently Viewed strip */}
+      {recentWorks.length > 0 && (
+        <div className="recently-viewed-strip">
+          <span className="recently-viewed-label">Recently Viewed</span>
+          <div className="recently-viewed-scroll">
+            {recentWorks.map((w) => (
+              <button
+                key={w.id}
+                className="recently-viewed-thumb"
+                onClick={() => {
+                  const idx = visibleWorks.findIndex((vw) => vw.id === w.id);
+                  if (idx >= 0) openLightbox(visibleWorks, idx);
+                  else openLightbox([w], 0);
+                }}
+                title={w.title}
+              >
+                <img src={w.imageUrl} alt={w.title} />
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Room header */}
-      {data && currentRoom !== "all" && (
+      {/* Room Header */}
+      <header className="room-header">
+        <div className="room-header-left">
+          <div className="room-eyebrow">
+            {currentRoom === "all"
+              ? "ARCHIVE ROOM"
+              : currentRoom === "favourites"
+              ? "PERSONAL COLLECTION"
+              : currentRoom === "nacky"
+              ? "THE NACKY NOOK"
+              : "VAULT CHAMBER"}
+          </div>
+          <h2 className="room-title">
+            {currentRoom === "all"
+              ? "All Works"
+              : currentRoom === "favourites"
+              ? "Your Favourites"
+              : currentRoom === "nacky"
+              ? "The Nacky Nook"
+              : data?.galleries[currentRoom]?.name || currentRoom}
+          </h2>
+          {(currentRoom === "favourites" || currentRoom === "nacky") && (
+            <p className="room-desc">
+              {currentRoom === "favourites"
+                ? "Your personal collection of the finest works, hand-picked and preserved."
+                : "A secret corner reserved for the most delightfully unhinged Pete content."}
+            </p>
+          )}
+        </div>
+        <div className="room-count">
+          <strong>{visibleWorks.length}</strong>
+          Works
+        </div>
+      </header>
+
+      {/* Gallery Content */}
+      <main className="flex-1">
+        <div className="wainscot" />
+
+        {/* Search results header */}
+        {searchQuery && (
+          <div className="search-results-header">
+            Found <strong>{visibleWorks.length}</strong> works matching &quot;{searchQuery}&quot;
+          </div>
+        )}
+
+        {/* Room wall */}
         <div
-          className={`room-header ${
+          className={`gallery-wall ${
             currentRoom === "pobots"
               ? "room-wall-1"
               : currentRoom === "prestlers"
@@ -1351,112 +1861,135 @@ export default function Home() {
               : ""
           }`}
         >
-          <div className="room-header-left">
-            <div className="room-eyebrow">
-              {currentRoom === "favourites"
-                ? "Your Collection"
-                : currentRoom === "nacky"
-                ? "The Nacky Nook"
-                : "Archive Room"}
-            </div>
-            <h2 className="room-title">
-              {currentRoom === "favourites"
-                ? "Your Favourites"
-                : currentRoom === "nacky"
-                ? "The Nacky Nook"
-                : data.galleries[currentRoom]?.name || "Gallery"}
-            </h2>
-            <p className="room-desc">
-              {currentRoom === "favourites"
-                ? "Your personal collection of favoured works from the archive."
-                : currentRoom === "nacky"
-                ? "A secret corner of the vault reserved for the most delightfully unhinged Pete content. Only the finest absurdist masterpieces earn their place here."
-                : data.galleries[currentRoom]?.tagline || ""}
-            </p>
-          </div>
-          <div className="room-count">
-            <strong>{visibleWorks.length}</strong>
-            works
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`${currentRoom}-${viewMode}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+            >
+              {visibleWorks.length === 0 ? (
+                <div className="no-results">
+                  {currentRoom === "favourites"
+                    ? "No favourites yet — click the heart on any artwork to save it here."
+                    : "No works found matching your search."}
+                </div>
+              ) : viewMode === "list" ? (
+                /* ── LIST VIEW ── */
+                <div className="gallery-list">
+                  {visibleWorks.map((work, i) => (
+                    <ListCard
+                      key={work.id}
+                      work={work}
+                      index={i}
+                      onClick={() => openLightbox(visibleWorks, i)}
+                      isFav={isFav(work.id)}
+                      onToggleFav={() => toggleFav(work.id)}
+                    />
+                  ))}
+                </div>
+              ) : viewMode === "solo" ? (
+                /* ── SOLO VIEW ── */
+                <div className="solo-view">
+                  {soloWork && (
+                    <div className="solo-card">
+                      <motion.div
+                        key={soloWork.id}
+                        initial={{ opacity: 0, x: 50 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -50 }}
+                        transition={{ duration: 0.4, ease: "easeOut" }}
+                      >
+                        <div className="solo-image-wrap">
+                          <img
+                            src={soloWork.imageUrl}
+                            alt={soloWork.title}
+                            onClick={() => openLightbox(visibleWorks, 0)}
+                          />
+                        </div>
+                        <div className="solo-info">
+                          <h3 className="solo-title">{soloWork.title}</h3>
+                          <span className="solo-gallery">{soloWork.galleryName}</span>
+                          <button
+                            className={`solo-fav ${isFav(soloWork.id) ? "solo-fav-active" : ""}`}
+                            onClick={() => toggleFav(soloWork.id)}
+                          >
+                            <Heart
+                              className="w-5 h-5"
+                              fill={isFav(soloWork.id) ? "currentColor" : "none"}
+                            />
+                          </button>
+                        </div>
+                        <div className="solo-nav">
+                          <button
+                            className="solo-nav-btn"
+                            onClick={() => {
+                              const newWorks = [...visibleWorks.slice(1), visibleWorks[0]];
+                              // rotate by updating visible display
+                            }}
+                            disabled={visibleWorks.length <= 1}
+                          >
+                            <ChevronLeft className="w-6 h-6" />
+                          </button>
+                          <span className="solo-nav-pos">1 / {visibleWorks.length}</span>
+                          <button
+                            className="solo-nav-btn"
+                            disabled={visibleWorks.length <= 1}
+                          >
+                            <ChevronRight className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* ── GRID VIEW (default) ── */
+                <div className="gallery-grid">
+                  {visibleWorks.map((work, i) => (
+                    <ArtworkCard
+                      key={work.id}
+                      work={work}
+                      index={i}
+                      onClick={() => openLightbox(visibleWorks, i)}
+                      isFav={isFav(work.id)}
+                      onToggleFav={() => toggleFav(work.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
-      )}
-
-      {/* Divider */}
-      <div className="wainscot" />
-
-      {/* Search results header */}
-      {searchQuery && (
-        <div className="search-results-header">
-          Found <strong>{visibleWorks.length}</strong> works matching &ldquo;
-          {searchQuery}&rdquo;
-        </div>
-      )}
-
-      {/* Gallery wall */}
-      <div
-        className={`gallery-wall ${
-          !searchQuery && currentRoom === "all"
-            ? ""
-            : currentRoom === "pobots"
-            ? "room-wall-1"
-            : currentRoom === "prestlers"
-            ? "room-wall-2"
-            : currentRoom === "cultural"
-            ? "room-wall-3"
-            : currentRoom === "pisc"
-            ? "room-wall-4"
-            : currentRoom === "nacky"
-            ? "room-wall-nacky"
-            : currentRoom === "favourites"
-            ? "room-wall-fav"
-            : ""
-        }`}
-      >
-        {visibleWorks.length > 0 ? (
-          <div className="gallery-grid">
-            {visibleWorks.map((work, i) => (
-              <ArtworkCard
-                key={work.id}
-                work={work}
-                index={i}
-                onClick={() => openLightbox(visibleWorks, i)}
-                isFav={isFav(work.id)}
-                onToggleFav={() => toggleFav(work.id)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="no-results">
-            {currentRoom === "favourites"
-              ? "No favourites yet. Click the heart on any work to add it to your collection."
-              : "No works found."}
-          </div>
-        )}
-      </div>
+      </main>
 
       {/* Footer */}
-      <footer className="gallery-footer">
-        <div className="footer-brand">
-          <span>Pete</span> Pics — The Vault
-        </div>
-        <div className="footer-links">
-          <a
-            className="footer-link"
-            href={TWITCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <TwitchIcon size={14} />
-            AGoodPete
-          </a>
-          <a
-            className="footer-link"
-            href={SPREADSHEET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            📊 Spreadsheet
-          </a>
+      <footer className="vault-footer">
+        <div className="vault-footer-inner">
+          <div className="vault-footer-links">
+            <a
+              className="footer-link"
+              href={TWITCH_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <TwitchIcon size={14} />
+              AGoodPete on Twitch
+            </a>
+            <a
+              className="footer-link"
+              href={SPREADSHEET_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              📊 Pete Pics Spreadsheet
+            </a>
+          </div>
+          <div className="vault-footer-brand">
+            Built with ❤️ by the Pete Pics community
+          </div>
+          <div className="vault-footer-version">v6.0</div>
         </div>
       </footer>
 
@@ -1474,21 +2007,35 @@ export default function Home() {
           if (currentLightboxWork) toggleFav(currentLightboxWork.id);
         }}
         onShare={handleShare}
-        onToggleZoom={() => setIsZoomed((prev) => !prev)}
+        onToggleZoom={() => setIsZoomed((p) => !p)}
         isZoomed={isZoomed}
         slideshowActive={slideshowActive}
         onToggleSlideshow={toggleSlideshow}
         onDownload={handleDownload}
+        compareActive={compareActive}
+        onToggleCompare={toggleCompare}
+        nextWork={nextLightboxWork}
+        allItems={lightboxItems}
+        onGoToIndex={goToIndex}
       />
 
-      {/* About modal */}
+      {/* About Modal */}
       <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
 
-      {/* Scroll to top */}
-      <ScrollToTop />
+      {/* Stats Modal */}
+      <StatsModal
+        isOpen={statsOpen}
+        onClose={() => setStatsOpen(false)}
+        data={data}
+        favCount={favCount}
+        recentCount={recentWorks.length}
+      />
 
       {/* Toast */}
       <Toast message={toastMessage} visible={toastVisible} />
+
+      {/* Scroll to top */}
+      <ScrollToTop />
     </div>
   );
 }

@@ -513,7 +513,192 @@ Current project status:
 Unresolved issues / next phase priorities:
 - Could add URL-based routing for deep-linking to specific gallery rooms
 - Could add infinite scroll or pagination for large galleries
-- Could add Ken Burns effect on slideshow images
 - Could add "Recently Viewed" section
 - Light theme CSS may need further refinement for warm vault aesthetic
 - Could add more micro-interactions (hover sound effects, tactile feedback)
+
+---
+Task ID: 9
+Agent: Feature Enhancement Agent
+Task: Add 4 new features + 15 styling improvements, remove unused imports
+
+Work Log:
+- Read worklog.md (8 previous task entries) and all current code files to assess project status
+- **Removed unused imports**: `Palette` and `GALLERY_ORDER` removed from page.tsx
+- **Added 4 new features**:
+
+  FEATURE 1: Grid View Toggle (Grid/List/Solo views):
+  - Added `useViewMode` hook with localStorage persistence (key: `petepics_viewmode`)
+  - Three view modes: Grid (default masonry), List (horizontal cards), Solo (single artwork)
+  - Toggle buttons in nav using LayoutGrid, List, Maximize icons from lucide-react
+  - Keyboard shortcut: V to cycle views
+  - List view: `.gallery-list` container, `.list-card` with thumbnail left (80px) + info right
+  - Solo view: `.solo-view` with centered large image, title, gallery tag, prev/next nav
+  - Mobile menu includes view toggle buttons
+  - Viewed counter shows current view mode ("· GRID VIEW" / "· LIST VIEW" / "· SOLO VIEW")
+
+  FEATURE 2: Recently Viewed Section:
+  - Added `useRecentlyViewed` hook with localStorage persistence (key: `petepics_recently_viewed`)
+  - Tracks last 20 viewed artwork IDs
+  - Horizontal scroll strip above gallery wall with small 36px thumbnails
+  - Clickable thumbnails open the artwork in lightbox
+  - Label "Recently Viewed" in Share Tech Mono
+
+  FEATURE 3: Collection Stats Modal (Vault Manifest):
+  - BarChart3 icon button in nav actions
+  - Opens modal with warm paper-like background
+  - Shows: Total works count, Per-gallery counts with amber progress bars, Favourites count, Recently viewed count, Most collected gallery
+  - StatsModal component with framer-motion animations
+  - Styled as "Vault Manifest" with warm paper-like gradient background
+
+  FEATURE 4: Image Comparison Mode (Side-by-side in Lightbox):
+  - Columns2 icon "Compare" button in lightbox actions row
+  - When active, shows current + next image side-by-side in lightbox frame
+  - Keyboard shortcut: C to toggle compare mode
+  - `.lb-frame-compare` CSS with flex-direction row layout
+  - Compare button shows active state when enabled
+  - Compare resets on lightbox close
+
+- **Added 15 styling improvements**:
+
+  Entrance Enhancements:
+  1. Subtle parallax effect on title — mouse position shifts title via `titleParallax` state
+  2. "Vault door opening" animation — amber overlay flashes when entering gallery (600ms)
+  3. Horizontal film strip decoration lines at top and bottom of entrance (`.film-strip-decoration`)
+  4. Flickering amber "REC" indicator dot in top-right corner (`.rec-indicator` with `recBlink` animation)
+
+  Gallery Page Enhancements:
+  5. Smooth room transition — AnimatePresence with mode="wait" on gallery content, fade in/out on room switch
+  6. Ambient sound toggle button (UI only, Volume2/VolumeX icons)
+  7. Improved footer with "Built with ❤️ by the Pete Pics community" and version "v6.0"
+
+  Card Enhancements:
+  8. Subtle tilt/3D perspective on card hover — `perspective(800px) rotateY(-1deg)` transform
+  9. Film sprocket count number on left side of cards (`.sprocket-number`, rotated -90deg, appears on hover)
+  10. Improved nameplate with subtle letter-spacing change on hover (0 → 0.02em)
+
+  Lightbox Enhancements:
+  11. Ken Burns (slow pan + zoom) effect on slideshow images (`kenBurns` keyframe animation, 20s cycle)
+  12. EXIF-like info display: "Film: PBT-001" reference number (`.lb-exif-ref`)
+  13. Film strip timeline at bottom of lightbox showing tiny thumbnails (`.lb-filmstrip`)
+
+  Mobile Enhancements:
+  14. Swipe gesture support for lightbox navigation (touchStart/touchEnd with 60px threshold)
+  15. Mobile menu with slide-in animation from right (spring animation, x: 100% → 0)
+
+- **CSS additions** in globals.css:
+  - `@keyframes recBlink` — REC indicator blink animation
+  - `@keyframes kenBurns` — slow pan + zoom for slideshow
+  - `.film-strip-decoration`, `.film-strip-top`, `.film-strip-bottom` — entrance decorations
+  - `.rec-indicator`, `.rec-dot` — REC indicator
+  - `.vault-door-overlay` — vault door animation
+  - `.nav-view-toggle`, `.nav-view-btn`, `.nav-view-btn-active` — view mode toggle
+  - `.gallery-list`, `.list-card`, `.list-card-thumb`, `.list-card-info`, etc. — list view
+  - `.solo-view`, `.solo-card`, `.solo-image-wrap`, `.solo-info`, `.solo-nav` — solo view
+  - `.recently-viewed-strip`, `.recently-viewed-label`, `.recently-viewed-scroll`, `.recently-viewed-thumb` — recently viewed
+  - `.stats-modal`, `.stats-modal-row`, `.stats-modal-gallery`, `.stats-modal-bar-*` — stats modal
+  - `.lb-exif-ref` — EXIF-like film reference
+  - `.lb-filmstrip`, `.lb-filmstrip-inner`, `.lb-filmstrip-thumb`, `.lb-filmstrip-active` — film strip timeline
+  - `.lb-frame-compare`, `.lb-compare-image` — compare mode
+  - `.lb-image-kenburns` — Ken Burns effect class
+  - `.mobile-menu-backdrop`, `.mobile-menu` — slide-in mobile menu
+  - `.vault-footer`, `.vault-footer-inner`, `.vault-footer-links`, `.footer-link`, `.vault-footer-brand`, `.vault-footer-version` — enhanced footer
+  - `.sprocket-number` — sprocket count on cards
+  - `.viewed-mode` — view mode indicator in viewed counter
+  - Updated card hover with `perspective(800px) rotateY(-1deg)`
+  - Updated nameplate hover with `letter-spacing: 0.02em`
+  - Light theme refinements for new components
+  - Responsive breakpoints for all new components
+
+- **All 20+ existing features preserved**:
+  1. 4 galleries from /api/gallery
+  2. Twitch integration
+  3. Spreadsheet link
+  4. Nacky Nook
+  5. Favourites with localStorage
+  6. Random artwork
+  7. Theme toggle
+  8. About modal
+  9. Custom lightbox (zoom, fav, share, prev/next, download, slideshow)
+  10. Search filtering
+  11. Scroll-to-top
+  12. Stats bar
+  13. Viewed counter
+  14. Toast notifications
+  15. Mobile responsive
+  16. All keyboard shortcuts (now including V for view cycle, C for compare)
+  17. Slideshow/autoplay mode
+  18. Download button
+  19. Typing effect on entrance
+  20. Gallery tag overlays
+  21. Boot sequence line
+
+- Lint passes clean with zero errors
+- Dev server compiles and serves pages successfully
+- API route fetches all 1212 works correctly
+
+Stage Summary:
+- **4 NEW FEATURES** — View Mode Toggle, Recently Viewed, Collection Stats Modal, Image Comparison
+- **15 STYLING IMPROVEMENTS** — Parallax, vault door animation, film strips, REC indicator, room transitions, ambient sound toggle, footer enhancements, card tilt, sprocket numbers, nameplate hover, Ken Burns, EXIF reference, film strip timeline, swipe gestures, slide-in mobile menu
+- **Unused imports removed** — Palette and GALLERY_ORDER
+- **All 21+ features preserved** — backward compatible additions only
+- **Lint clean**, zero errors
+- **No runtime errors**, dev server stable
+
+---
+Task ID: 10
+Agent: Main Developer (Session Continuation + QA)
+Task: Assess project status, QA testing, add features, improve styling, update worklog
+
+Work Log:
+- Read worklog.md (9 previous task entries) to understand project history
+- Found source files at `/home/z/my-project/src/app/` (not `/home/z/my-project/app/`)
+- QA tested with agent-browser:
+  - Entrance page: "THE VAULT" title, film reel badge, "ACCESS THE VAULT" button — all working
+  - Gallery: 1212 artwork cards across 7 rooms (All Works, Pobots, Prestlers, Cultural Pics, Pisc, Favourites, Nacky Nook)
+  - View mode toggle: Grid/List/Solo views all accessible and working
+  - Collection stats modal opens correctly
+  - Mobile responsive with proper hamburger menu
+  - Mobile menu shows slide-in animation
+  - No JavaScript errors, no console errors
+  - Lint passes clean with zero errors
+- Delegated feature enhancement work to full-stack developer agent (Task ID 9)
+- Verified all changes: 4 new features + 15 styling improvements
+- Final QA with agent-browser confirms all working:
+  - Grid/List/Solo view buttons visible in nav
+  - Stats button (BarChart3 icon) opens vault manifest modal
+  - Ambient sound toggle button present
+  - All rooms switching correctly
+  - Mobile menu with slide-in from right
+  - Zero errors across all interactions
+
+Stage Summary:
+- **Project is stable and feature-rich** — 25+ features working
+- **QA verified** — no errors, no runtime issues
+- **4 new features added** — View Mode Toggle, Recently Viewed, Collection Stats Modal, Image Comparison
+- **15 styling improvements added** — parallax, vault door animation, film strips, REC indicator, Ken Burns, etc.
+- **Lint clean**, zero errors
+- **All 1212 images loading correctly**
+
+Current project status:
+- Stable and feature-complete with "The Vault v6.0" visual design
+- All 1212 images loading correctly from postimg.cc via server-side API
+- API caching working (8ms response time)
+- Both dark and light themes working
+- Mobile responsive with slide-in menu and mobile lightbox bar
+- Three view modes: Grid, List, Solo
+- Recently viewed tracking with horizontal scroll strip
+- Collection stats modal with visual progress bars
+- Image comparison mode in lightbox
+- Enhanced entrance with parallax, film strip decorations, REC indicator
+- Ken Burns effect on slideshow
+- Swipe gesture support for mobile lightbox
+- Film strip timeline in lightbox
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Could add infinite scroll or pagination for large galleries (1212 images)
+- Light theme CSS overrides may need further refinement for vault aesthetic with new components
+- Could add actual ambient sound effects (currently UI-only toggle)
+- Could add export/import favourites feature
+- Could add share-to-social-media buttons
