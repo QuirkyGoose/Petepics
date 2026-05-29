@@ -67,6 +67,7 @@ const GALLERY_ABBREVIATIONS: Record<string, string> = {
   prestlers: "PST",
   cultural: "CUL",
   pisc: "PSC",
+  submissions: "SUB",
 };
 const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
@@ -1415,8 +1416,16 @@ export default function Home() {
     }
 
     if (currentRoom === "submissions") {
-      // Submissions room shows no gallery works — it has its own panel
-      return [];
+      // Submissions is a real gallery now — show its works if available, otherwise show the panel
+      const subWorks = data.galleries["submissions"]?.works || [];
+      if (subWorks.length === 0) return [];
+      if (q)
+        return subWorks.filter(
+          (w) =>
+            w.title.toLowerCase().includes(q) ||
+            w.galleryName.toLowerCase().includes(q)
+        );
+      return subWorks;
     }
 
     if (currentRoom === "nacky") {
@@ -1864,12 +1873,10 @@ export default function Home() {
               : data?.galleries[currentRoom]?.tagline || ""}
           </p>
         </div>
-        {currentRoom !== "submissions" && (
-          <div className="room-count">
-            <strong>{visibleWorks.length}</strong>
-            Works
-          </div>
-        )}
+        <div className="room-count">
+          <strong>{visibleWorks.length}</strong>
+          Works
+        </div>
       </header>
 
       {/* Gallery Content */}
@@ -1902,6 +1909,24 @@ export default function Home() {
             <span className="showing-indicator-sep">/</span>
             <span className="showing-indicator-total">{visibleWorks.length}</span>
             <span className="showing-indicator-label">works</span>
+          </div>
+        )}
+
+        {/* Submissions CTA banner when gallery has images */}
+        {currentRoom === "submissions" && visibleWorks.length > 0 && (
+          <div className="submissions-cta-banner">
+            <span className="submissions-cta-banner-text">
+              Community contributions — want to add yours?
+            </span>
+            <a
+              className="submissions-cta-banner-link"
+              href={SPREADSHEET_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Upload className="w-3.5 h-3.5" />
+              Submit to Spreadsheet
+            </a>
           </div>
         )}
 

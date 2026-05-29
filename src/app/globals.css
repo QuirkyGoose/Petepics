@@ -1627,6 +1627,44 @@ body {
   line-height: 1.6;
 }
 
+/* ── Submissions CTA banner (shown when gallery has images) ── */
+.submissions-cta-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 3rem;
+  background: rgba(107,124,94,0.06);
+  border-bottom: 1px solid rgba(107,124,94,0.15);
+}
+
+.submissions-cta-banner-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--vault-muted);
+  letter-spacing: 0.02em;
+}
+
+.submissions-cta-banner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--vault-sage);
+  border: 1px solid var(--vault-sage);
+  padding: 0.3rem 0.8rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.submissions-cta-banner-link:hover {
+  background: var(--vault-sage);
+  color: var(--vault-bg);
+}
+
 /* ── Showing indicator (pagination count) ── */
 .showing-indicator {
   padding: 0.6rem 3rem;
