@@ -133,10 +133,14 @@ async function fetchAllGalleries() {
   return { galleries, allWorks, totalWorks: allWorks.length };
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    // Return cached data if still fresh
-    if (cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
+    // Check for force-refresh parameter
+    const url = new URL(request.url);
+    const forceRefresh = url.searchParams.get("refresh") === "true";
+
+    // Return cached data if still fresh (unless force-refresh requested)
+    if (!forceRefresh && cachedData && Date.now() - cachedData.timestamp < CACHE_TTL) {
       return NextResponse.json(cachedData.data);
     }
 

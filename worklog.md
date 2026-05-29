@@ -1091,3 +1091,57 @@ Unresolved issues / next phase priorities:
 - Light theme CSS may need font-size adjustments for new fonts
 - Could add focus trap in lightbox modal
 - Could add more micro-interactions with new font aesthetic
+
+---
+Task ID: 15
+Agent: Main Developer
+Task: Fix search bar keyboard shortcut conflict, add gallery refresh capability
+
+Work Log:
+- User reported two issues:
+  1. Website can't detect new images added to postimg galleries
+  2. Search bar triggers keyboard shortcuts while typing (R, T, V, S, D, etc.)
+
+- **Fixed keyboard shortcut conflict with search bar**:
+  - Added `isTyping` check at the top of the keyboard handler
+  - Detects if `document.activeElement` is HTMLInputElement or HTMLTextAreaElement
+  - If typing, skips all single-key shortcuts (R, T, V, I)
+  - Escape and ? shortcuts still work (they're modifier-free and useful when typing)
+  - Tested: typing "test", "testrabcdef" in search — no shortcut actions fired
+
+- **Added gallery refresh capability**:
+  - Updated API route (`/api/gallery`) to accept `?refresh=true` query parameter
+  - When `refresh=true`, bypasses the 10-minute cache and fetches fresh from postimg.cc
+  - Added `handleRefresh` callback in page.tsx:
+    - Fetches `/api/gallery?refresh=true`
+    - Shows "Gallery refreshed — N works" toast on success
+    - Shows "Refresh failed — try again later" toast on error
+    - Uses `refreshing` state to prevent double-clicks
+  - Added RefreshCw icon button in nav actions (between Shuffle and Stats)
+    - Spinning animation while refreshing (Tailwind `animate-spin`)
+    - Disabled state with reduced opacity during refresh
+    - Amber highlight color during refresh
+  - Added "Refresh Gallery" option in mobile menu with RefreshCw icon
+  - Added CSS:
+    - `.nav-action-btn-refreshing` — amber color, no pointer events
+    - `.nav-action-btn:disabled` — reduced opacity, not-allowed cursor
+
+- QA tested with agent-browser:
+  - Refresh button visible and working in nav
+  - Search input correctly filters without triggering shortcuts
+  - Zero JavaScript errors
+  - Lint passes clean
+
+Stage Summary:
+- **Keyboard shortcut fix** — search bar no longer fires shortcuts (R, T, V, I) while typing
+- **Gallery refresh feature** — click the refresh button to fetch latest images from postimg.cc
+- **API cache bypass** — `/api/gallery?refresh=true` forces fresh fetch
+- **Mobile support** — refresh option in mobile hamburger menu
+- **Lint clean**, zero errors, no runtime errors
+
+Unresolved issues / next phase priorities:
+- Could add auto-refresh interval (e.g., check every 30 minutes)
+- Could add a "last refreshed" timestamp display
+- Could add diff detection (show "3 new images since last visit")
+- Light theme CSS may need refresh button adjustments
+- Could add URL-based routing for deep-linking

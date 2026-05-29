@@ -604,6 +604,17 @@ body {
   box-shadow: 0 0 12px var(--vault-glow);
 }
 
+.nav-action-btn-refreshing {
+  color: var(--vault-amber) !important;
+  border-color: var(--vault-amber) !important;
+  pointer-events: none;
+}
+
+.nav-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* ── View mode toggle group ── */
 .nav-view-toggle {
   display: flex;

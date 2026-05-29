@@ -33,6 +33,7 @@ import {
   DownloadCloud,
   Expand,
   ChevronDown,
+  RefreshCw,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -1084,6 +1085,7 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
 export default function Home() {
   const [data, setData] = useState<GalleryResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [fetchStatus, setFetchStatus] = useState("Connecting to archive…");
   const [currentRoom, setCurrentRoom] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -1190,6 +1192,24 @@ export default function Home() {
     }
     fetchData();
   }, []);
+
+  /* Refresh gallery data — force re-fetch from postimg.cc */
+  const handleRefresh = useCallback(async () => {
+    if (refreshing) return;
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/gallery?refresh=true");
+      if (!res.ok) throw new Error("Refresh failed");
+      const json: GalleryResponse = await res.json();
+      setData(json);
+      showToast(`Gallery refreshed — ${json.totalWorks} works`);
+    } catch (err) {
+      console.error("Gallery refresh error:", err);
+      showToast("Refresh failed — try again later");
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refreshing, showToast]);
 
   /* Room change handler — FEATURE 1: update hash, FEATURE 2: reset pagination */
   const handleRoomChange = useCallback((room: string) => {
@@ -1302,6 +1322,10 @@ export default function Home() {
   /* Keyboard navigation */
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
+      // Don't trigger shortcuts when the user is typing in an input/textarea
+      const activeEl = document.activeElement;
+      const isTyping = activeEl instanceof HTMLInputElement || activeEl instanceof HTMLTextAreaElement;
+
       if (e.key === "?" && !lightboxOpen) {
         e.preventDefault();
         setAboutOpen((prev) => !prev);
@@ -1330,6 +1354,9 @@ export default function Home() {
         if (e.key === "c" || e.key === "C") toggleCompare();
         return;
       }
+
+      // Skip all single-key shortcuts when typing in search/input
+      if (isTyping) return;
 
       if (e.key === "r" || e.key === "R") handleRandom();
       if (e.key === "t" || e.key === "T") toggleTheme();
@@ -1571,6 +1598,16 @@ export default function Home() {
           </button>
 
           <button
+            className={`nav-action-btn ${refreshing ? "nav-action-btn-refreshing" : ""}`}
+            onClick={handleRefresh}
+            title="Refresh gallery from source"
+            aria-label="Refresh gallery data"
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+          </button>
+
+          <button
             className="nav-action-btn"
             onClick={() => setStatsOpen(true)}
             title="Vault Manifest"
@@ -1725,6 +1762,15 @@ export default function Home() {
               >
                 📊 Pete Pics Spreadsheet
               </a>
+              <div className="mobile-menu-divider" />
+              <button
+                className="mobile-menu-item"
+                onClick={() => { handleRefresh(); setMobileMenuOpen(false); }}
+                disabled={refreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                {refreshing ? "Refreshing…" : "Refresh Gallery"}
+              </button>
               <div className="mobile-menu-divider" />
               <div className="mobile-menu-view-toggle">
                 <button
