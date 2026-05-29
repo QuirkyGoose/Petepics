@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
@@ -11,10 +11,13 @@ import {
   ArrowRight,
   Menu,
   X,
+  ArrowUp,
+  DoorOpen,
+  Grid3X3,
+  Eye,
+  Shuffle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 
 /* ── Types ────────────────────────────────────────────────── */
 interface GalleryWork {
@@ -44,12 +47,51 @@ interface GalleryResponse {
 const GALLERY_ORDER = ["pobots", "prestlers", "cultural", "pisc"];
 const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const ROOMS = [
-  { id: "all", label: "All Works" },
-  { id: "pobots", label: "Pobots" },
-  { id: "prestlers", label: "Prestlers" },
-  { id: "cultural", label: "Cultural Pics" },
-  { id: "pisc", label: "Pisc" },
+  { id: "all", label: "All Works", icon: Grid3X3 },
+  { id: "pobots", label: "Pobots", icon: null },
+  { id: "prestlers", label: "Prestlers", icon: null },
+  { id: "cultural", label: "Cultural Pics", icon: null },
+  { id: "pisc", label: "Pisc", icon: null },
 ] as const;
+
+/* ── Floating Particles ───────────────────────────────────── */
+function FloatingParticles() {
+  const particles = useMemo(
+    () =>
+      Array.from({ length: 30 }, (_, i) => ({
+        id: i,
+        x: ((i * 37 + 13) % 100),        // deterministic pseudo-random
+        y: ((i * 53 + 7) % 100),
+        size: (i % 3) + 1,
+        duration: (i % 20) + 15,
+        delay: (i % 10),
+      })),
+    []
+  );
+
+  return (
+    <div className="particles-container" aria-hidden="true">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          className="particle"
+          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
+          animate={{
+            y: [0, -30, 0, 20, 0],
+            x: [0, 15, -10, 5, 0],
+            opacity: [0.1, 0.4, 0.2, 0.5, 0.1],
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 /* ── Lazy Image Component ─────────────────────────────────── */
 function LazyImage({ src, alt }: { src: string; alt: string }) {
@@ -118,9 +160,10 @@ function ArtworkCard({
   return (
     <motion.div
       className="artwork-card break-inside-avoid mb-6 cursor-pointer group"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: Math.min(index * 0.02, 0.5), duration: 0.4 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ delay: Math.min(index * 0.015, 0.3), duration: 0.5, ease: "easeOut" }}
       onClick={onClick}
     >
       <div className={`frame ${frameStyle}`}>
@@ -132,6 +175,165 @@ function ArtworkCard({
         <div className="nameplate-title">{work.title}</div>
       </div>
     </motion.div>
+  );
+}
+
+/* ── Custom Lightbox ──────────────────────────────────────── */
+function Lightbox({
+  isOpen,
+  onClose,
+  work,
+  position,
+  total,
+  onPrev,
+  onNext,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  work: GalleryWork | null;
+  position: number;
+  total: number;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const currentWorkId = work?.id ?? "";
+  const zoomed = useState(false);
+  // Reset zoom when artwork changes — use key on the container instead
+  const isZoomed = zoomed[0];
+  const setIsZoomed = zoomed[1];
+
+  if (!isOpen || !work) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="lb-overlay"
+        key={currentWorkId}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+      >
+        {/* Close button */}
+        <button className="lb-close" onClick={onClose} aria-label="Close lightbox">
+          <X className="w-5 h-5" />
+        </button>
+
+        <motion.div
+          className="lb-content"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+        >
+          {/* Frame with spotlight */}
+          <div className="lb-frame">
+            <div className="lb-spotlight" aria-hidden="true" />
+            <div className="lb-frame-inner" onClick={() => setIsZoomed(!isZoomed)}>
+              <img
+                src={work.imageUrl}
+                alt={work.title}
+                className={`lb-image ${isZoomed ? "lb-image-zoomed" : ""}`}
+              />
+              <div className="lb-zoom-hint">
+                {isZoomed ? "Click to zoom out" : "Click to zoom in"}
+              </div>
+            </div>
+          </div>
+
+          {/* Info panel */}
+          <div className="lb-info">
+            <div className="lb-gallery-tag">{work.galleryName}</div>
+            <h2 className="lb-title">{work.title}</h2>
+            <div className="lb-position">
+              {position + 1} / {total}
+            </div>
+
+            {/* Progress bar */}
+            <div className="lb-progress-track">
+              <div
+                className="lb-progress-fill"
+                style={{ width: `${((position + 1) / total) * 100}%` }}
+              />
+            </div>
+
+            <div className="lb-nav">
+              <button className="lb-btn" onClick={onPrev}>
+                <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+              </button>
+              <button className="lb-btn" onClick={onNext}>
+                Next <ChevronRight className="w-4 h-4 ml-1" />
+              </button>
+            </div>
+            <a
+              href={work.imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="lb-open-link"
+            >
+              View full image <ExternalLink className="w-3 h-3 inline ml-1" />
+            </a>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* ── Scroll-to-Top Button ─────────────────────────────────── */
+function ScrollToTop() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setVisible(window.scrollY > 400);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.button
+          className="scroll-top-btn"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </motion.button>
+      )}
+    </AnimatePresence>
+  );
+}
+
+/* ── Stats Bar ────────────────────────────────────────────── */
+function StatsBar({ data }: { data: GalleryResponse | null }) {
+  if (!data) return null;
+  const galleries = Object.values(data.galleries);
+
+  return (
+    <div className="stats-bar">
+      {galleries.map((g) => (
+        <div key={g.id} className="stat-item">
+          <span className="stat-count">{g.works.length}</span>
+          <span className="stat-label">{g.name}</span>
+        </div>
+      ))}
+      <div className="stat-divider" />
+      <div className="stat-item stat-item-total">
+        <span className="stat-count stat-count-total">{data.totalWorks}</span>
+        <span className="stat-label">Total Works</span>
+      </div>
+    </div>
   );
 }
 
@@ -147,6 +349,7 @@ export default function Home() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxItems, setLightboxItems] = useState<GalleryWork[]>([]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [viewedCount, setViewedCount] = useState(0);
 
   /* Fetch gallery data on mount */
   useEffect(() => {
@@ -189,9 +392,16 @@ export default function Home() {
       setLightboxItems(items);
       setLightboxIndex(index);
       setLightboxOpen(true);
+      setViewedCount((c) => c + 1);
+      document.body.style.overflow = "hidden";
     },
     []
   );
+
+  const closeLightbox = useCallback(() => {
+    setLightboxOpen(false);
+    document.body.style.overflow = "";
+  }, []);
 
   const lbNav = useCallback(
     (dir: number) => {
@@ -208,11 +418,21 @@ export default function Home() {
       if (!lightboxOpen) return;
       if (e.key === "ArrowRight" || e.key === "ArrowDown") lbNav(1);
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") lbNav(-1);
-      if (e.key === "Escape") setLightboxOpen(false);
+      if (e.key === "Escape") closeLightbox();
     }
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [lightboxOpen, lbNav]);
+  }, [lightboxOpen, lbNav, closeLightbox]);
+
+  /* Random artwork */
+  const handleRandom = useCallback(() => {
+    if (!data || data.allWorks.length === 0) return;
+    const randomWork = data.allWorks[Math.floor(Math.random() * data.allWorks.length)];
+    const room = randomWork.gallery;
+    const works = data.galleries[room]?.works || data.allWorks;
+    const idx = works.findIndex((w) => w.id === randomWork.id);
+    openLightbox(works, idx >= 0 ? idx : 0);
+  }, [data, openLightbox]);
 
   /* Get visible works */
   const getVisibleWorks = useCallback((): GalleryWork[] => {
@@ -235,50 +455,87 @@ export default function Home() {
   /* ────── ENTRANCE ────── */
   if (phase === "entrance") {
     return (
-      <section className="entrance-section">
+      <section className="entrance-section" suppressHydrationWarning>
+        {/* Floating particles */}
+        <FloatingParticles />
+
         {/* Decorative columns */}
         <div className="entrance-columns" aria-hidden="true">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className={`col-pillar ${i === 1 || i === 2 ? "col-pillar-thin" : ""}`} />
+          {[...Array(7)].map((_, i) => (
+            <div
+              key={i}
+              className={`col-pillar ${i === 1 || i === 2 || i === 4 || i === 5 ? "col-pillar-thin" : ""}`}
+            />
           ))}
         </div>
 
+        {/* Ornamental top border */}
+        <div className="entrance-top-border" aria-hidden="true" />
+
         <motion.div
           className="entrance-inner text-center z-10 px-8 py-16"
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2 }}
+          transition={{ duration: 1.4, ease: "easeOut" }}
+          suppressHydrationWarning
         >
-          {/* Logo badge */}
-          <motion.div
-            className="logo-badge"
-            animate={{
-              boxShadow: [
-                "0 0 20px rgba(184,148,42,0.15), inset 0 0 10px rgba(184,148,42,0.03)",
-                "0 0 50px rgba(184,148,42,0.35), inset 0 0 30px rgba(184,148,42,0.08)",
-              ],
-            }}
-            transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-          >
-            <Palette className="w-9 h-9 text-[var(--gold)]" />
-          </motion.div>
+          {/* Logo badge with ring animation */}
+          <div className="logo-badge-container">
+            <motion.div
+              className="logo-ring"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="logo-badge"
+              animate={{
+                boxShadow: [
+                  "0 0 30px rgba(184,148,42,0.15), inset 0 0 15px rgba(184,148,42,0.05)",
+                  "0 0 60px rgba(184,148,42,0.4), inset 0 0 40px rgba(184,148,42,0.1)",
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            >
+              <Palette className="w-9 h-9 text-[var(--gold)]" suppressHydrationWarning />
+            </motion.div>
+          </div>
 
-          {/* Title */}
-          <h1 className="museum-name">
+          {/* Title with staggered animation */}
+          <motion.h1
+            className="museum-name"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
             <span>Pete</span> Pics
-          </h1>
-          <p className="museum-subtitle">The Gallery · Est. 2024</p>
-          <p className="museum-tagline">
+          </motion.h1>
+          <motion.p
+            className="museum-subtitle"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+          >
+            The Gallery · Est. 2024
+          </motion.p>
+          <motion.p
+            className="museum-tagline"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9, duration: 0.8 }}
+          >
             A permanent collection dedicated to the finest Pete-adjacent artwork, Pobots,
             Prestlers, and Cultural Artefacts of Our Time.
-          </p>
+          </motion.p>
 
           {/* Enter button */}
           <motion.button
             className="enter-btn"
             onClick={enterGallery}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6 }}
           >
             Enter the Gallery
             <ArrowRight className="enter-btn-arrow" />
@@ -290,22 +547,24 @@ export default function Home() {
               className="mt-8 flex items-center justify-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
+              transition={{ delay: 1.5 }}
             >
               <div className="loader-spinner" />
-              <span className="font-['Josefin_Sans'] text-[0.7rem] tracking-[0.3em] uppercase text-[rgba(184,148,42,0.5)]">
-                {fetchStatus}
-              </span>
+              <span className="entrance-loading-text">{fetchStatus}</span>
             </motion.div>
           )}
         </motion.div>
 
+        {/* Ornamental bottom border */}
+        <div className="entrance-bottom-border" aria-hidden="true" />
+
         {/* Collection count */}
         <motion.div
           className="gallery-count"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1.8 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8, duration: 1 }}
+          suppressHydrationWarning
         >
           {!loading && data
             ? `${data.totalWorks} works in the permanent collection`
@@ -319,34 +578,60 @@ export default function Home() {
 
   /* ────── GALLERY ────── */
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--warm-white)]">
+    <div className="min-h-screen flex flex-col bg-[var(--warm-white)]" suppressHydrationWarning>
       {/* Navigation */}
       <nav className="gallery-nav">
+        <button
+          className="nav-back-btn"
+          onClick={() => setPhase("entrance")}
+          aria-label="Back to entrance"
+          title="Back to Entrance"
+        >
+          <DoorOpen className="w-4 h-4" />
+        </button>
         <div className="nav-logo">
           <span>Pete</span> Pics
         </div>
 
-        {/* Desktop tabs */}
+        {/* Desktop tabs with count badges */}
         <div className="nav-tabs">
-          {ROOMS.map((room) => (
-            <button
-              key={room.id}
-              className={`nav-tab ${currentRoom === room.id ? "active" : ""}`}
-              onClick={() => handleRoomChange(room.id)}
-            >
-              {room.label}
-            </button>
-          ))}
+          {ROOMS.map((room) => {
+            const count =
+              room.id === "all"
+                ? data?.totalWorks || 0
+                : data?.galleries[room.id]?.works.length || 0;
+            return (
+              <button
+                key={room.id}
+                className={`nav-tab ${currentRoom === room.id ? "active" : ""}`}
+                onClick={() => handleRoomChange(room.id)}
+              >
+                {room.label}
+                <span className="nav-tab-count">{count}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Mobile menu toggle */}
-        <button
-          className="mobile-menu-btn"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          aria-label="Toggle navigation menu"
-        >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Action buttons */}
+        <div className="nav-actions">
+          <button
+            className="nav-action-btn"
+            onClick={handleRandom}
+            title="Random Artwork"
+            aria-label="View random artwork"
+          >
+            <Shuffle className="w-4 h-4" />
+          </button>
+
+          <button
+            className="nav-action-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle navigation menu"
+          >
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          </button>
+        </div>
 
         {/* Search */}
         <div className="search-wrap">
@@ -371,25 +656,35 @@ export default function Home() {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
           >
-            {ROOMS.map((room) => (
-              <button
-                key={room.id}
-                className={`mobile-menu-item ${currentRoom === room.id ? "active" : ""}`}
-                onClick={() => handleRoomChange(room.id)}
-              >
-                {room.label}
-                {currentRoom === room.id && (
-                  <span className="mobile-menu-count">
-                    {room.id === "all"
-                      ? data?.totalWorks || 0
-                      : data?.galleries[room.id]?.works.length || 0}
-                  </span>
-                )}
-              </button>
-            ))}
+            {ROOMS.map((room) => {
+              const count =
+                room.id === "all"
+                  ? data?.totalWorks || 0
+                  : data?.galleries[room.id]?.works.length || 0;
+              return (
+                <button
+                  key={room.id}
+                  className={`mobile-menu-item ${currentRoom === room.id ? "active" : ""}`}
+                  onClick={() => handleRoomChange(room.id)}
+                >
+                  {room.label}
+                  <span className="mobile-menu-count">{count}</span>
+                </button>
+              );
+            })}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Stats bar */}
+      <StatsBar data={data} />
+
+      {/* Viewed counter */}
+      {viewedCount > 0 && (
+        <div className="viewed-counter">
+          <Eye className="w-3 h-3" /> {viewedCount} artwork{viewedCount !== 1 ? "s" : ""} viewed
+        </div>
+      )}
 
       {/* Main content */}
       <main className="flex-1">
@@ -503,61 +798,19 @@ export default function Home() {
         postimg.cc
       </footer>
 
-      {/* Lightbox Dialog */}
-      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="lightbox-dialog">
-          <DialogTitle className="sr-only">
-            {currentLightboxWork?.title || "Artwork Viewer"}
-          </DialogTitle>
-          {currentLightboxWork && (
-            <div className="lb-inner">
-              <div className="lb-frame">
-                <div className="lb-spotlight" aria-hidden="true" />
-                <div className="lb-frame-inner">
-                  <img
-                    src={currentLightboxWork.imageUrl}
-                    alt={currentLightboxWork.title}
-                    className="lb-image"
-                  />
-                </div>
-              </div>
-              <div className="lb-info">
-                <div className="lb-gallery-tag">{currentLightboxWork.galleryName}</div>
-                <h2 className="lb-title">{currentLightboxWork.title}</h2>
-                <div className="lb-position">
-                  {lightboxIndex + 1} / {lightboxItems.length}
-                </div>
-                <div className="lb-nav">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="lb-btn"
-                    onClick={() => lbNav(-1)}
-                  >
-                    <ChevronLeft className="w-4 h-4 mr-1" /> Prev
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="lb-btn"
-                    onClick={() => lbNav(1)}
-                  >
-                    Next <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-                <a
-                  href={currentLightboxWork.imageUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="lb-open-link"
-                >
-                  View full image <ExternalLink className="w-3 h-3 inline ml-1" />
-                </a>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Scroll to top */}
+      <ScrollToTop />
+
+      {/* Custom Lightbox */}
+      <Lightbox
+        isOpen={lightboxOpen}
+        onClose={closeLightbox}
+        work={currentLightboxWork}
+        position={lightboxIndex}
+        total={lightboxItems.length}
+        onPrev={() => lbNav(-1)}
+        onNext={() => lbNav(1)}
+      />
     </div>
   );
 }
