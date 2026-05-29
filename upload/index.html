@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pete Pics — The Gallery</title>
+  <meta name="description" content="A permanent collection dedicated to the finest Pete-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts of Our Time.">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="gallery.css">
+</head>
+<body>
+
+  <!-- ═══════════════ ENTRANCE ═══════════════ -->
+  <section id="entrance">
+    <div class="entrance-columns" aria-hidden="true">
+      <div class="col-pillar"></div>
+      <div class="col-pillar"></div>
+      <div class="col-pillar"></div>
+      <div class="col-pillar"></div>
+      <div class="col-pillar"></div>
+    </div>
+
+    <div class="entrance-inner">
+      <div class="logo-badge" aria-hidden="true">🎨</div>
+      <h1 class="museum-name"><span>Pete</span> Pics</h1>
+      <p class="museum-subtitle">The Gallery &nbsp;·&nbsp; Est. 2024</p>
+      <p class="museum-tagline">A permanent collection dedicated to the finest Pete-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts of Our Time.</p>
+      <button class="enter-btn" onclick="openGallery()">Enter the Gallery</button>
+    </div>
+
+    <div class="gallery-count" id="total-count">Loading collection…</div>
+  </section>
+
+  <!-- ═══════════════ GALLERY SHELL ═══════════════ -->
+  <div id="gallery-shell">
+
+    <!-- Top Navigation -->
+    <nav class="top-nav" role="navigation" aria-label="Gallery rooms">
+      <div class="nav-logo"><span>Pete</span> Pics</div>
+
+      <div class="nav-tabs" role="tablist">
+        <button class="nav-tab active" role="tab" aria-selected="true"  onclick="showRoom('all')">All Works</button>
+        <button class="nav-tab"        role="tab" aria-selected="false" onclick="showRoom('pobots')">Pobots</button>
+        <button class="nav-tab"        role="tab" aria-selected="false" onclick="showRoom('prestlers')">Prestlers</button>
+        <button class="nav-tab"        role="tab" aria-selected="false" onclick="showRoom('cultural')">Cultural Pics</button>
+        <button class="nav-tab"        role="tab" aria-selected="false" onclick="showRoom('pisc')">Pisc</button>
+      </div>
+
+      <div class="search-wrap">
+        <input
+          type="search"
+          id="search-input"
+          placeholder="Search works…"
+          aria-label="Search artworks"
+          oninput="handleSearch(this.value)"
+          autocomplete="off"
+        >
+      </div>
+    </nav>
+
+    <!-- Gallery rooms render here -->
+    <main id="gallery-content" role="main">
+      <div id="gallery-loader">
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Fetching the permanent collection…</p>
+        <p class="loader-status" id="loader-status"></p>
+      </div>
+    </main>
+
+    <footer>
+      <strong>Pete Pics — The Gallery</strong>
+      A collection of the world's finest Pete-related artwork &nbsp;·&nbsp; Images sourced from postimg.cc
+    </footer>
+  </div>
+
+  <!-- ═══════════════ LIGHTBOX ═══════════════ -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Artwork viewer">
+    <button class="lb-close" onclick="closeLightbox()" aria-label="Close lightbox">✕</button>
+
+    <div class="lb-inner">
+      <div class="lb-frame">
+        <div class="lb-spotlight" aria-hidden="true"></div>
+        <div class="lb-frame-inner">
+          <img id="lb-img" src="" alt="">
+        </div>
+      </div>
+
+      <div class="lb-info">
+        <div class="lb-gallery-tag" id="lb-gallery"></div>
+        <h2 class="lb-title" id="lb-title"></h2>
+        <div class="lb-position" id="lb-position"></div>
+        <div class="lb-nav">
+          <button class="lb-btn" onclick="lbNav(-1)" aria-label="Previous artwork">← Prev</button>
+          <button class="lb-btn" onclick="lbNav(1)"  aria-label="Next artwork">Next →</button>
+        </div>
+        <a class="lb-open-link" id="lb-link" href="#" target="_blank" rel="noopener">
+          View full image ↗
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script src="gallery.js"></script>
+
+</body>
+</html>
