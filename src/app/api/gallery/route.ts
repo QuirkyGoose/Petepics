@@ -2,14 +2,6 @@ import { NextResponse } from "next/server";
 import { readFileSync, writeFileSync, existsSync } from "fs";
 import { join } from "path";
 
-const GALLERY_DEFS = [
-  { id: "pobots", name: "Pobots", albumHex: "VML2tRn" },
-  { id: "prestlers", name: "Prestlers", albumHex: "RFbFrht" },
-  { id: "cultural", name: "Cultural Pics", albumHex: "HVYDkG8" },
-  { id: "pisc", name: "Pisc", albumHex: "Yt9J3Xt" },
-  { id: "submissions", name: "Submissions", albumHex: "nMN0w6j" },
-];
-
 interface GalleryWork {
   id: string;
   file: string;
@@ -41,15 +33,50 @@ const GALLERY_META: Record<string, { name: string; tagline: string; wallClass: s
   submissions: { name: "Submissions", tagline: "Community contributions — submit your own Pete Pics via the spreadsheet.", wallClass: "room-wall-submissions" },
 };
 
-const CACHE_FILE = join(process.cwd(), "db", "gallery-cache.json");
-const CACHE_TTL = 10 * 60 * 1000; // 10 minutes in-memory, 2 hours file
+const GALLERY_DEFS = [
+  { id: "pobots", albumHex: "VML2tRn" },
+  { id: "prestlers", albumHex: "RFbFrht" },
+  { id: "cultural", albumHex: "HVYDkG8" },
+  { id: "pisc", albumHex: "Yt9J3Xt" },
+  { id: "submissions", albumHex: "nMN0w6j" },
+];
 
+const DATA_FILE = join(process.cwd(), "db", "gallery-data.json");
+const CACHE_FILE = join(process.cwd(), "db", "gallery-cache.json");
+
+/* ── Build full response with metadata from local data file ── */
+function buildResponse(rawData: { galleries: Record<string, { id: string; works: GalleryWork[] }>; totalWorks: number }): GalleryResponse {
+  const galleries: Record<string, GalleryData> = {};
+  const allWorks: GalleryWork[] = [];
+
+  for (const [gid, g] of Object.entries(rawData.galleries)) {
+    const meta = GALLERY_META[gid] || { name: gid, tagline: "", wallClass: "" };
+
+    // Enrich works with gallery metadata
+    const works = g.works.map((w) => ({
+      ...w,
+      galleryName: meta.name,
+    }));
+
+    galleries[gid] = {
+      id: gid,
+      name: meta.name,
+      tagline: meta.tagline,
+      wallClass: meta.wallClass,
+      works,
+    };
+
+    allWorks.push(...works);
+  }
+
+  return { galleries, allWorks, totalWorks: allWorks.length };
+}
+
+/* ── Fetch from postimg.cc API (for refresh) ──────────────── */
 function deriveTitle(name: string): string {
   try {
     name = decodeURIComponent(name);
-  } catch {
-    // keep as-is
-  }
+  } catch {}
   name = name.replace(/-/g, " ");
   return name.trim() || name;
 }
@@ -75,44 +102,20 @@ async function fetchGalleryPage(
   }
 
   const data = await res.json();
-
   if (data.error) {
-    throw new Error(`API error for ${albumHex}: ${data.error.message || JSON.stringify(data.error)}`);
+    throw new Error(`API error: ${data.error.message || JSON.stringify(data.error)}`);
   }
 
-  const images = data.images || [];
-  const hasMore = data.has_page_next === true || data.has_page_next === "true";
-
-  return { images, hasMore };
+  return {
+    images: data.images || [],
+    hasMore: data.has_page_next === true || data.has_page_next === "true",
+  };
 }
 
-/* ── File-based cache ─────────────────────────────────────── */
-function readCacheFile(): { data: GalleryResponse; timestamp: number } | null {
-  try {
-    if (!existsSync(CACHE_FILE)) return null;
-    const raw = readFileSync(CACHE_FILE, "utf-8");
-    const cached = JSON.parse(raw);
-    if (cached && cached.data && cached.timestamp) return cached;
-  } catch {}
-  return null;
-}
-
-function writeCacheFile(data: GalleryResponse): void {
-  try {
-    writeFileSync(CACHE_FILE, JSON.stringify({ data, timestamp: Date.now() }), "utf-8");
-  } catch (err) {
-    console.warn("Failed to write gallery cache file:", err);
-  }
-}
-
-/* ── In-memory cache ──────────────────────────────────────── */
-let memoryCache: { data: GalleryResponse; timestamp: number } | null = null;
-
-async function fetchAllGalleries(): Promise<GalleryResponse> {
+async function refreshFromApi(): Promise<GalleryResponse | null> {
   const galleries: Record<string, GalleryData> = {};
   const allWorks: GalleryWork[] = [];
 
-  // Fetch galleries sequentially with delays to avoid rate-limiting
   for (let gi = 0; gi < GALLERY_DEFS.length; gi++) {
     const def = GALLERY_DEFS[gi];
     const meta = GALLERY_META[def.id];
@@ -156,23 +159,40 @@ async function fetchAllGalleries(): Promise<GalleryResponse> {
       } catch (err) {
         retries++;
         if (retries <= 2) {
-          console.warn(`Retry ${retries} for ${def.name} page ${page}:`, err);
+          console.warn(`Retry ${retries} for ${meta.name} page ${page}:`, err);
           await new Promise((r) => setTimeout(r, 2000 * retries));
         } else {
-          console.warn(`Failed to fetch ${def.name} page ${page} after ${retries} retries:`, err);
+          console.warn(`Failed to fetch ${meta.name} page ${page}:`, err);
           hasMore = false;
         }
       }
     }
 
-    // Delay between galleries to avoid rate-limiting
     if (gi < GALLERY_DEFS.length - 1) {
       await new Promise((r) => setTimeout(r, 1500));
     }
   }
 
-  return { galleries, allWorks, totalWorks: allWorks.length };
+  const totalWorks = allWorks.length;
+  if (totalWorks === 0) return null;
+
+  // Save to data file for next cold start
+  const rawSave = { galleries: {} as Record<string, { id: string; works: GalleryWork[] }>, totalWorks };
+  for (const [gid, g] of Object.entries(galleries)) {
+    rawSave.galleries[gid] = { id: g.id, works: g.works };
+  }
+  try {
+    writeFileSync(DATA_FILE, JSON.stringify(rawSave, null, 2), "utf-8");
+  } catch (err) {
+    console.warn("Failed to save gallery data file:", err);
+  }
+
+  return { galleries, allWorks, totalWorks };
 }
+
+/* ── In-memory cache ──────────────────────────────────────── */
+let memoryCache: { data: GalleryResponse; timestamp: number } | null = null;
+const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
 export async function GET(request: Request) {
   try {
@@ -184,7 +204,7 @@ export async function GET(request: Request) {
       return NextResponse.json(memoryCache.data);
     }
 
-    // 2. Check file cache (2-hour TTL — survives restarts)
+    // 2. Check file cache (2-hour TTL)
     if (!forceRefresh) {
       const fileCache = readCacheFile();
       if (fileCache && Date.now() - fileCache.timestamp < 2 * 60 * 60 * 1000) {
@@ -193,23 +213,76 @@ export async function GET(request: Request) {
       }
     }
 
-    // 3. Fetch fresh data
-    const data = await fetchAllGalleries();
+    // 3. Try to read from local data file (instant, no API call)
+    const localData = readDataFile();
+    if (localData) {
+      const response = buildResponse(localData);
+      memoryCache = { data: response, timestamp: Date.now() };
+      writeCacheFile(response);
 
-    // Update both caches
-    memoryCache = { data, timestamp: Date.now() };
-    writeCacheFile(data);
+      // If refresh requested, also trigger a background API fetch
+      if (forceRefresh) {
+        refreshFromApi().then((freshData) => {
+          if (freshData) {
+            memoryCache = { data: freshData, timestamp: Date.now() };
+            writeCacheFile(freshData);
+          }
+        }).catch(() => {});
+      }
 
-    return NextResponse.json(data);
+      return NextResponse.json(response);
+    }
+
+    // 4. Fall back to API fetch
+    const apiData = await refreshFromApi();
+    if (apiData) {
+      memoryCache = { data: apiData, timestamp: Date.now() };
+      writeCacheFile(apiData);
+      return NextResponse.json(apiData);
+    }
+
+    // 5. Last resort — stale file cache
+    const staleCache = readCacheFile();
+    if (staleCache) return NextResponse.json(staleCache.data);
+
+    return NextResponse.json(
+      { error: "Failed to fetch gallery data", galleries: {}, allWorks: [], totalWorks: 0 },
+      { status: 500 }
+    );
   } catch (error) {
     console.error("Gallery fetch error:", error);
-    // Return stale cache if available
     if (memoryCache) return NextResponse.json(memoryCache.data);
-    const fileCache = readCacheFile();
-    if (fileCache) return NextResponse.json(fileCache.data);
+    const staleCache = readCacheFile();
+    if (staleCache) return NextResponse.json(staleCache.data);
     return NextResponse.json(
       { error: "Failed to fetch gallery data", galleries: {}, allWorks: [], totalWorks: 0 },
       { status: 500 }
     );
   }
+}
+
+function readDataFile() {
+  try {
+    if (!existsSync(DATA_FILE)) return null;
+    const raw = readFileSync(DATA_FILE, "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function readCacheFile(): { data: GalleryResponse; timestamp: number } | null {
+  try {
+    if (!existsSync(CACHE_FILE)) return null;
+    const raw = readFileSync(CACHE_FILE, "utf-8");
+    const cached = JSON.parse(raw);
+    if (cached && cached.data && cached.timestamp) return cached;
+  } catch {}
+  return null;
+}
+
+function writeCacheFile(data: GalleryResponse): void {
+  try {
+    writeFileSync(CACHE_FILE, JSON.stringify({ data, timestamp: Date.now() }), "utf-8");
+  } catch {}
 }
