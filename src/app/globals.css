@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400;1,6..72,500;1,6..72,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -161,7 +161,7 @@
   padding: 0.75rem 1.5rem;
   background: var(--vault-amber);
   color: var(--vault-bg);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -305,7 +305,7 @@ body {
 body {
   background: var(--vault-bg) !important;
   color: var(--vault-cream) !important;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -430,7 +430,7 @@ body {
 
 /* ── Warm logo ── */
 .nav-logo {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 1.35rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -457,7 +457,7 @@ body {
 
 .nav-logo-subtitle {
   display: block;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.58rem;
   font-weight: 500;
   letter-spacing: 0.25em;
@@ -499,7 +499,7 @@ body {
 
 /* ── Tab buttons — card catalog drawer labels ── */
 .nav-tab {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.68rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -573,6 +573,21 @@ body {
   color: var(--vault-red) !important;
   border-bottom-color: var(--vault-red) !important;
   box-shadow: 0 2px 8px rgba(196,71,58,0.2) !important;
+}
+
+/* ── Special sage style for Submissions tab ── */
+.nav-tab-submissions {
+  color: rgba(107,124,94,0.6) !important;
+}
+
+.nav-tab-submissions:hover {
+  color: var(--vault-sage) !important;
+}
+
+.nav-tab-submissions.active {
+  color: var(--vault-sage) !important;
+  border-bottom-color: var(--vault-sage) !important;
+  box-shadow: 0 2px 8px rgba(107,124,94,0.2) !important;
 }
 
 /* ── Action buttons container ── */
@@ -793,7 +808,7 @@ body {
 }
 
 .room-eyebrow {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.65rem;
   font-weight: 500;
   letter-spacing: 0.35em;
@@ -803,7 +818,7 @@ body {
 }
 
 .room-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 400;
   color: var(--vault-cream);
@@ -819,7 +834,7 @@ body {
 .room-desc {
   margin-top: 0.8rem;
   color: var(--vault-muted);
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-style: italic;
   font-size: 1.1rem;
   font-weight: 400;
@@ -868,6 +883,10 @@ body {
 
 .room-wall-fav {
   background: linear-gradient(180deg, rgba(196,71,58,0.05) 0%, var(--vault-bg) 400px);
+}
+
+.room-wall-submissions {
+  background: linear-gradient(180deg, rgba(107,124,94,0.06) 0%, var(--vault-bg) 400px);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -940,7 +959,7 @@ body {
 }
 
 .list-card-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 0.9rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -1063,7 +1082,7 @@ body {
 }
 
 .solo-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 1.4rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -1461,7 +1480,7 @@ body {
 }
 
 .nameplate-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 0.72rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -1512,7 +1531,7 @@ body {
 .search-results-header strong {
   color: var(--vault-amber);
   font-size: 1.1rem;
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   letter-spacing: 0;
 }
 
@@ -1520,32 +1539,131 @@ body {
   padding: 4rem;
   text-align: center;
   color: var(--vault-muted);
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-style: italic;
   font-size: 1.2rem;
 }
 
-/* ── Showing indicator (pagination count) ── */
-.showing-indicator {
-  padding: 0.75rem 3rem;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  font-weight: 400;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--vault-dim);
+/* ── Submissions panel ── */
+.submissions-panel {
+  max-width: 540px;
+  margin: 4rem auto;
+  padding: 3rem;
+  text-align: center;
+  border: 1px solid var(--vault-sage);
+  background: rgba(107,124,94,0.04);
+  position: relative;
+}
+
+.submissions-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--vault-sage), transparent);
+}
+
+.submissions-icon-wrap {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  border: 2px solid var(--vault-sage);
+  color: var(--vault-sage);
+  border-radius: 50%;
+}
+
+.submissions-title {
+  font-family: 'Newsreader', serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--vault-cream);
+  margin: 0 0 1rem;
+  letter-spacing: 0.01em;
+}
+
+.submissions-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--vault-muted);
+  margin: 0 0 2rem;
+}
+
+.submissions-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--vault-bg);
+  background: var(--vault-sage);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+
+.submissions-cta:hover {
+  background: #7d9170;
+  box-shadow: 0 4px 20px rgba(107,124,94,0.3);
+  transform: translateY(-1px);
+}
+
+.submissions-note {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  color: var(--vault-dim);
+  margin: 2rem 0 0;
+  line-height: 1.6;
+}
+
+/* ── Showing indicator (pagination count) ── */
+.showing-indicator {
+  padding: 0.6rem 3rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--vault-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+}
+
+.showing-indicator-shown {
+  color: var(--vault-cream);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .showing-indicator-sep {
   color: var(--vault-border);
+  margin: 0 0.4em;
+  font-weight: 300;
 }
 
 .showing-indicator-total {
   color: var(--vault-amber);
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.showing-indicator-label {
+  color: var(--vault-dim);
+  margin-left: 0.35em;
+  font-size: 0.65rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* ── Load More button ── */
@@ -1835,7 +1953,7 @@ body {
 
 /* ── Lightbox title ── */
 .lb-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 1.5rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -1884,7 +2002,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-cream);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
   cursor: pointer;
@@ -1913,7 +2031,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-muted);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.68rem;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
@@ -1939,7 +2057,7 @@ body {
   border: 1px solid var(--vault-border);
   background: transparent;
   color: var(--vault-muted);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.68rem;
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s, background 0.2s;
@@ -2114,7 +2232,7 @@ body {
 }
 
 .mobile-lb-bar-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 0.8rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -2233,7 +2351,7 @@ body {
   border: none;
   border-bottom: 1px solid var(--vault-border);
   color: var(--vault-cream);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -2357,7 +2475,7 @@ body {
 
 .stats-modal-accent {
   color: var(--vault-amber);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -2380,7 +2498,7 @@ body {
 }
 
 .stats-modal-gallery-name {
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--vault-cream);
@@ -2455,7 +2573,7 @@ body {
 }
 
 .about-title {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 1.3rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -2465,7 +2583,7 @@ body {
 }
 
 .about-subtitle {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 0.9rem;
   font-weight: 400;
   color: var(--vault-cream);
@@ -2473,7 +2591,7 @@ body {
 }
 
 .about-desc {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-style: italic;
   font-size: 0.9rem;
   color: var(--vault-muted);
@@ -2592,7 +2710,7 @@ body {
 }
 
 .vault-footer-brand {
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-style: italic;
   font-size: 0.8rem;
   color: var(--vault-dim);
@@ -2954,7 +3072,7 @@ body {
 
 .quick-preview-title {
   padding: 0.5rem 0.75rem;
-  font-family: 'DM Serif Display', serif;
+  font-family: 'Newsreader', serif;
   font-size: 0.75rem;
   font-weight: 400;
   color: var(--vault-cream);

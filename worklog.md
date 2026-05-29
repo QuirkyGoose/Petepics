@@ -1145,3 +1145,64 @@ Unresolved issues / next phase priorities:
 - Could add diff detection (show "3 new images since last visit")
 - Light theme CSS may need refresh button adjustments
 - Could add URL-based routing for deep-linking
+
+---
+Task ID: 12
+Agent: Main Developer (Session Continuation)
+Task: Fix count display, replace fonts, add Submissions tab, add category descriptions, answer InfinityFree question
+
+Work Log:
+- Read worklog.md (11 previous task entries) and all current code files
+- **Fixed "Showing 60 · of 1212" count display**:
+  - Changed from `Showing {n} · of {m}` to `{n} / {m} works` format
+  - Used `font-variant-numeric: tabular-nums` for aligned number rendering
+  - Split into 4 styled spans: `.showing-indicator-shown` (cream), `.showing-indicator-sep` (subtle `/`), `.showing-indicator-total` (amber), `.showing-indicator-label` (dim "works" text)
+  - Changed font from JetBrains Mono to Inter for a cleaner, more refined look
+  - Reduced letter-spacing from 0.12em to 0.04em for better readability
+- **Replaced fonts with more refined alternatives**:
+  - DM Serif Display → **Newsreader** (elegant editorial serif with optical sizing, beautiful italics)
+  - Outfit → **Inter** (the gold standard for UI text, clean and professional)
+  - JetBrains Mono stays (already refined for monospace use)
+  - Updated Google Fonts @import URL in globals.css
+  - Replaced ALL instances of `'DM Serif Display', serif` → `'Newsreader', serif` in globals.css
+  - Replaced ALL instances of `'Outfit', sans-serif` → `'Inter', sans-serif` in globals.css
+- **Brought back the Submissions tab**:
+  - Added `{ id: "submissions", label: "Submissions", icon: Upload }` to ROOMS array
+  - Added Upload icon rendering in nav tabs and mobile menu
+  - Added `.nav-tab-submissions` CSS with sage/green theme
+  - Added `.room-wall-submissions` wall gradient
+  - Submissions room returns empty visibleWorks array (no gallery images)
+  - When submissions tab is active, shows a dedicated submissions panel instead of "no results"
+  - Submissions panel includes: Upload icon in circle, "Submit Your Pete Pics" title, description text, CTA button linking to spreadsheet, note about review process
+  - Room count ("0 Works") hidden for submissions room
+  - Eyebrow: "COMMUNITY SUBMISSIONS"
+  - Description: "Community contributions — submit your own Pete Pics via the spreadsheet."
+- **Brought back category descriptions under titles**:
+  - Room descriptions now show for ALL rooms (not just favourites/nacky)
+  - All Works: "The complete archive — every work across all collections."
+  - Favourites: "Your personal collection of the finest works, hand-picked and preserved."
+  - Nacky Nook: "A secret corner reserved for the most delightfully unhinged Pete content."
+  - Submissions: "Community contributions — submit your own Pete Pics via the spreadsheet."
+  - Gallery rooms (Pobots, Prestlers, Cultural Pics, Pisc): Use the `tagline` from the API's `GALLERY_META`
+    - Pobots: "Robots. Petes. The intersection thereof."
+    - Prestlers: "Pete meets the squared circle and beyond."
+    - Cultural Pics: "Art, culture, and things that are Pete."
+    - Pisc: "A miscellany. A cornucopia. A Pisc."
+- **Provided InfinityFree hosting guidance** (see user response)
+- **Created 15-minute QA cron job** (webDevReview, job ID: 175570)
+- Lint passes clean with zero errors
+- Dev server compiles successfully, no errors
+
+Stage Summary:
+- **Count display fixed** — Cleaner `60 / 1212 works` format with tabular numerals
+- **Fonts replaced** — Newsreader (refined serif) + Inter (clean sans) + JetBrains Mono (monospace)
+- **Submissions tab restored** — Sage-green themed with dedicated panel and spreadsheet CTA
+- **Category descriptions restored** — All rooms now show taglines/descriptions under titles
+- **Lint clean**, zero errors
+- **No runtime errors**, dev server stable
+
+Unresolved issues / next phase priorities:
+- InfinityFree hosting requires static export (see guidance provided)
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Could add infinite scroll or pagination for large galleries
+- Light theme CSS may need refinement for new fonts

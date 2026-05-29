@@ -82,6 +82,7 @@ const ROOMS = [
   { id: "prestlers", label: "Prestlers", icon: null },
   { id: "cultural", label: "Cultural Pics", icon: null },
   { id: "pisc", label: "Pisc", icon: null },
+  { id: "submissions", label: "Submissions", icon: Upload },
   { id: "favourites", label: "Favourites", icon: Heart },
   { id: "nacky", label: "Nacky Nook", icon: Sparkles },
 ] as const;
@@ -1413,6 +1414,11 @@ export default function Home() {
       return favWorks;
     }
 
+    if (currentRoom === "submissions") {
+      // Submissions room shows no gallery works — it has its own panel
+      return [];
+    }
+
     if (currentRoom === "nacky") {
       const nackyWorks = data.allWorks.filter((_, i) => i % 7 === 0);
       if (q)
@@ -1469,6 +1475,8 @@ export default function Home() {
     ? "Your Favourites"
     : currentRoom === "nacky"
     ? "The Nacky Nook"
+    : currentRoom === "submissions"
+    ? "Submissions"
     : data?.galleries[currentRoom]?.name || currentRoom;
 
   /* ────── GALLERY ────── */
@@ -1545,12 +1553,13 @@ export default function Home() {
             return (
               <button
                 key={room.id}
-                className={`nav-tab ${currentRoom === room.id ? "active" : ""} ${room.id === "nacky" ? "nav-tab-nacky" : ""} ${room.id === "favourites" ? "nav-tab-fav" : ""}`}
+                className={`nav-tab ${currentRoom === room.id ? "active" : ""} ${room.id === "nacky" ? "nav-tab-nacky" : ""} ${room.id === "favourites" ? "nav-tab-fav" : ""} ${room.id === "submissions" ? "nav-tab-submissions" : ""}`}
                 onClick={() => handleRoomChange(room.id)}
                 aria-current={currentRoom === room.id ? "page" : undefined}
               >
                 {room.id === "nacky" && <Sparkles className="w-3 h-3" />}
                 {room.id === "favourites" && <Heart className="w-3 h-3" />}
+                {room.id === "submissions" && <Upload className="w-3 h-3" />}
                 {room.label}
                 {count > 0 && <span className="nav-tab-count">{count}</span>}
               </button>
@@ -1739,6 +1748,7 @@ export default function Home() {
                   >
                     {room.id === "nacky" && <Sparkles className="w-4 h-4" />}
                     {room.id === "favourites" && <Heart className="w-4 h-4" />}
+                    {room.id === "submissions" && <Upload className="w-4 h-4" />}
                     {room.label}
                     <span className="mobile-menu-count">{count}</span>
                   </button>
@@ -1835,23 +1845,31 @@ export default function Home() {
               ? "PERSONAL COLLECTION"
               : currentRoom === "nacky"
               ? "THE NACKY NOOK"
+              : currentRoom === "submissions"
+              ? "COMMUNITY SUBMISSIONS"
               : "VAULT CHAMBER"}
           </div>
           <h2 className="room-title">
             {currentRoomName}
           </h2>
-          {(currentRoom === "favourites" || currentRoom === "nacky") && (
-            <p className="room-desc">
-              {currentRoom === "favourites"
-                ? "Your personal collection of the finest works, hand-picked and preserved."
-                : "A secret corner reserved for the most delightfully unhinged Pete content."}
-            </p>
-          )}
+          <p className="room-desc">
+            {currentRoom === "all"
+              ? "The complete archive — every work across all collections."
+              : currentRoom === "favourites"
+              ? "Your personal collection of the finest works, hand-picked and preserved."
+              : currentRoom === "nacky"
+              ? "A secret corner reserved for the most delightfully unhinged Pete content."
+              : currentRoom === "submissions"
+              ? "Community contributions — submit your own Pete Pics via the spreadsheet."
+              : data?.galleries[currentRoom]?.tagline || ""}
+          </p>
         </div>
-        <div className="room-count">
-          <strong>{visibleWorks.length}</strong>
-          Works
-        </div>
+        {currentRoom !== "submissions" && (
+          <div className="room-count">
+            <strong>{visibleWorks.length}</strong>
+            Works
+          </div>
+        )}
       </header>
 
       {/* Gallery Content */}
@@ -1880,7 +1898,10 @@ export default function Home() {
         {/* FEATURE 2: Showing indicator */}
         {!isSearching && visibleWorks.length > PAGE_SIZE && (
           <div className="showing-indicator">
-            Showing {displayedWorks.length} <span className="showing-indicator-sep">·</span> of <span className="showing-indicator-total">{visibleWorks.length}</span>
+            <span className="showing-indicator-shown">{displayedWorks.length}</span>
+            <span className="showing-indicator-sep">/</span>
+            <span className="showing-indicator-total">{visibleWorks.length}</span>
+            <span className="showing-indicator-label">works</span>
           </div>
         )}
 
@@ -1899,6 +1920,8 @@ export default function Home() {
               ? "room-wall-nacky"
               : currentRoom === "favourites"
               ? "room-wall-fav"
+              : currentRoom === "submissions"
+              ? "room-wall-submissions"
               : ""
           }`}
         >
@@ -1911,11 +1934,38 @@ export default function Home() {
               transition={{ duration: 0.3 }}
             >
               {visibleWorks.length === 0 ? (
-                <div className="no-results">
-                  {currentRoom === "favourites"
-                    ? "No favourites yet — click the heart on any artwork to save it here."
-                    : "No works found matching your search."}
-                </div>
+                currentRoom === "submissions" ? (
+                  <div className="submissions-panel">
+                    <div className="submissions-icon-wrap">
+                      <Upload className="w-8 h-8" />
+                    </div>
+                    <h3 className="submissions-title">Submit Your Pete Pics</h3>
+                    <p className="submissions-text">
+                      Have a Pete-related image that deserves a place in the archive?
+                      Add it to the community spreadsheet and it may be featured
+                      in a future update to the gallery.
+                    </p>
+                    <a
+                      className="submissions-cta"
+                      href={SPREADSHEET_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Upload className="w-4 h-4" />
+                      Open Submission Spreadsheet
+                    </a>
+                    <p className="submissions-note">
+                      Submissions are reviewed before being added to the permanent collection.
+                      The spreadsheet is open to everyone — feel free to add your finds!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="no-results">
+                    {currentRoom === "favourites"
+                      ? "No favourites yet — click the heart on any artwork to save it here."
+                      : "No works found matching your search."}
+                  </div>
+                )
               ) : viewMode === "list" ? (
                 /* ── LIST VIEW ── */
                 <div className="gallery-list" aria-roledescription="gallery">
