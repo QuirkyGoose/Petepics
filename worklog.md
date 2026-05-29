@@ -249,3 +249,83 @@ Unresolved issues / next phase priorities:
 - Could add a slideshow/carousel mode in the lightbox
 - Light theme CSS overrides may need refinement for the new neon design
 - Could add URL-based routing for deep-linking to gallery rooms
+
+---
+Task ID: 5
+Agent: WebDev Review Agent (Cron)
+Task: QA testing, styling improvements, new features
+
+Work Log:
+- Assessed current project status via worklog.md — project is at Neon Arcade Gallery redesign, stable
+- QA tested via agent-browser:
+  - Entrance page loads correctly with neon arcade theme, typing effect, badge
+  - Gallery loads with all 1212 works across 7 rooms
+  - Navigation tabs all work (All Works, Pobots, Prestlers, Cultural Pics, Pisc, Favourites, Nacky Nook)
+  - Artwork cards render with images, favourite badges, gallery tags
+  - Stats bar shows correct counts
+  - Footer with Twitch and Spreadsheet links
+  - No errors in dev server log, lint clean
+- **Added Slideshow/Autoplay Mode** in lightbox:
+  - Play/Pause toggle button with `Play`/`Pause` icons
+  - Auto-advances every 4 seconds when active
+  - "AUTO" indicator badge next to position counter when slideshow is running
+  - Interval resets on manual navigation
+  - Pauses on zoom, stops on lightbox close
+  - Keyboard shortcut `S` to toggle slideshow
+- **Added Download Button** in lightbox:
+  - `Download` icon button next to Share in action row
+  - Fetches image as blob, creates object URL, triggers download with sanitized filename
+  - Shows toast notification "Downloading {title}..."
+  - Keyboard shortcut `D` to download
+- **Added Typing Effect** for entrance subtitle:
+  - Types "NEON GALLERY · EST. 2024" character by character with 60ms delay
+  - Starts after 800ms delay (after title animation)
+  - Blinking cursor using CSS `cursorBlink` animation
+- **Added Gallery Tag Overlays** on artwork cards:
+  - Small tag in top-left corner showing gallery abbreviation (PBT, PST, CUL, PSC)
+  - Color-coded by gallery: cyan=Pobots, amber=Prestlers, magenta=Cultural, green=Pisc
+  - Appears on hover with opacity transition
+- **Added Boot Sequence Line** on entrance:
+  - "SYS://GALLERY.ONLINE · 1212_WORKS.DAT · STATUS: ACTIVE" text
+  - Appears after 2.5s delay in Share Tech Mono
+  - Subtle cyan color with retro terminal aesthetic
+- **Added about modal shortcuts**: S (Slideshow), D (Download)
+- **Major CSS Polish** — v2 Visual Enhancements:
+  - Enhanced arcade title with layered neon text-shadow (6 layers of cyan/magenta glow)
+  - Card hover ripple effect (conic-gradient rainbow border on hover)
+  - Nav tab active indicator glow (neon underline with box-shadow)
+  - Stats bar neon separator (gradient vertical line)
+  - Room header neon accent bar (cyan-to-magenta gradient)
+  - Lightbox frame neon glow enhancement
+  - Footer neon top border (gradient border-image)
+  - Nameplate hover neon glow
+  - Favourite badge neon heart glow
+  - Scroll-top button neon hover
+  - Enter button enhanced glow
+  - Search focus glow enhancement
+  - Mobile menu neon separator
+  - About modal neon border
+  - Wainscot neon divider (gradient line)
+  - Progress bar animated gradient shimmer
+  - Room wall tints with subtle neon color tones
+  - All room label neon accent
+- Lint passes clean with zero errors
+- No dev server errors
+
+Stage Summary:
+- **Slideshow/Autoplay mode** — Play/Pause, auto-advance, "AUTO" indicator, S shortcut
+- **Download button** — Blob download, sanitized filename, D shortcut
+- **Typing effect** — Character-by-character subtitle with blinking cursor
+- **Gallery tag overlays** — Color-coded per-gallery abbreviation on cards
+- **Boot sequence line** — Retro terminal status text on entrance
+- **Major CSS polish** — 20+ visual enhancements across all components
+- **Lint clean**, no errors, no runtime errors
+- **All existing features preserved** — 16+ features from previous phases intact
+
+Unresolved issues / next phase priorities:
+- Light theme CSS may need more refinement for neon aesthetic
+- Could add URL-based routing for deep-linking to gallery rooms
+- Could add infinite scroll or pagination for large galleries
+- Could add image carousel/slideshow with Ken Burns effect
+- Could add "Recently Added" section
+- Could add masonry layout animation on room switch

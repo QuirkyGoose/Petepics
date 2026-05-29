@@ -22,6 +22,9 @@ import {
   Moon,
   Info,
   Sparkles,
+  Play,
+  Pause,
+  Download,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -51,6 +54,12 @@ interface GalleryResponse {
 
 /* ── Constants ────────────────────────────────────────────── */
 const GALLERY_ORDER = ["pobots", "prestlers", "cultural", "pisc"];
+const GALLERY_ABBREVIATIONS: Record<string, string> = {
+  pobots: "PBT",
+  prestlers: "PST",
+  cultural: "CUL",
+  pisc: "PSC",
+};
 const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
 const SPREADSHEET_URL =
@@ -265,6 +274,14 @@ function ArtworkCard({
   onToggleFav: () => void;
 }) {
   const frameStyle = FRAME_STYLES[index % FRAME_STYLES.length];
+  const tagClass =
+    work.gallery === "pobots"
+      ? "tag-cyan"
+      : work.gallery === "prestlers"
+      ? "tag-amber"
+      : work.gallery === "cultural"
+      ? "tag-magenta"
+      : "tag-green";
 
   return (
     <motion.div
@@ -281,6 +298,9 @@ function ArtworkCard({
       <div className={`frame ${frameStyle}`} onClick={onClick}>
         <div className="frame-inner">
           <LazyImage src={work.imageUrl} alt={work.title} />
+          <span className={`card-gallery-tag ${tagClass}`}>
+            {GALLERY_ABBREVIATIONS[work.gallery] || work.gallery.slice(0, 3).toUpperCase()}
+          </span>
           <button
             className={`fav-badge ${isFav ? "fav-badge-active" : ""}`}
             onClick={(e) => {
@@ -320,6 +340,9 @@ function Lightbox({
   onShare,
   onToggleZoom,
   isZoomed,
+  slideshowActive,
+  onToggleSlideshow,
+  onDownload,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -333,6 +356,9 @@ function Lightbox({
   onShare: () => void;
   onToggleZoom: () => void;
   isZoomed: boolean;
+  slideshowActive: boolean;
+  onToggleSlideshow: () => void;
+  onDownload: () => void;
 }) {
   const currentWorkId = work?.id ?? "";
 
@@ -385,6 +411,9 @@ function Lightbox({
             <h2 className="lb-title">{work.title}</h2>
             <div className="lb-position">
               {position + 1} / {total}
+              {slideshowActive && (
+                <span className="slideshow-indicator">AUTO</span>
+              )}
             </div>
 
             <div className="lb-progress-track">
@@ -425,11 +454,32 @@ function Lightbox({
                 <Share2 className="w-4 h-4" />
                 <span>Share</span>
               </button>
+              <button
+                className="lb-action-btn"
+                onClick={onDownload}
+                title="Download image"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download</span>
+              </button>
+              <button
+                className={`lb-action-btn-slideshow ${slideshowActive ? "active" : ""}`}
+                onClick={onToggleSlideshow}
+                title={slideshowActive ? "Pause slideshow" : "Start slideshow"}
+              >
+                {slideshowActive ? (
+                  <Pause className="w-4 h-4" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+                <span>{slideshowActive ? "Pause" : "Slideshow"}</span>
+              </button>
             </div>
 
             <div className="lb-shortcut-hint">
               <kbd>←</kbd> <kbd>→</kbd> Navigate &nbsp; <kbd>Z</kbd> Zoom
-              &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>Esc</kbd> Close
+              &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>S</kbd> Slideshow
+              &nbsp; <kbd>D</kbd> Download &nbsp; <kbd>Esc</kbd> Close
             </div>
 
             <a
@@ -638,6 +688,12 @@ function AboutModal({
               <kbd>?</kbd> <span>Show this shortcuts panel</span>
             </div>
             <div className="about-shortcut-row">
+              <kbd>S</kbd> <span>Toggle slideshow</span>
+            </div>
+            <div className="about-shortcut-row">
+              <kbd>D</kbd> <span>Download image</span>
+            </div>
+            <div className="about-shortcut-row">
               <kbd>Esc</kbd> <span>Close lightbox / modal</span>
             </div>
           </div>
@@ -693,6 +749,8 @@ export default function Home() {
   const [isZoomed, setIsZoomed] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastVisible, setToastVisible] = useState(false);
+  const [slideshowActive, setSlideshowActive] = useState(false);
+  const [typewriterText, setTypewriterText] = useState("");
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
@@ -702,6 +760,24 @@ export default function Home() {
     setToastMessage(msg);
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
+  }, []);
+
+  /* Typewriter effect for subtitle */
+  useEffect(() => {
+    const target = "NEON GALLERY · EST. 2024";
+    let i = 0;
+    const timeout = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (i < target.length) {
+          setTypewriterText(target.slice(0, i + 1));
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 60);
+      return () => clearInterval(interval);
+    }, 800);
+    return () => clearTimeout(timeout);
   }, []);
 
   /* Fetch gallery data on mount */
@@ -755,6 +831,7 @@ export default function Home() {
   const closeLightbox = useCallback(() => {
     setLightboxOpen(false);
     setIsZoomed(false);
+    setSlideshowActive(false);
     document.body.style.overflow = "";
   }, []);
 
@@ -767,6 +844,43 @@ export default function Home() {
     },
     [lightboxItems.length]
   );
+
+  /* Slideshow auto-advance */
+  useEffect(() => {
+    if (!slideshowActive || !lightboxOpen) return;
+    const timer = setInterval(() => {
+      lbNav(1);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [slideshowActive, lightboxOpen, lbNav]);
+
+  /* Toggle slideshow */
+  const toggleSlideshow = useCallback(() => {
+    setSlideshowActive((prev) => !prev);
+  }, []);
+
+  /* Download handler */
+  const handleDownload = useCallback(() => {
+    const work = lightboxItems[lightboxIndex];
+    if (!work) return;
+    showToast(`Downloading ${work.title}...`);
+    fetch(work.imageUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const sanitized = work.title.replace(/[^a-zA-Z0-9_\- ]/g, "").replace(/\s+/g, "_");
+        a.download = `${sanitized}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      })
+      .catch(() => {
+        showToast("Download failed");
+      });
+  }, [lightboxItems, lightboxIndex, showToast]);
 
   /* Random artwork */
   const handleRandom = useCallback(() => {
@@ -801,6 +915,8 @@ export default function Home() {
           const work = lightboxItems[lightboxIndex];
           if (work) toggleFav(work.id);
         }
+        if (e.key === "s" || e.key === "S") toggleSlideshow();
+        if (e.key === "d" || e.key === "D") handleDownload();
         return;
       }
 
@@ -820,6 +936,8 @@ export default function Home() {
     toggleFav,
     toggleTheme,
     handleRandom,
+    toggleSlideshow,
+    handleDownload,
   ]);
 
   /* Share handler */
@@ -926,7 +1044,8 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            NEON GALLERY · EST. 2024
+            {typewriterText}
+            <span className="typing-cursor" />
           </motion.p>
 
           {/* Italic tagline */}
@@ -939,6 +1058,16 @@ export default function Home() {
             A permanent collection dedicated to the finest Pete-adjacent artwork,
             Pobots, Prestlers, and Cultural Artefacts of Our Time.
           </motion.p>
+
+          {/* Boot sequence line */}
+          <motion.div
+            className="boot-sequence"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2.5, duration: 1 }}
+          >
+            SYS://GALLERY.ONLINE · 1212_WORKS.DAT · STATUS: ACTIVE
+          </motion.div>
 
           {/* Twitch link card */}
           <motion.a
@@ -1394,8 +1523,14 @@ export default function Home() {
           if (currentLightboxWork) toggleFav(currentLightboxWork.id);
         }}
         onShare={handleShare}
-        onToggleZoom={() => setIsZoomed((prev) => !prev)}
+        onToggleZoom={() => {
+          if (slideshowActive) setSlideshowActive(false);
+          setIsZoomed((prev) => !prev);
+        }}
         isZoomed={isZoomed}
+        slideshowActive={slideshowActive}
+        onToggleSlideshow={toggleSlideshow}
+        onDownload={handleDownload}
       />
 
       {/* About Modal */}
