@@ -21,6 +21,8 @@ import {
   Sun,
   Moon,
   Info,
+  Dice5,
+  Star,
   Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -53,8 +55,7 @@ interface GalleryResponse {
 const GALLERY_ORDER = ["pobots", "prestlers", "cultural", "pisc"];
 const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
-const SPREADSHEET_URL =
-  "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
+const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
 const FAVS_STORAGE_KEY = "petepics_favourites";
 
 const ROOMS = [
@@ -68,103 +69,73 @@ const ROOMS = [
 ] as const;
 
 /* ── Twitch SVG Icon ──────────────────────────────────────── */
-function TwitchIcon({
-  size = 16,
-  className = "",
-}: {
-  size?: number;
-  className?: string;
-}) {
+function TwitchIcon({ size = 16, className = "" }: { size?: number; className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      className={className}
-      fill="currentColor"
-    >
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} fill="currentColor">
       <path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z" />
     </svg>
   );
 }
 
-/* ── Favourites Hook (hydration-safe) ─────────────────────── */
+/* ── Favourites Hook ──────────────────────────────────────── */
 function useFavourites() {
-  const [favs, setFavs] = useState<Set<string>>(new Set());
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
+  const [favs, setFavs] = useState<Set<string>>(() => {
     try {
+      if (typeof window === "undefined") return new Set();
       const stored = localStorage.getItem(FAVS_STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate from localStorage after mount to avoid SSR mismatch
-      if (stored) setFavs(new Set(JSON.parse(stored)));
+      if (stored) return new Set(JSON.parse(stored));
     } catch {}
-    setMounted(true);
-  }, []);
-
-  const isFav = useCallback(
-    (id: string) => mounted && favs.has(id),
-    [favs, mounted]
-  );
-
-  const favCount = mounted ? favs.size : 0;
+    return new Set();
+  });
 
   const toggleFav = useCallback((id: string) => {
     setFavs((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id);
       else next.add(id);
-      try {
-        localStorage.setItem(FAVS_STORAGE_KEY, JSON.stringify([...next]));
-      } catch {}
+      try { localStorage.setItem(FAVS_STORAGE_KEY, JSON.stringify([...next])); } catch {}
       return next;
     });
   }, []);
 
-  return { favs, toggleFav, isFav, favCount };
+  const isFav = useCallback((id: string) => favs.has(id), [favs]);
+
+  return { favs, toggleFav, isFav, favCount: favs.size };
 }
 
-/* ── Theme Hook (hydration-safe) ──────────────────────────── */
+/* ── Theme Hook ───────────────────────────────────────────── */
 function useTheme() {
-  const [dark, setDark] = useState(true);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate theme from localStorage after mount to avoid SSR mismatch
-    setMounted(true);
+  const [dark, setDark] = useState(() => {
     try {
+      if (typeof window === "undefined") return true;
       const stored = localStorage.getItem("petepics_theme");
-      if (stored) setDark(stored === "dark");
-    } catch {}
-  }, []);
+      return stored ? stored === "dark" : true;
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
-    if (!mounted) return;
-    document.documentElement.setAttribute(
-      "data-theme",
-      dark ? "dark" : "light"
-    );
-    try {
-      localStorage.setItem("petepics_theme", dark ? "dark" : "light");
-    } catch {}
-  }, [dark, mounted]);
+    document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
+    try { localStorage.setItem("petepics_theme", dark ? "dark" : "light"); } catch {}
+  }, [dark]);
 
   const toggle = useCallback(() => setDark((d) => !d), []);
 
-  return { dark, toggle, mounted };
+  return { dark, toggle };
 }
 
-/* ── Floating Particles (deterministic) ───────────────────── */
+/* ── Floating Particles ───────────────────────────────────── */
 function FloatingParticles() {
   const particles = useMemo(
     () =>
       Array.from({ length: 30 }, (_, i) => ({
         id: i,
-        x: (i * 37 + 13) % 100,
-        y: (i * 53 + 7) % 100,
+        x: ((i * 37 + 13) % 100),
+        y: ((i * 53 + 7) % 100),
         size: (i % 3) + 1,
         duration: (i % 20) + 15,
-        delay: i % 10,
+        delay: (i % 10),
       })),
     []
   );
@@ -175,12 +146,7 @@ function FloatingParticles() {
         <motion.div
           key={p.id}
           className="particle"
-          style={{
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-            width: p.size,
-            height: p.size,
-          }}
+          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
           animate={{
             y: [0, -30, 0, 20, 0],
             x: [0, 15, -10, 5, 0],
@@ -233,7 +199,7 @@ function LazyImage({ src, alt }: { src: string; alt: string }) {
   }
 
   return (
-    <div className="relative overflow-hidden bg-[var(--neon-dark)] min-h-[80px]">
+    <div className="relative overflow-hidden bg-[var(--frame-bg)] min-h-[80px]">
       {!loaded && <div className="img-shimmer" />}
       <img
         ref={imgRef}
@@ -272,30 +238,19 @@ function ArtworkCard({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{
-        delay: Math.min(index * 0.015, 0.3),
-        duration: 0.5,
-        ease: "easeOut",
-      }}
+      transition={{ delay: Math.min(index * 0.015, 0.3), duration: 0.5, ease: "easeOut" }}
     >
       <div className={`frame ${frameStyle}`} onClick={onClick}>
         <div className="frame-inner">
           <LazyImage src={work.imageUrl} alt={work.title} />
+          {/* Favourite badge */}
           <button
             className={`fav-badge ${isFav ? "fav-badge-active" : ""}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFav();
-            }}
-            aria-label={
-              isFav ? "Remove from favourites" : "Add to favourites"
-            }
+            onClick={(e) => { e.stopPropagation(); onToggleFav(); }}
+            aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
             title={isFav ? "Remove from favourites" : "Add to favourites"}
           >
-            <Heart
-              className="w-3 h-3"
-              fill={isFav ? "currentColor" : "none"}
-            />
+            <Heart className="w-3 h-3" fill={isFav ? "currentColor" : "none"} />
           </button>
         </div>
       </div>
@@ -351,11 +306,8 @@ function Lightbox({
           if (e.target === e.currentTarget) onClose();
         }}
       >
-        <button
-          className="lb-close"
-          onClick={onClose}
-          aria-label="Close lightbox"
-        >
+        {/* Close button */}
+        <button className="lb-close" onClick={onClose} aria-label="Close lightbox">
           <X className="w-5 h-5" />
         </button>
 
@@ -366,6 +318,7 @@ function Lightbox({
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
+          {/* Frame with spotlight */}
           <div className="lb-frame">
             <div className="lb-spotlight" aria-hidden="true" />
             <div className="lb-frame-inner" onClick={onToggleZoom}>
@@ -380,6 +333,7 @@ function Lightbox({
             </div>
           </div>
 
+          {/* Info panel */}
           <div className="lb-info">
             <div className="lb-gallery-tag">{work.galleryName}</div>
             <h2 className="lb-title">{work.title}</h2>
@@ -387,6 +341,7 @@ function Lightbox({
               {position + 1} / {total}
             </div>
 
+            {/* Progress bar */}
             <div className="lb-progress-track">
               <div
                 className="lb-progress-fill"
@@ -403,33 +358,25 @@ function Lightbox({
               </button>
             </div>
 
+            {/* Action row: Favourite + Share */}
             <div className="lb-actions-row">
               <button
                 className={`lb-action-btn ${isFav ? "lb-action-btn-active" : ""}`}
                 onClick={onToggleFav}
-                title={
-                  isFav ? "Remove from favourites" : "Add to favourites"
-                }
+                title={isFav ? "Remove from favourites" : "Add to favourites"}
               >
-                <Heart
-                  className="w-4 h-4"
-                  fill={isFav ? "currentColor" : "none"}
-                />
+                <Heart className="w-4 h-4" fill={isFav ? "currentColor" : "none"} />
                 <span>{isFav ? "Favourited" : "Favourite"}</span>
               </button>
-              <button
-                className="lb-action-btn"
-                onClick={onShare}
-                title="Copy image link"
-              >
+              <button className="lb-action-btn" onClick={onShare} title="Copy image link">
                 <Share2 className="w-4 h-4" />
                 <span>Share</span>
               </button>
             </div>
 
+            {/* Shortcut hints */}
             <div className="lb-shortcut-hint">
-              <kbd>←</kbd> <kbd>→</kbd> Navigate &nbsp; <kbd>Z</kbd> Zoom
-              &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>Esc</kbd> Close
+              <kbd>←</kbd> <kbd>→</kbd> Navigate &nbsp; <kbd>Z</kbd> Zoom &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>Esc</kbd> Close
             </div>
 
             <a
@@ -447,13 +394,9 @@ function Lightbox({
         <div className="mobile-lb-bar">
           <div className="mobile-lb-bar-inner">
             <div className="mobile-lb-bar-info">
-              <span className="mobile-lb-bar-gallery">
-                {work.galleryName}
-              </span>
+              <span className="mobile-lb-bar-gallery">{work.galleryName}</span>
               <span className="mobile-lb-bar-title">{work.title}</span>
-              <span className="mobile-lb-bar-pos">
-                {position + 1} / {total}
-              </span>
+              <span className="mobile-lb-bar-pos">{position + 1} / {total}</span>
             </div>
             <div className="mobile-lb-bar-actions">
               <button
@@ -461,36 +404,19 @@ function Lightbox({
                 onClick={onToggleFav}
                 title="Favourite"
               >
-                <Heart
-                  className="w-4 h-4"
-                  fill={isFav ? "currentColor" : "none"}
-                />
+                <Heart className="w-4 h-4" fill={isFav ? "currentColor" : "none"} />
               </button>
-              <button
-                className="lb-action-btn-sm"
-                onClick={onShare}
-                title="Copy link"
-              >
+              <button className="lb-action-btn-sm" onClick={onShare} title="Copy link">
                 <Share2 className="w-4 h-4" />
               </button>
             </div>
           </div>
           <div className="mobile-lb-nav">
-            <button
-              className="mobile-lb-nav-btn"
-              onClick={onPrev}
-              aria-label="Previous"
-            >
+            <button className="mobile-lb-nav-btn" onClick={onPrev} aria-label="Previous">
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <span className="mobile-lb-nav-pos">
-              {position + 1} / {total}
-            </span>
-            <button
-              className="mobile-lb-nav-btn"
-              onClick={onNext}
-              aria-label="Next"
-            >
+            <span className="mobile-lb-nav-pos">{position + 1} / {total}</span>
+            <button className="mobile-lb-nav-btn" onClick={onNext} aria-label="Next">
               <ChevronRight className="w-6 h-6" />
             </button>
           </div>
@@ -533,13 +459,7 @@ function ScrollToTop() {
 }
 
 /* ── Stats Bar ────────────────────────────────────────────── */
-function StatsBar({
-  data,
-  favCount,
-}: {
-  data: GalleryResponse | null;
-  favCount: number;
-}) {
+function StatsBar({ data, favCount }: { data: GalleryResponse | null; favCount: number }) {
   if (!data) return null;
   const galleries = Object.values(data.galleries);
 
@@ -567,13 +487,7 @@ function StatsBar({
 }
 
 /* ── About Modal ──────────────────────────────────────────── */
-function AboutModal({
-  isOpen,
-  onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+function AboutModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   if (!isOpen) return null;
 
   return (
@@ -583,9 +497,7 @@ function AboutModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose();
-        }}
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       >
         <motion.div
           className="about-modal"
@@ -595,32 +507,25 @@ function AboutModal({
           transition={{ duration: 0.3, ease: "easeOut" }}
           onClick={(e) => e.stopPropagation()}
         >
-          <button
-            className="about-close"
-            onClick={onClose}
-            aria-label="Close about"
-          >
+          <button className="about-close" onClick={onClose} aria-label="Close about">
             <X className="w-4 h-4" />
           </button>
           <h3 className="about-title">About Pete Pics</h3>
           <p className="about-desc">
-            Pete Pics is a permanent collection dedicated to the finest
-            Pete-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts.
-            Curated by AGoodPete on Twitch.
+            Pete Pics is a permanent collection dedicated to the finest Pete-adjacent artwork,
+            Pobots, Prestlers, and Cultural Artefacts. Curated by AGoodPete on Twitch.
           </p>
           <div className="about-divider" />
           <h4 className="about-subtitle">The Nacky Nook</h4>
           <p className="about-desc">
-            A secret corner of the gallery reserved for the most delightfully
-            unhinged Pete content. Only the finest absurdist masterpieces earn
-            their place in the Nacky Nook.
+            A secret corner of the gallery reserved for the most delightfully unhinged Pete content.
+            Only the finest absurdist masterpieces earn their place in the Nacky Nook.
           </p>
           <div className="about-divider" />
           <h4 className="about-subtitle">Keyboard Shortcuts</h4>
           <div className="about-shortcuts">
             <div className="about-shortcut-row">
-              <kbd>←</kbd> <kbd>→</kbd>{" "}
-              <span>Navigate images in lightbox</span>
+              <kbd>←</kbd> <kbd>→</kbd> <span>Navigate images in lightbox</span>
             </div>
             <div className="about-shortcut-row">
               <kbd>Z</kbd> <span>Zoom in/out</span>
@@ -642,12 +547,7 @@ function AboutModal({
             </div>
           </div>
           <div className="about-divider" />
-          <a
-            className="about-twitch-link"
-            href={TWITCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a className="about-twitch-link" href={TWITCH_URL} target="_blank" rel="noopener noreferrer">
             <TwitchIcon size={16} />
             twitch.tv/AGoodPete
           </a>
@@ -681,7 +581,7 @@ export default function Home() {
   const [phase, setPhase] = useState<"entrance" | "gallery">("entrance");
   const [data, setData] = useState<GalleryResponse | null>(null);
   const [loading, setLoading] = useState(true);
-  const [fetchStatus, setFetchStatus] = useState("Connecting to archive…");
+  const [fetchStatus, setFetchStatus] = useState("Fetching collection…");
   const [currentRoom, setCurrentRoom] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -695,7 +595,7 @@ export default function Home() {
   const [toastVisible, setToastVisible] = useState(false);
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
-  const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
+  const { dark, toggle: toggleTheme } = useTheme();
 
   /* Show toast */
   const showToast = useCallback((msg: string) => {
@@ -768,20 +668,10 @@ export default function Home() {
     [lightboxItems.length]
   );
 
-  /* Random artwork */
-  const handleRandom = useCallback(() => {
-    if (!data || data.allWorks.length === 0) return;
-    const randomWork =
-      data.allWorks[Math.floor(Math.random() * data.allWorks.length)];
-    const room = randomWork.gallery;
-    const works = data.galleries[room]?.works || data.allWorks;
-    const idx = works.findIndex((w) => w.id === randomWork.id);
-    openLightbox(works, idx >= 0 ? idx : 0);
-  }, [data, openLightbox]);
-
   /* Keyboard navigation */
   useEffect(() => {
     function handleKey(e: KeyboardEvent) {
+      // About modal
       if (e.key === "?" && !lightboxOpen) {
         e.preventDefault();
         setAboutOpen((prev) => !prev);
@@ -792,6 +682,7 @@ export default function Home() {
         return;
       }
 
+      // Lightbox keys
       if (lightboxOpen) {
         if (e.key === "ArrowRight" || e.key === "ArrowDown") lbNav(1);
         if (e.key === "ArrowLeft" || e.key === "ArrowUp") lbNav(-1);
@@ -804,36 +695,35 @@ export default function Home() {
         return;
       }
 
+      // Gallery keys
       if (e.key === "r" || e.key === "R") handleRandom();
       if (e.key === "t" || e.key === "T") toggleTheme();
     }
 
+    // We need to include handleRandom and toggleTheme in deps but they're stable
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [
-    lightboxOpen,
-    lbNav,
-    closeLightbox,
-    aboutOpen,
-    lightboxItems,
-    lightboxIndex,
-    toggleFav,
-    toggleTheme,
-    handleRandom,
-  ]);
+  }, [lightboxOpen, lbNav, closeLightbox, aboutOpen, lightboxItems, lightboxIndex, toggleFav, toggleTheme]);
+
+  /* Random artwork */
+  const handleRandom = useCallback(() => {
+    if (!data || data.allWorks.length === 0) return;
+    const randomWork = data.allWorks[Math.floor(Math.random() * data.allWorks.length)];
+    const room = randomWork.gallery;
+    const works = data.galleries[room]?.works || data.allWorks;
+    const idx = works.findIndex((w) => w.id === randomWork.id);
+    openLightbox(works, idx >= 0 ? idx : 0);
+  }, [data, openLightbox]);
 
   /* Share handler */
   const handleShare = useCallback(() => {
     const work = lightboxItems[lightboxIndex];
     if (!work) return;
-    navigator.clipboard
-      .writeText(work.imageUrl)
-      .then(() => {
-        showToast("Image link copied to clipboard!");
-      })
-      .catch(() => {
-        showToast("Could not copy link");
-      });
+    navigator.clipboard.writeText(work.imageUrl).then(() => {
+      showToast("Image link copied to clipboard!");
+    }).catch(() => {
+      showToast("Could not copy link");
+    });
   }, [lightboxItems, lightboxIndex, showToast]);
 
   /* Get visible works */
@@ -843,23 +733,19 @@ export default function Home() {
 
     if (currentRoom === "favourites") {
       const favWorks = data.allWorks.filter((w) => favs.has(w.id));
-      if (q)
-        return favWorks.filter(
-          (w) =>
-            w.title.toLowerCase().includes(q) ||
-            w.galleryName.toLowerCase().includes(q)
-        );
+      if (q) return favWorks.filter((w) => w.title.toLowerCase().includes(q) || w.galleryName.toLowerCase().includes(q));
       return favWorks;
     }
 
     if (currentRoom === "nacky") {
+      // Nacky Nook — randomly curated subset with fun filter
+      const shuffled = [...data.allWorks].sort(() => {
+        // Deterministic "random" based on id hash
+        return 0;
+      });
+      // Pick every 7th item for a quirky selection
       const nackyWorks = data.allWorks.filter((_, i) => i % 7 === 0);
-      if (q)
-        return nackyWorks.filter(
-          (w) =>
-            w.title.toLowerCase().includes(q) ||
-            w.galleryName.toLowerCase().includes(q)
-        );
+      if (q) return nackyWorks.filter((w) => w.title.toLowerCase().includes(q) || w.galleryName.toLowerCase().includes(q));
       return nackyWorks;
     }
 
@@ -878,116 +764,137 @@ export default function Home() {
   const currentLightboxWork = lightboxItems[lightboxIndex];
 
   /* Nacky Nook info */
-  const nackyCount = data
-    ? data.allWorks.filter((_, i) => i % 7 === 0).length
-    : 0;
+  const nackyCount = data ? data.allWorks.filter((_, i) => i % 7 === 0).length : 0;
 
-  /* ────── ENTRANCE — Neon Arcade "INSERT COIN" Screen ────── */
+  /* ────── ENTRANCE ────── */
   if (phase === "entrance") {
     return (
-      <section className="entrance-section">
-        {/* Animated perspective grid background */}
-        <div className="entrance-grid-bg" aria-hidden="true" />
-        {/* CRT scanline overlay */}
-        <div className="entrance-scanlines" aria-hidden="true" />
+      <section className="entrance-section" suppressHydrationWarning>
         {/* Floating particles */}
         <FloatingParticles />
 
+        {/* Decorative columns */}
+        <div className="entrance-columns" aria-hidden="true">
+          {[...Array(7)].map((_, i) => (
+            <div
+              key={i}
+              className={`col-pillar ${i === 1 || i === 2 || i === 4 || i === 5 ? "col-pillar-thin" : ""}`}
+            />
+          ))}
+        </div>
+
+        {/* Ornamental top border */}
+        <div className="entrance-top-border" aria-hidden="true" />
+
         <motion.div
-          className="entrance-inner"
+          className="entrance-inner text-center z-10 px-8 py-16"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.4, ease: "easeOut" }}
+          suppressHydrationWarning
         >
-          {/* Circular neon badge */}
-          <motion.div
-            className="arcade-badge"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6 }}
-          >
-            <Palette className="w-10 h-10" />
-          </motion.div>
+          {/* Logo badge with ring animation */}
+          <div className="logo-badge-container">
+            <motion.div
+              className="logo-ring"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="logo-badge"
+              animate={{
+                boxShadow: [
+                  "0 0 30px rgba(184,148,42,0.15), inset 0 0 15px rgba(184,148,42,0.05)",
+                  "0 0 60px rgba(184,148,42,0.4), inset 0 0 40px rgba(184,148,42,0.1)",
+                ],
+              }}
+              transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+            >
+              <Palette className="w-9 h-9 text-[var(--gold)]" suppressHydrationWarning />
+            </motion.div>
+          </div>
 
-          {/* Title with glitch effect on hover */}
+          {/* Title with staggered animation */}
           <motion.h1
-            className="arcade-title"
+            className="museum-name"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
             <span>Pete</span> Pics
           </motion.h1>
-
-          {/* Monospace subtitle with typing cursor */}
           <motion.p
-            className="arcade-subtitle"
+            className="museum-subtitle"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            NEON GALLERY · EST. 2024
+            The Gallery · Est. 2024
           </motion.p>
-
-          {/* Italic tagline */}
           <motion.p
-            className="arcade-tagline"
+            className="museum-tagline"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
           >
-            A permanent collection dedicated to the finest Pete-adjacent artwork,
-            Pobots, Prestlers, and Cultural Artefacts of Our Time.
+            A permanent collection dedicated to the finest Pete-adjacent artwork, Pobots,
+            Prestlers, and Cultural Artefacts of Our Time.
           </motion.p>
 
-          {/* Twitch link card */}
+          {/* Twitch entrance card */}
           <motion.a
-            className="twitch-arcade-card"
+            className="twitch-entrance-card"
             href={TWITCH_URL}
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.05, duration: 0.6 }}
+            whileHover={{ scale: 1.03, boxShadow: "0 0 25px rgba(145,70,255,0.3)" }}
+            whileTap={{ scale: 0.97 }}
           >
             <TwitchIcon size={18} />
             <span>Watch AGoodPete on Twitch</span>
           </motion.a>
 
           {/* Enter button */}
-          <motion.div
+          <motion.button
+            className="enter-btn"
+            onClick={enterGallery}
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.2, duration: 0.6 }}
           >
-            <button className="enter-arcade-btn" onClick={enterGallery}>
-              ENTER THE GALLERY
-              <ArrowRight className="enter-arcade-btn-arrow" />
-            </button>
-          </motion.div>
+            Enter the Gallery
+            <ArrowRight className="enter-btn-arrow" />
+          </motion.button>
 
-          {/* Retro pixel loading indicator */}
+          {/* Loading indicator */}
           {loading && (
             <motion.div
-              className="arcade-loading"
+              className="mt-8 flex items-center justify-center gap-3"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 1.5 }}
             >
-              <span />
-              <span />
-              <span />
-              <span className="arcade-loading-text">{fetchStatus}</span>
+              <div className="loader-spinner" />
+              <span className="entrance-loading-text">{fetchStatus}</span>
             </motion.div>
           )}
         </motion.div>
 
-        {/* Bottom count display */}
+        {/* Ornamental bottom border */}
+        <div className="entrance-bottom-border" aria-hidden="true" />
+
+        {/* Collection count */}
         <motion.div
-          className="arcade-count"
+          className="gallery-count"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8, duration: 1 }}
+          suppressHydrationWarning
         >
           {!loading && data
             ? `${data.totalWorks} works in the permanent collection`
@@ -1001,7 +908,7 @@ export default function Home() {
 
   /* ────── GALLERY ────── */
   return (
-    <div className="min-h-screen flex flex-col bg-[var(--neon-bg)]">
+    <div className="min-h-screen flex flex-col bg-[var(--warm-white)]" data-theme={dark ? "dark" : "light"} suppressHydrationWarning>
       {/* Navigation */}
       <nav className="gallery-nav">
         <button
@@ -1014,18 +921,13 @@ export default function Home() {
         </button>
         <div className="nav-logo">
           <span>Pete</span> Pics
-          <a
-            className="nav-twitch-badge"
-            href={TWITCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+          <a className="nav-twitch-badge" href={TWITCH_URL} target="_blank" rel="noopener noreferrer">
             <TwitchIcon size={12} />
             AGoodPete
           </a>
         </div>
 
-        {/* Desktop tabs */}
+        {/* Desktop tabs with count badges */}
         <div className="nav-tabs">
           {ROOMS.map((room) => {
             const count =
@@ -1068,11 +970,7 @@ export default function Home() {
             title="Toggle Theme (T)"
             aria-label="Toggle theme"
           >
-            {themeMounted && dark ? (
-              <Sun className="w-4 h-4" />
-            ) : (
-              <Moon className="w-4 h-4" />
-            )}
+            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
 
           <button
@@ -1089,17 +987,13 @@ export default function Home() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle navigation menu"
           >
-            {mobileMenuOpen ? (
-              <X className="w-4 h-4" />
-            ) : (
-              <Menu className="w-4 h-4" />
-            )}
+            {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
 
         {/* Search */}
         <div className="search-wrap">
-          <Search className="w-4 h-4 text-[var(--neon-cyan)] opacity-50" />
+          <Search className="w-4 h-4 text-[var(--gold)] opacity-50" />
           <Input
             type="search"
             placeholder="Search works…"
@@ -1136,17 +1030,11 @@ export default function Home() {
                   onClick={() => handleRoomChange(room.id)}
                 >
                   <span className="mobile-menu-label">
-                    {room.id === "nacky" && (
-                      <Sparkles className="w-3 h-3 inline mr-1" />
-                    )}
-                    {room.id === "favourites" && (
-                      <Heart className="w-3 h-3 inline mr-1" />
-                    )}
+                    {room.id === "nacky" && <Sparkles className="w-3 h-3 inline mr-1" />}
+                    {room.id === "favourites" && <Heart className="w-3 h-3 inline mr-1" />}
                     {room.label}
                   </span>
-                  {count > 0 && (
-                    <span className="mobile-menu-count">{count}</span>
-                  )}
+                  {count > 0 && <span className="mobile-menu-count">{count}</span>}
                 </button>
               );
             })}
@@ -1156,15 +1044,8 @@ export default function Home() {
                 <TwitchIcon size={20} />
                 <span className="mobile-twitch-card-name">AGoodPete</span>
               </div>
-              <div className="mobile-twitch-card-status">
-                Check back for the next stream
-              </div>
-              <a
-                href={TWITCH_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mobile-twitch-link"
-              >
+              <div className="mobile-twitch-card-status">Check back for the next stream</div>
+              <a href={TWITCH_URL} target="_blank" rel="noopener noreferrer" className="mobile-twitch-link">
                 <TwitchIcon size={14} />
                 Open Channel
               </a>
@@ -1179,8 +1060,7 @@ export default function Home() {
       {/* Viewed counter */}
       {viewedCount > 0 && (
         <div className="viewed-counter">
-          <Eye className="w-3 h-3" /> {viewedCount} artwork
-          {viewedCount !== 1 ? "s" : ""} viewed
+          <Eye className="w-3 h-3" /> {viewedCount} artwork{viewedCount !== 1 ? "s" : ""} viewed
         </div>
       )}
 
@@ -1198,16 +1078,13 @@ export default function Home() {
             {!searchQuery && currentRoom === "nacky" && (
               <div className="room-header room-wall-nacky">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">
-                    ✨ Pete Pics — The Nacky Nook
-                  </div>
+                  <div className="room-eyebrow">✨ Pete Pics — The Nacky Nook</div>
                   <h2 className="room-title">
                     The <em>Nacky Nook</em>
                   </h2>
                   <p className="room-desc">
-                    A secret corner reserved for the most delightfully unhinged
-                    Pete content. Only the finest absurdist masterpieces earn
-                    their place here.
+                    A secret corner reserved for the most delightfully unhinged Pete content.
+                    Only the finest absurdist masterpieces earn their place here.
                   </p>
                 </div>
                 <div className="room-count">
@@ -1220,15 +1097,12 @@ export default function Home() {
             {!searchQuery && currentRoom === "favourites" && (
               <div className="room-header room-wall-fav">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">
-                    ♥ Pete Pics — Your Collection
-                  </div>
+                  <div className="room-eyebrow">♥ Pete Pics — Your Collection</div>
                   <h2 className="room-title">
                     Your <em>Favourites</em>
                   </h2>
                   <p className="room-desc">
-                    Your personal collection of favourited works. Heart any
-                    artwork to add it here.
+                    Your personal collection of favourited works. Heart any artwork to add it here.
                   </p>
                 </div>
                 <div className="room-count">
@@ -1238,147 +1112,131 @@ export default function Home() {
               </div>
             )}
 
-            {!searchQuery &&
-              currentRoom !== "all" &&
-              currentRoom !== "nacky" &&
-              currentRoom !== "favourites" &&
-              data?.galleries[currentRoom] && (
-                <div
-                  className={`room-header ${data.galleries[currentRoom].wallClass}`}
-                >
-                  <div className="room-header-left">
-                    <div className="room-eyebrow">
-                      Pete Pics — Permanent Collection
-                    </div>
-                    <h2 className="room-title">
-                      <em>{data.galleries[currentRoom].name}</em>
-                    </h2>
-                    <p className="room-desc">
-                      {data.galleries[currentRoom].tagline}
-                    </p>
-                  </div>
-                  <div className="room-count">
-                    <strong>{data.galleries[currentRoom].works.length}</strong>
-                    Works on Display
-                  </div>
+            {!searchQuery && currentRoom !== "all" && currentRoom !== "nacky" && currentRoom !== "favourites" && data?.galleries[currentRoom] && (
+              <div className={`room-header ${data.galleries[currentRoom].wallClass}`}>
+                <div className="room-header-left">
+                  <div className="room-eyebrow">Pete Pics — Permanent Collection</div>
+                  <h2 className="room-title">
+                    <em>{data.galleries[currentRoom].name}</em>
+                  </h2>
+                  <p className="room-desc">{data.galleries[currentRoom].tagline}</p>
                 </div>
-              )}
+                <div className="room-count">
+                  <strong>{data.galleries[currentRoom].works.length}</strong>
+                  Works on Display
+                </div>
+              </div>
+            )}
 
             {!searchQuery && currentRoom === "all" && (
-              <div className="room-header room-wall-1">
+              <div className="room-header">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">
-                    Pete Pics — The Permanent Collection
-                  </div>
+                  <div className="room-eyebrow">Pete Pics — Full Collection</div>
                   <h2 className="room-title">
-                    The <em>Collection</em>
+                    All <em>Works</em>
                   </h2>
                   <p className="room-desc">
-                    Browse the complete archive of Pete-adjacent artwork across
-                    all galleries.
+                    The complete permanent collection across all four galleries.
                   </p>
                 </div>
                 <div className="room-count">
                   <strong>{data?.totalWorks || 0}</strong>
-                  Total Works
+                  Works Total
                 </div>
               </div>
             )}
 
-            {/* Search results header */}
             {searchQuery && (
               <div className="search-results-header">
-                Found <strong>{visibleWorks.length}</strong> works matching &quot;
-                {searchQuery}&quot;
+                {visibleWorks.length > 0 ? (
+                  <>
+                    Showing <strong>{visibleWorks.length}</strong> result
+                    {visibleWorks.length !== 1 ? "s" : ""} for &ldquo;{searchQuery}&rdquo;
+                  </>
+                ) : null}
               </div>
             )}
+
+            {/* Wainscot */}
+            {!searchQuery && <div className="wainscot" />}
           </motion.div>
         </AnimatePresence>
 
         {/* Gallery grid */}
         <div className="gallery-wall">
-          {visibleWorks.length > 0 ? (
+          {searchQuery && visibleWorks.length === 0 ? (
+            <div className="no-results">
+              No works found for &ldquo;{searchQuery}&rdquo;
+            </div>
+          ) : !searchQuery && currentRoom === "favourites" && favCount === 0 ? (
+            <div className="no-results">
+              <Heart className="w-8 h-8 mx-auto mb-4 opacity-20" />
+              No favourites yet. Click the heart icon on any artwork to add it here.
+            </div>
+          ) : searchQuery || currentRoom !== "all" ? (
             <div className="gallery-grid">
-              {visibleWorks.map((work, i) => (
+              {visibleWorks.map((work, idx) => (
                 <ArtworkCard
                   key={work.id}
                   work={work}
-                  index={i}
-                  onClick={() => openLightbox(visibleWorks, i)}
+                  index={idx}
+                  onClick={() => openLightbox(visibleWorks, idx)}
                   isFav={isFav(work.id)}
                   onToggleFav={() => toggleFav(work.id)}
                 />
               ))}
             </div>
           ) : (
-            <div className="no-results">
-              {searchQuery
-                ? "No works found matching your search."
-                : currentRoom === "favourites"
-                ? "No favourites yet. Heart an artwork to add it here."
-                : "This gallery is empty."}
-            </div>
+            /* All rooms view */
+            GALLERY_ORDER.map((galleryId) => {
+              const gallery = data?.galleries[galleryId];
+              if (!gallery || gallery.works.length === 0) return null;
+              return (
+                <div key={galleryId} className="all-room">
+                  <div className="all-room-label">
+                    {gallery.name} — {gallery.works.length} works
+                  </div>
+                  <div className="gallery-grid">
+                    {gallery.works.map((work, idx) => (
+                      <ArtworkCard
+                        key={work.id}
+                        work={work}
+                        index={idx}
+                        onClick={() => openLightbox(gallery.works, idx)}
+                        isFav={isFav(work.id)}
+                        onToggleFav={() => toggleFav(work.id)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
-
-        {/* All-room section in "all" view */}
-        {currentRoom === "all" &&
-          !searchQuery &&
-          data &&
-          GALLERY_ORDER.map((galleryId) => {
-            const gallery = data.galleries[galleryId];
-            if (!gallery) return null;
-            return (
-              <div key={galleryId} className="all-room">
-                <div className="all-room-label">{gallery.name}</div>
-                <div className="gallery-grid" style={{ padding: "0 3rem" }}>
-                  {gallery.works.slice(0, 6).map((work, i) => (
-                    <ArtworkCard
-                      key={work.id}
-                      work={work}
-                      index={i}
-                      onClick={() =>
-                        openLightbox(
-                          gallery.works,
-                          gallery.works.findIndex((w) => w.id === work.id)
-                        )
-                      }
-                      isFav={isFav(work.id)}
-                      onToggleFav={() => toggleFav(work.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
       </main>
 
       {/* Footer */}
-      <footer className="gallery-footer">
-        <strong>Pete Pics</strong>
-        <span>A permanent collection of Pete-adjacent artwork</span>
+      <footer className="gallery-footer mt-auto">
+        <strong>Pete Pics — The Gallery</strong>
+        <div className="footer-credit">
+          A collection of the world&apos;s finest Pete-related artwork · Images sourced from
+          postimg.cc
+        </div>
         <div className="footer-links">
-          <a
-            href={TWITCH_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-twitch-link"
-          >
-            <TwitchIcon size={14} />
-            AGoodPete on Twitch
+          <a className="footer-twitch" href={TWITCH_URL} target="_blank" rel="noopener noreferrer">
+            <TwitchIcon size={16} />
+            twitch.tv/AGoodPete
           </a>
-          <a
-            href={SPREADSHEET_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="footer-sheet-link"
-          >
-            Collection Spreadsheet
+          <a className="footer-spreadsheet" href={SPREADSHEET_URL} target="_blank" rel="noopener noreferrer">
+            📊 Pete Pics Spreadsheet
           </a>
         </div>
       </footer>
 
-      {/* Lightbox */}
+      {/* Scroll to top */}
+      <ScrollToTop />
+
+      {/* Custom Lightbox */}
       <Lightbox
         isOpen={lightboxOpen}
         onClose={closeLightbox}
@@ -1387,12 +1245,8 @@ export default function Home() {
         total={lightboxItems.length}
         onPrev={() => lbNav(-1)}
         onNext={() => lbNav(1)}
-        isFav={
-          currentLightboxWork ? isFav(currentLightboxWork.id) : false
-        }
-        onToggleFav={() => {
-          if (currentLightboxWork) toggleFav(currentLightboxWork.id);
-        }}
+        isFav={currentLightboxWork ? isFav(currentLightboxWork.id) : false}
+        onToggleFav={() => currentLightboxWork && toggleFav(currentLightboxWork.id)}
         onShare={handleShare}
         onToggleZoom={() => setIsZoomed((prev) => !prev)}
         isZoomed={isZoomed}
@@ -1401,10 +1255,7 @@ export default function Home() {
       {/* About Modal */}
       <AboutModal isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
 
-      {/* Scroll to top */}
-      <ScrollToTop />
-
-      {/* Toast */}
+      {/* Toast Notification */}
       <Toast message={toastMessage} visible={toastVisible} />
     </div>
   );

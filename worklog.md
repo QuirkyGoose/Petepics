@@ -183,3 +183,69 @@ Unresolved issues / next phase priorities:
 - Could add Submissions room (requires backend write capability)
 - Could add Admin panel with PIN login
 - Mobile lightbox bar could be more polished
+
+---
+Task ID: 4
+Agent: Main Developer
+Task: Ground-up visual redesign — "Neon Arcade Gallery" concept
+
+Work Log:
+- Backed up current museum-themed files as page.backup.tsx and globals.backup.css
+- Analyzed all existing features to ensure nothing is lost in the redesign
+- **Complete visual redesign from museum theme to Neon Arcade Gallery**:
+  - Replaced gold/brown/cream color palette with neon cyberpunk palette (cyan #00fff5, magenta #ff2d7b, amber #ffb300, green #39ff14)
+  - Replaced Google Fonts (EB Garamond, Josefin Sans) with Space Grotesk + Share Tech Mono
+  - Kept Playfair Display only for artwork nameplates
+  - New animated perspective grid background (Tron-style) on entrance
+  - New CRT scanline overlay effect
+  - New circular neon-bordered badge with pulsing glow animation
+  - New glitch text effect on title hover (chromatic aberration)
+  - New holographic animated gradient borders on artwork cards (4 neon color variants)
+  - New neon progress bar in lightbox
+  - New retro pixel loading indicator (3 pulsing bars)
+  - New neon-styled custom scrollbar
+  - New "ENTER THE GALLERY" button with neon fill-on-hover animation
+  - New scanline overlay on artwork images
+  - New neon shimmer loading state
+  - New neon glow effects throughout (text-shadow, box-shadow)
+  - New pulsing neon animations on interactive elements
+- **Fixed hydration errors properly** (no more suppressHydrationWarning):
+  - `useTheme()` hook: Uses `mounted` state pattern — defaults to dark, hydrates from localStorage in useEffect after mount
+  - `useFavourites()` hook: Initializes with empty Set, hydrates from localStorage in useEffect, `isFav()` returns false until mounted
+  - Removed ALL `suppressHydrationWarning` props (was on 5+ elements)
+  - No more `Math.random()` or `Date.now()` in render
+  - No inline styles that differ between server and client
+- **All 16 features preserved**:
+  1. 4 galleries from /api/gallery (Pobots, Prestlers, Cultural Pics, Pisc)
+  2. Twitch integration (entrance card, nav badge, footer link, mobile card)
+  3. Spreadsheet link in footer
+  4. Nacky Nook (every 7th item, purple neon themed)
+  5. Favourites with localStorage + heart badges
+  6. Random artwork button (R shortcut)
+  7. Theme toggle (Dark/Light) with localStorage
+  8. About modal with keyboard shortcuts
+  9. Custom lightbox with zoom, favourite, share, prev/next
+  10. Search filtering by title
+  11. Scroll-to-top button
+  12. Stats bar with gallery counts
+  13. Viewed counter
+  14. Toast notifications
+  15. Mobile responsive (hamburger menu, mobile lightbox bar)
+  16. All keyboard shortcuts (R, T, Z, F, ?, Esc, ← →)
+- QA tested with agent-browser — entrance, gallery navigation, room switching all working
+- Lint passes clean with zero errors
+
+Stage Summary:
+- **COMPLETE VISUAL REDESIGN** — Museum theme → Neon Arcade Gallery (cyberpunk/retro-arcade aesthetic)
+- **Hydration errors FIXED** — Proper mounted state pattern, no suppressHydrationWarning
+- **All features preserved** — 16 features carried over from previous version
+- **New visual effects** — CRT scanlines, animated grid, glitch text, holographic borders, neon glows
+- **Lint clean**, no errors
+- **Backup files** saved as page.backup.tsx and globals.backup.css
+
+Unresolved issues / next phase priorities:
+- agent-browser click on the "ENTER THE GALLERY" button requires focus+Enter (may be framer-motion interference)
+- Could add more detailed CSS transitions for room switching
+- Could add a slideshow/carousel mode in the lightbox
+- Light theme CSS overrides may need refinement for the new neon design
+- Could add URL-based routing for deep-linking to gallery rooms
