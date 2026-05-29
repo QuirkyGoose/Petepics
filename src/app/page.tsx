@@ -34,6 +34,8 @@ import {
   VolumeX,
   Upload,
   DownloadCloud,
+  Expand,
+  ChevronDown,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -624,6 +626,24 @@ function Lightbox({
                 <Share2 className="w-4 h-4" />
                 <span>Share</span>
               </button>
+              <a
+                className="lb-social-btn"
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${work.title}" from Pete Pics!`)}&url=${encodeURIComponent(work.imageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on X/Twitter"
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              </a>
+              <a
+                className="lb-social-btn"
+                href={`https://reddit.com/submit?title=${encodeURIComponent(`${work.title} - Pete Pics`)}&url=${encodeURIComponent(work.imageUrl)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Share on Reddit"
+              >
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.841.09 3.502.624 4.739 1.433.449-.455 1.072-.737 1.764-.737a2.49 2.49 0 0 1 2.49 2.49c0 1.103-.723 2.038-1.723 2.37.046.2.07.41.07.622 0 3.12-3.264 5.644-7.277 5.644-4.014 0-7.278-2.523-7.278-5.644 0-.222.024-.437.07-.647C4.772 13.6 4.049 12.665 4.049 11.562a2.49 2.49 0 0 1 2.49-2.49c.683 0 1.3.27 1.748.722 1.247-.812 2.92-1.35 4.773-1.434l.885-4.148a.348.348 0 0 1 .14-.208.35.35 0 0 1 .247-.042l2.896.613a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.941.913.457 0 2.099-.071 2.94-.913a.328.328 0 0 0 0-.463.327.327 0 0 0-.462 0c-.548.549-1.897.787-2.478.787-.58 0-1.93-.24-2.478-.787a.326.326 0 0 0-.232-.094z"/></svg>
+              </a>
               <button
                 className="lb-action-btn"
                 onClick={onDownload}
@@ -658,7 +678,7 @@ function Lightbox({
               <kbd>←</kbd> <kbd>→</kbd> Navigate &nbsp; <kbd>Z</kbd> Zoom
               &nbsp; <kbd>F</kbd> Favourite &nbsp; <kbd>S</kbd> Slideshow
               &nbsp; <kbd>C</kbd> Compare &nbsp; <kbd>D</kbd> Download
-              &nbsp; <kbd>Esc</kbd> Close
+              &nbsp; <kbd>I</kbd> Immersive &nbsp; <kbd>Esc</kbd> Close
             </div>
 
             <a
@@ -1052,6 +1072,9 @@ function AboutModal({
               <kbd>D</kbd> <span>Download image</span>
             </div>
             <div className="about-shortcut-row">
+              <kbd>I</kbd> <span>Toggle immersive mode</span>
+            </div>
+            <div className="about-shortcut-row">
               <kbd>Esc</kbd> <span>Close lightbox / modal</span>
             </div>
           </div>
@@ -1138,6 +1161,10 @@ export default function Home() {
   const [titleParallax, setTitleParallax] = useState({ x: 0, y: 0 });
   const [displayCount, setDisplayCount] = useState(PAGE_SIZE);
   const [roomTransitionKey, setRoomTransitionKey] = useState(0);
+  const [immersiveMode, setImmersiveMode] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [showScrollHint, setShowScrollHint] = useState(false);
+  const [immersiveToolbarVisible, setImmersiveToolbarVisible] = useState(true);
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
@@ -1150,6 +1177,49 @@ export default function Home() {
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
   }, []);
+
+  /* Scroll progress tracking */
+  useEffect(() => {
+    if (phase !== "gallery") return;
+    function onScroll() {
+      const scrollTop = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(docHeight > 0 ? (scrollTop / docHeight) * 100 : 0);
+    }
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [phase]);
+
+  /* Gallery scroll hint — show once when gallery loads */
+  useEffect(() => {
+    if (phase === "gallery" && data) {
+      const timer = setTimeout(() => setShowScrollHint(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [phase, data]);
+
+  useEffect(() => {
+    if (showScrollHint) {
+      const timer = setTimeout(() => setShowScrollHint(false), 4500);
+      return () => clearTimeout(timer);
+    }
+  }, [showScrollHint]);
+
+  /* Immersive mode toolbar auto-hide */
+  useEffect(() => {
+    if (!immersiveMode) return;
+    let timeout: ReturnType<typeof setTimeout>;
+    function onMouseMove() {
+      setImmersiveToolbarVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => setImmersiveToolbarVisible(false), 3000);
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      clearTimeout(timeout);
+    };
+  }, [immersiveMode]);
 
   /* FEATURE 1: Hash-Based Deep Linking — read hash on mount */
   useEffect(() => {
@@ -1366,6 +1436,7 @@ export default function Home() {
       if (e.key === "r" || e.key === "R") handleRandom();
       if (e.key === "t" || e.key === "T") toggleTheme();
       if (e.key === "v" || e.key === "V") cycleView();
+      if (e.key === "i" || e.key === "I") setImmersiveMode((prev) => !prev);
     }
 
     window.addEventListener("keydown", handleKey);
@@ -1628,7 +1699,43 @@ export default function Home() {
   /* ────── GALLERY ────── */
   return (
     <div className="min-h-screen flex flex-col bg-[var(--vault-bg)]">
+      {/* Scroll Progress Bar */}
+      {phase === "gallery" && !immersiveMode && (
+        <div
+          className="scroll-progress-bar"
+          style={{ width: `${scrollProgress}%` }}
+        />
+      )}
+
+      {/* Immersive Mode Toolbar */}
+      {immersiveMode && (
+        <div className={`immersive-toolbar ${immersiveToolbarVisible ? "" : "immersive-hidden"}`}>
+          <span className="immersive-room-name">{currentRoomName}</span>
+          <button
+            className="immersive-exit-btn"
+            onClick={() => setImmersiveMode(false)}
+          >
+            <X className="w-3.5 h-3.5" />
+            Exit Immersive
+          </button>
+        </div>
+      )}
+
+      {/* Gallery Scroll Hint */}
+      {showScrollHint && !immersiveMode && (
+        <motion.div
+          className="scroll-hint"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          <ChevronDown className="w-5 h-5" />
+          <span className="scroll-hint-text">Scroll to explore</span>
+        </motion.div>
+      )}
+
       {/* Navigation */}
+      {!immersiveMode && (
       <nav className="gallery-nav">
         <button
           className="nav-back-btn"
@@ -1754,6 +1861,15 @@ export default function Home() {
 
           <button
             className="nav-action-btn"
+            onClick={() => setImmersiveMode(true)}
+            title="Immersive Mode (I)"
+            aria-label="Enter immersive mode"
+          >
+            <Expand className="w-4 h-4" />
+          </button>
+
+          <button
+            className="nav-action-btn"
             onClick={() => setAboutOpen(true)}
             title="About & Shortcuts (?)"
             aria-label="About and keyboard shortcuts"
@@ -1786,6 +1902,9 @@ export default function Home() {
           />
         </div>
       </nav>
+
+      )}
+      {/* End nav wrapper for immersive mode */}
 
       {/* Mobile menu — slide-in from right */}
       <AnimatePresence>
@@ -1882,7 +2001,7 @@ export default function Home() {
       </AnimatePresence>
 
       {/* Stats Bar */}
-      <StatsBar data={data} favCount={favCount} />
+      {!immersiveMode && <StatsBar data={data} favCount={favCount} />}
 
       {/* FEATURE 4: Breadcrumb / Room Indicator */}
       <div className="room-breadcrumb">
@@ -1897,14 +2016,14 @@ export default function Home() {
       </div>
 
       {/* Viewed Counter */}
-      <div className="viewed-counter">
+      {!immersiveMode && <div className="viewed-counter">
         <Eye className="w-3 h-3" />
         <span>{viewedCount} works viewed</span>
         <span className="viewed-mode">· {viewMode.toUpperCase()} VIEW</span>
-      </div>
+      </div>}
 
       {/* Recently Viewed strip */}
-      {recentWorks.length > 0 && (
+      {!immersiveMode && recentWorks.length > 0 && (
         <div className="recently-viewed-strip">
           <span className="recently-viewed-label">Recently Viewed</span>
           <div className="recently-viewed-scroll">
@@ -2120,6 +2239,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
+      {!immersiveMode && (
       <footer className="vault-footer">
         <div className="vault-footer-filmstrip" aria-hidden="true" />
         <div className="vault-footer-inner">
@@ -2131,7 +2251,7 @@ export default function Home() {
           </div>
           <div className="vault-footer-links">
             <a
-              className="footer-link"
+              className="footer-link footer-link-animated"
               href={TWITCH_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -2140,7 +2260,7 @@ export default function Home() {
               AGoodPete on Twitch
             </a>
             <a
-              className="footer-link"
+              className="footer-link footer-link-animated"
               href={SPREADSHEET_URL}
               target="_blank"
               rel="noopener noreferrer"
@@ -2148,9 +2268,10 @@ export default function Home() {
               📊 Pete Pics Spreadsheet
             </a>
           </div>
-          <div className="vault-footer-version">v7.0</div>
+          <div className="vault-footer-version">v7.0 · EST. 2024</div>
         </div>
       </footer>
+      )}
 
       {/* Lightbox */}
       <Lightbox
