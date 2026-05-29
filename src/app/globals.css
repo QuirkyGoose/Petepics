@@ -84,8 +84,8 @@
   --vault-card: #2a2520;
   --vault-amber: #d4a853;
   --vault-cream: #e8dcc8;
-  --vault-muted: #8a7d6a;
-  --vault-dim: #5a5245;
+  --vault-muted: #9a8d7a;
+  --vault-dim: #8e8374;
   --vault-red: #c4473a;
   --vault-rust: #a0522d;
   --vault-sage: #6b7c5e;
@@ -135,7 +135,7 @@
   --vault-card: #ede7da;
   --vault-cream: #2a2520;
   --vault-muted: #6b6355;
-  --vault-dim: #9a9183;
+  --vault-dim: #6b6355;
   --vault-border: #d0c8b8;
   --vault-glow: rgba(212,168,83,0.1);
 }
@@ -215,6 +215,49 @@ button, a, input, [role="button"] {
 [role="button"]:focus-visible {
   outline: 2px solid var(--vault-amber) !important;
   outline-offset: 2px !important;
+}
+
+/* Focus styles for artwork cards (keyboard navigation) */
+.artwork-card:focus-visible .frame {
+  box-shadow:
+    0 6px 24px rgba(0,0,0,0.4),
+    0 0 15px var(--vault-amber),
+    0 0 30px rgba(212,168,83,0.15);
+  transform: translateY(-4px);
+}
+
+.artwork-card:focus-visible .nameplate {
+  border-color: var(--vault-amber);
+  box-shadow: 0 0 10px var(--vault-glow);
+}
+
+/* Focus styles for list cards */
+.list-card:focus-visible {
+  border-color: var(--vault-amber) !important;
+  box-shadow: 0 0 15px var(--vault-glow) !important;
+}
+
+/* Focus styles for nav tabs */
+.nav-tab:focus-visible {
+  color: var(--vault-amber);
+  border-bottom-color: var(--vault-amber);
+  background: rgba(212,168,83,0.04);
+}
+
+/* Focus styles for lightbox buttons */
+.lb-btn:focus-visible,
+.lb-action-btn:focus-visible,
+.lb-action-btn-slideshow:focus-visible,
+.lb-close:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 12px var(--vault-glow);
+}
+
+/* Film strip thumbnail focus */
+.lb-filmstrip-thumb:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 1px !important;
 }
 
 /* Better text legibility */
@@ -396,7 +439,18 @@ body {
   letter-spacing: 0.03em;
 }
 
-.nav-logo span {
+.nav-logo h1 {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  line-height: 1.2;
+  display: inline;
+}
+
+.nav-logo h1 span {
   color: var(--vault-amber);
   font-style: italic;
 }
@@ -2331,9 +2385,9 @@ body {
 }
 
 .about-title {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 1.3rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--vault-cream);
   margin-bottom: 1rem;
   padding-bottom: 0.5rem;
@@ -2341,9 +2395,9 @@ body {
 }
 
 .about-subtitle {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--vault-cream);
   margin-bottom: 0.5rem;
 }
@@ -2938,4 +2992,151 @@ body {
 
 .frame {
   transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.4s;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACCESSIBILITY — v7 Focus & A11y Enhancements
+   ═══════════════════════════════════════════════════════════ */
+
+/* Focus styles for nav tabs (:focus-visible) */
+.nav-tab:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: -2px !important;
+  background: rgba(212,168,83,0.08);
+}
+
+/* Focus styles for artwork cards (tab navigation) */
+.artwork-card:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 4px !important;
+}
+
+.artwork-card:focus-visible .frame {
+  box-shadow:
+    0 0 0 2px var(--vault-amber),
+    0 6px 24px rgba(0,0,0,0.4),
+    0 0 10px var(--vault-glow);
+}
+
+/* Focus styles for list cards */
+.list-card:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: -2px !important;
+  border-color: var(--vault-amber);
+}
+
+/* Focus styles for lightbox navigation buttons */
+.lb-btn:focus-visible,
+.lb-action-btn:focus-visible,
+.lb-action-btn-slideshow:focus-visible,
+.lb-action-btn-sm:focus-visible,
+.lb-close:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+  background: rgba(212,168,83,0.15);
+}
+
+/* Focus styles for lightbox film strip thumbnails */
+.lb-filmstrip-thumb:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for recently viewed thumbnails */
+.recently-viewed-thumb:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for solo nav buttons */
+.solo-nav-btn:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for mobile menu items */
+.mobile-menu-item:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: -2px !important;
+}
+
+/* Focus styles for view toggle buttons */
+.nav-view-btn:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: -2px !important;
+}
+
+/* Focus styles for action buttons */
+.nav-action-btn:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for favourite badges */
+.fav-badge:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
+}
+
+/* Focus styles for list card favourite buttons */
+.list-card-fav:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for solo favourite button */
+.solo-fav:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for load more button */
+.load-more-btn:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for about/stats modal close buttons */
+.about-close:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for footer links */
+.footer-link:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for about modal links */
+.about-twitch-link:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus styles for export/import buttons */
+.favs-export-btn:focus-visible,
+.favs-import-btn:focus-visible {
+  outline: 2px solid var(--vault-amber) !important;
+  outline-offset: 2px !important;
+}
+
+/* Focus trap for lightbox — prevent scroll when open */
+.lb-overlay {
+  isolation: isolate;
+}
+
+/* Visually hidden text for screen readers */
+.vault-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }

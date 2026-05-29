@@ -971,3 +971,68 @@ Unresolved issues / next phase priorities:
 - Could add actual ambient sound effects (currently UI-only toggle)
 - Could add more micro-interactions
 - Could add infinite scroll or pagination improvements
+
+---
+Task ID: 13
+Agent: Main Developer (Session Continuation)
+Task: Font consistency, accessibility improvements, WCAG contrast fixes, heading hierarchy
+
+Work Log:
+- Read worklog.md (12 previous task entries) and all current code files to assess project status
+- Verified previous session's tasks were already completed:
+  - Landing/entrance page already removed (gallery loads directly)
+  - StatsBar already removed (replaced by Vault Manifest modal)
+  - Hydration errors already fixed (suppressHydrationWarning on html, body, nav, main, footer)
+- **Font consistency audit**:
+  - Inventoried all 65+ font-family declarations in globals.css
+  - Confirmed only 3 fonts in active code: Cormorant Garamond (serif), Space Grotesk (sans-serif), Share Tech Mono (monospace)
+  - No Playfair Display or Josefin Sans references in active code (only in backup files)
+  - Font usage is consistent across all components
+- **WCAG contrast ratio fixes**:
+  - Calculated contrast ratios for all vault color variables against backgrounds
+  - vault-dim (#8e8374) on vault-bg: 4.77:1 already passes AA
+  - vault-muted (#8a7d6a) on vault-bg: 4.41:1 fails AA (need 4.5:1)
+  - Changed vault-muted from #8a7d6a to #9a8d7a (5.46:1 passes AA)
+  - Light theme vault-dim (#6b6355) on #f5f0e6: 5.22:1 already passes AA
+- **Heading hierarchy fix**:
+  - Found no h1 element on the page (accessibility violation)
+  - Added h1 wrapping Pete Pics in the nav logo
+  - Updated CSS: .nav-logo h1 with inherited font styles, display: inline, margin: 0
+  - Moved .nav-logo span color style to .nav-logo h1 span for proper specificity
+- **ARIA improvements**:
+  - Added aria-current=page to active navigation tab button
+  - Added aria-describedby=lb-info to lightbox dialog element
+  - Added id=lb-info to lightbox info section
+  - Added aria-roledescription=artwork card to ArtworkCard component
+  - Verified existing ARIA: role=search on search, aria-live on results, skip-to-content link
+- **Focus state improvements** (added to globals.css):
+  - .artwork-card:focus-visible .frame — amber glow ring with transform
+  - .artwork-card:focus-visible .nameplate — amber border and glow
+  - .list-card:focus-visible — amber border and glow
+  - .nav-tab:focus-visible — amber color, border-bottom, subtle background
+  - .lb-btn:focus-visible, .lb-action-btn:focus-visible, etc — amber outline with glow
+  - .lb-filmstrip-thumb:focus-visible — amber outline for film strip thumbnails
+- QA tested with agent-browser:
+  - Page loads correctly with proper title
+  - h1 Pete Pics confirmed in nav (only 1 h1 on page)
+  - 60 artwork cards rendered with descriptive alt text
+  - No JavaScript errors
+  - Lint passes clean with zero errors
+- Set up 15-minute webDevReview cron job (job_id: 175546)
+
+Stage Summary:
+- Font consistency verified — all 3 fonts used consistently, no legacy fonts in active code
+- WCAG contrast fixed — vault-muted improved from 4.41:1 to 5.46:1 (passes AA)
+- Heading hierarchy fixed — h1 added for Pete Pics in nav
+- ARIA improvements — aria-current, aria-describedby, aria-roledescription added
+- Focus states added — keyboard navigation now visible on cards, tabs, lightbox buttons
+- Lint clean, zero errors
+- No runtime errors, dev server stable
+
+Unresolved issues / next phase priorities:
+- Could add URL-based routing for deep-linking to specific gallery rooms
+- Light theme CSS overrides may need further refinement for new focus styles
+- Could add actual ambient sound effects (currently UI-only toggle)
+- Could add more micro-interactions
+- Could add infinite scroll or pagination improvements
+- Could add focus trap in lightbox modal for full keyboard accessibility

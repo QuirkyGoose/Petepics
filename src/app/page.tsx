@@ -329,6 +329,7 @@ function ArtworkCard({
         ease: "easeOut",
       }}
       role="article"
+      aria-roledescription="artwork card"
       aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
       tabIndex={0}
       onKeyDown={onKeyDown}
@@ -336,8 +337,8 @@ function ArtworkCard({
       <span className="sprocket-number" aria-hidden="true">{sprocketNum}</span>
       <div className={`frame ${frameStyle}`} onClick={onClick}>
         <div className="frame-inner">
-          <LazyImage src={work.imageUrl} alt={work.title} />
-          <span className="frame-number">#{index + 1}</span>
+          <LazyImage src={work.imageUrl} alt={`${work.title} — ${work.galleryName} artwork`} />
+          <span className="frame-number" aria-hidden="true">#{index + 1}</span>
           <span className={`card-gallery-tag ${tagClass}`}>
             {GALLERY_ABBREVIATIONS[work.gallery] || work.gallery.slice(0, 3).toUpperCase()}
           </span>
@@ -400,12 +401,13 @@ function ListCard({
       transition={{ delay: Math.min(index * 0.02, 0.3), duration: 0.4 }}
       onClick={onClick}
       role="article"
+      aria-roledescription="artwork card"
       aria-label={`Artwork: ${work.title} from ${work.galleryName}`}
       tabIndex={0}
       onKeyDown={onKeyDown}
     >
       <div className="list-card-thumb">
-        <img src={work.imageUrl} alt={work.title} loading="lazy" />
+        <img src={work.imageUrl} alt={`${work.title} — thumbnail`} loading="lazy" />
       </div>
       <div className="list-card-info">
         <div className="list-card-title">{work.title}</div>
@@ -490,6 +492,7 @@ function Lightbox({
         role="dialog"
         aria-modal="true"
         aria-label={`Artwork lightbox: ${work.title}`}
+        aria-describedby="lb-info"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -547,7 +550,7 @@ function Lightbox({
             )}
           </div>
 
-          <div className="lb-info">
+          <div className="lb-info" id="lb-info">
             <div className="lb-gallery-tag">{work.galleryName}</div>
             <h2 className="lb-title">{work.title}</h2>
             <div className="lb-exif-ref">{filmRef}</div>
@@ -1487,8 +1490,8 @@ export default function Home() {
       {/* Navigation */}
       {!immersiveMode && (
       <nav className="gallery-nav" role="navigation" aria-label="Main navigation" suppressHydrationWarning>
-        <div className="nav-logo" role="banner">
-          <span>Pete</span> Pics
+        <div className="nav-logo">
+          <h1><span>Pete</span> Pics</h1>
           <a
             className="nav-twitch-badge"
             href={TWITCH_URL}
@@ -1517,6 +1520,7 @@ export default function Home() {
                 key={room.id}
                 className={`nav-tab ${currentRoom === room.id ? "active" : ""} ${room.id === "nacky" ? "nav-tab-nacky" : ""} ${room.id === "favourites" ? "nav-tab-fav" : ""}`}
                 onClick={() => handleRoomChange(room.id)}
+                aria-current={currentRoom === room.id ? "page" : undefined}
               >
                 {room.id === "nacky" && <Sparkles className="w-3 h-3" />}
                 {room.id === "favourites" && <Heart className="w-3 h-3" />}
