@@ -13,14 +13,16 @@ export const metadata: Metadata = {
     description: "The world's finest Pete-related artwork collection.",
     siteName: "Pete Pics",
     type: "website",
+    images: [{ url: "/BigPeteOilPainting.webp", width: 1200, height: 630, alt: "Pete Pics — The Gallery" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Pete Pics — The Gallery",
     description: "The world's finest Pete-related artwork collection.",
+    images: ["/BigPeteOilPainting.webp"],
   },
   icons: {
-    icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
+    icon: "/BigPeteOilPainting.webp",
   },
 };
 
