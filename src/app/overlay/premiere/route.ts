@@ -16,8 +16,11 @@ export async function GET() {
 </head>
 <body>
 
-<div class="artwork-layer" id="artworkLayer"></div>
-<div class="overlay-dark"></div>
+<!-- Ambient background layers (no photos) -->
+<div class="bg-base"></div>
+<div class="bg-gradient-shift"></div>
+<div class="bg-vignette"></div>
+<div class="bg-horizon-glow"></div>
 
 <div class="ambient-glow-layer">
   <div class="ambient-orb orb-1"></div>
@@ -25,11 +28,15 @@ export async function GET() {
   <div class="ambient-orb orb-3"></div>
   <div class="ambient-orb orb-4"></div>
   <div class="ambient-orb orb-5"></div>
+  <div class="ambient-orb orb-6"></div>
+  <div class="ambient-orb orb-7"></div>
 </div>
-<div class="ambient-beam"></div>
-<div class="ambient-beam beam-2"></div>
+
+<div class="ambient-beam beam-left"></div>
+<div class="ambient-beam beam-right"></div>
 <div class="ambient-rays"></div>
 <canvas class="ambient-particles" id="particleCanvas"></canvas>
+<canvas class="ambient-bokeh" id="bokehCanvas"></canvas>
 
 <div class="film-strip-top"></div>
 <div class="film-strip-bottom"></div>
@@ -100,53 +107,142 @@ export async function GET() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════
-   STYLES
+   STYLES — cinematic ambient background, no photo images
    ═══════════════════════════════════════════════════════════════════ */
 const STYLES = `
   *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #000; color: #e8dcc8; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; overflow: hidden; width: 1920px; height: 1080px; position: relative; }
   :root { --amber: #d4a853; --cream: #e8dcc8; --muted: #9a8d7a; --dim: #8e8374; --dark: #1a1814; --card: #2a2520; --border: #3d352a; --red: #c4473a; --accent: var(--amber); }
 
-  .artwork-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #000; }
-  .artwork-layer .artwork-img { position: absolute; inset: -40px; width: calc(100% + 80px); height: calc(100% + 80px); object-fit: cover; opacity: 0; transition: opacity 2.5s ease; filter: brightness(.35) saturate(.6); }
-  .artwork-layer .artwork-img.active { opacity: 1; }
-  .artwork-layer .artwork-img.ken-burns-in { animation: kenBurnsIn 20s ease-out forwards; }
-  .artwork-layer .artwork-img.ken-burns-out { animation: kenBurnsOut 20s ease-in forwards; }
-  @keyframes kenBurnsIn { from { transform: scale(1) translate(0, 0); } to { transform: scale(1.08) translate(-10px, -5px); } }
-  @keyframes kenBurnsOut { from { transform: scale(1.05) translate(5px, 3px); } to { transform: scale(1) translate(0, 0); } }
+  /* ═══ BACKGROUND LAYERS ═══ */
 
-  .overlay-dark { position: fixed; inset: 0; z-index: 1; background: linear-gradient(180deg, rgba(0,0,0,.7) 0%, rgba(0,0,0,.3) 40%, rgba(0,0,0,.3) 60%, rgba(0,0,0,.8) 100%), radial-gradient(ellipse at 30% 50%, transparent 30%, rgba(0,0,0,.5) 100%); }
+  /* Deep dark base with warm undertone */
+  .bg-base {
+    position: fixed; inset: 0; z-index: 0;
+    background: radial-gradient(ellipse at 25% 45%, #12100d 0%, #080706 50%, #030303 100%);
+  }
 
-  .ambient-particles { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
-  .ambient-rays { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .35; background: conic-gradient(from -5deg at 0% 0%, transparent 0deg, rgba(212,168,83,.03) 3deg, transparent 6deg, transparent 18deg, rgba(212,168,83,.02) 20deg, transparent 23deg, transparent 40deg, rgba(212,168,83,.025) 42deg, transparent 45deg, transparent 360deg); animation: raysRotate 60s linear infinite; mix-blend-mode: screen; }
+  /* Slow-shifting colour wash — very subtle warm/cool oscillation */
+  .bg-gradient-shift {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 70%, rgba(212,168,83,.03) 0%, transparent 70%),
+      radial-gradient(ellipse 70% 50% at 80% 30%, rgba(181,112,126,.02) 0%, transparent 70%);
+    animation: shiftWash 40s ease-in-out infinite alternate;
+    mix-blend-mode: screen;
+  }
+  @keyframes shiftWash {
+    0%   { opacity: .4; transform: scale(1) translateX(0); }
+    50%  { opacity: .7; transform: scale(1.05) translateX(-20px); }
+    100% { opacity: .4; transform: scale(1) translateX(20px); }
+  }
+
+  /* Heavy vignette for cinema depth */
+  .bg-vignette {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none;
+    background:
+      radial-gradient(ellipse 85% 80% at 50% 50%, transparent 30%, rgba(0,0,0,.5) 70%, rgba(0,0,0,.85) 100%),
+      linear-gradient(180deg, rgba(0,0,0,.3) 0%, transparent 20%, transparent 80%, rgba(0,0,0,.5) 100%);
+  }
+
+  /* Warm horizon glow at bottom — like stage footlights */
+  .bg-horizon-glow {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 40%; z-index: 1; pointer-events: none;
+    background:
+      radial-gradient(ellipse 120% 80% at 50% 100%, rgba(212,168,83,.04) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 30% 100%, rgba(196,71,58,.02) 0%, transparent 50%);
+    animation: horizonPulse 12s ease-in-out infinite alternate;
+  }
+  @keyframes horizonPulse {
+    0%   { opacity: .6; }
+    100% { opacity: 1; }
+  }
+
+  /* ═══ AMBIENT ELEMENTS ═══ */
+
+  .ambient-particles { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+  .ambient-bokeh { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+
+  .ambient-rays {
+    position: fixed; inset: 0; z-index: 3; pointer-events: none; opacity: .2;
+    background: conic-gradient(from -5deg at 0% 0%,
+      transparent 0deg, rgba(212,168,83,.025) 3deg, transparent 6deg,
+      transparent 18deg, rgba(212,168,83,.015) 20deg, transparent 23deg,
+      transparent 40deg, rgba(212,168,83,.02) 42deg, transparent 45deg,
+      transparent 360deg);
+    animation: raysRotate 80s linear infinite; mix-blend-mode: screen;
+  }
   @keyframes raysRotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-  .ambient-glow-layer { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
-  .ambient-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0; animation: orbDrift linear infinite; will-change: transform, opacity; }
-  .ambient-orb.orb-1 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(212,168,83,.08) 0%, transparent 70%); top: 10%; left: -5%; animation-duration: 45s; }
-  .ambient-orb.orb-2 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(212,168,83,.06) 0%, transparent 70%); top: 50%; right: -5%; animation-duration: 55s; animation-delay: -15s; }
-  .ambient-orb.orb-3 { width: 350px; height: 350px; background: radial-gradient(circle, rgba(196,71,58,.04) 0%, transparent 70%); bottom: 10%; left: 30%; animation-duration: 50s; animation-delay: -25s; }
-  .ambient-orb.orb-4 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(212,168,83,.05) 0%, transparent 70%); top: 30%; left: 50%; animation-duration: 40s; animation-delay: -10s; }
-  .ambient-orb.orb-5 { width: 450px; height: 450px; background: radial-gradient(circle, rgba(181,112,126,.04) 0%, transparent 70%); top: 60%; left: 15%; animation-duration: 60s; animation-delay: -35s; }
-  @keyframes orbDrift { 0% { transform: translate(0, 0) scale(1); opacity: 0; } 10% { opacity: 1; } 50% { transform: translate(120px, -80px) scale(1.15); opacity: .8; } 90% { opacity: 1; } 100% { transform: translate(250px, 60px) scale(.9); opacity: 0; } }
+  .ambient-glow-layer { position: fixed; inset: 0; z-index: 3; pointer-events: none; overflow: hidden; }
+  .ambient-orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0; animation: orbDrift linear infinite; will-change: transform, opacity; }
 
-  .ambient-beam { position: fixed; top: -200px; left: 20%; width: 600px; height: 1400px; z-index: 2; pointer-events: none; background: linear-gradient(180deg, rgba(212,168,83,.04) 0%, rgba(212,168,83,.02) 30%, transparent 100%); transform: rotate(-8deg); animation: beamSway 20s ease-in-out infinite; mix-blend-mode: screen; }
-  .ambient-beam.beam-2 { left: 65%; width: 400px; transform: rotate(5deg); animation-duration: 25s; animation-delay: -8s; opacity: .6; }
-  @keyframes beamSway { 0%, 100% { transform: rotate(-8deg) translateX(0); opacity: .5; } 50% { transform: rotate(-4deg) translateX(30px); opacity: .8; } }
+  .ambient-orb.orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(212,168,83,.07) 0%, transparent 70%); top: 5%; left: -8%; animation-duration: 50s; }
+  .ambient-orb.orb-2 { width: 450px; height: 450px; background: radial-gradient(circle, rgba(212,168,83,.05) 0%, transparent 70%); top: 45%; right: -5%; animation-duration: 60s; animation-delay: -15s; }
+  .ambient-orb.orb-3 { width: 380px; height: 380px; background: radial-gradient(circle, rgba(196,71,58,.03) 0%, transparent 70%); bottom: 5%; left: 25%; animation-duration: 55s; animation-delay: -25s; }
+  .ambient-orb.orb-4 { width: 320px; height: 320px; background: radial-gradient(circle, rgba(212,168,83,.04) 0%, transparent 70%); top: 25%; left: 45%; animation-duration: 45s; animation-delay: -10s; }
+  .ambient-orb.orb-5 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(181,112,126,.03) 0%, transparent 70%); top: 55%; left: 10%; animation-duration: 65s; animation-delay: -35s; }
+  .ambient-orb.orb-6 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(212,168,83,.04) 0%, transparent 70%); top: 10%; right: 25%; animation-duration: 50s; animation-delay: -20s; }
+  .ambient-orb.orb-7 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(160,82,45,.025) 0%, transparent 70%); bottom: 20%; right: 15%; animation-duration: 55s; animation-delay: -40s; }
 
-  .grain-overlay { position: fixed; inset: -50px; width: 200%; height: 200%; background-repeat: repeat; background-size: 128px 128px; opacity: .22; pointer-events: none; z-index: 99; animation: grainDrift .4s steps(6) infinite; }
-  @keyframes grainDrift { 0% { transform: translate(0, 0); } 10% { transform: translate(-2%, -2%); } 20% { transform: translate(2%, 0%); } 30% { transform: translate(-2%, 2%); } 40% { transform: translate(2%, -2%); } 50% { transform: translate(-2%, 0%); } 60% { transform: translate(0%, 2%); } 70% { transform: translate(2%, 0%); } 80% { transform: translate(-2%, -2%); } 90% { transform: translate(0%, 2%); } 100% { transform: translate(0, 0); } }
+  @keyframes orbDrift {
+    0%   { transform: translate(0, 0) scale(1); opacity: 0; }
+    8%   { opacity: 1; }
+    50%  { transform: translate(100px, -60px) scale(1.1); opacity: .7; }
+    92%  { opacity: 1; }
+    100% { transform: translate(200px, 40px) scale(.95); opacity: 0; }
+  }
+
+  /* Volumetric light beams */
+  .ambient-beam {
+    position: fixed; top: -300px; width: 500px; height: 1600px; z-index: 3; pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  .ambient-beam.beam-left {
+    left: 15%;
+    background: linear-gradient(180deg, rgba(212,168,83,.035) 0%, rgba(212,168,83,.015) 35%, transparent 100%);
+    transform: rotate(-6deg); animation: beamSwayLeft 25s ease-in-out infinite;
+  }
+  .ambient-beam.beam-right {
+    left: 60%; width: 350px;
+    background: linear-gradient(180deg, rgba(212,168,83,.025) 0%, rgba(212,168,83,.01) 35%, transparent 100%);
+    transform: rotate(4deg); animation: beamSwayRight 30s ease-in-out infinite;
+  }
+  @keyframes beamSwayLeft {
+    0%, 100% { transform: rotate(-6deg) translateX(0); opacity: .5; }
+    50%      { transform: rotate(-3deg) translateX(25px); opacity: .75; }
+  }
+  @keyframes beamSwayRight {
+    0%, 100% { transform: rotate(4deg) translateX(0); opacity: .4; }
+    50%      { transform: rotate(2deg) translateX(-20px); opacity: .65; }
+  }
+
+  /* Film grain */
+  .grain-overlay {
+    position: fixed; inset: -50px; width: 200%; height: 200%;
+    background-repeat: repeat; background-size: 128px 128px; opacity: .18;
+    pointer-events: none; z-index: 99; animation: grainDrift .4s steps(6) infinite;
+  }
+  @keyframes grainDrift {
+    0% { transform: translate(0, 0); } 10% { transform: translate(-2%, -2%); }
+    20% { transform: translate(2%, 0%); } 30% { transform: translate(-2%, 2%); }
+    40% { transform: translate(2%, -2%); } 50% { transform: translate(-2%, 0%); }
+    60% { transform: translate(0%, 2%); } 70% { transform: translate(2%, 0%); }
+    80% { transform: translate(-2%, -2%); } 90% { transform: translate(0%, 2%); }
+    100% { transform: translate(0, 0); }
+  }
 
   .film-strip-top, .film-strip-bottom { position: fixed; left: 0; right: 0; height: 3px; z-index: 30; pointer-events: none; }
-  .film-strip-top { top: 0; background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity: .15; }
-  .film-strip-bottom { bottom: 0; background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity: .15; }
+  .film-strip-top { top: 0; background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity: .12; }
+  .film-strip-bottom { bottom: 0; background: linear-gradient(90deg, transparent, var(--amber), transparent); opacity: .12; }
 
+  /* ═══ MAIN LAYOUT ═══ */
   .main-layout { position: fixed; inset: 0; z-index: 20; display: flex; align-items: stretch; }
   .left-panel { flex: 0 0 55%; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 40px 60px; position: relative; }
 
   .brand-logo { text-align: center; margin-bottom: 28px; animation: brandReveal 1.2s cubic-bezier(.16, 1, .3, 1) both; }
   @keyframes brandReveal { from { opacity: 0; transform: translateY(-30px) scale(.95); letter-spacing: .3em; } to { opacity: 1; transform: translateY(0) scale(1); letter-spacing: -.03em; } }
-  .brand-title { font-family: 'Newsreader', serif; font-size: 80px; font-weight: 700; color: var(--cream); letter-spacing: -.03em; line-height: 1; text-shadow: 0 4px 40px rgba(0,0,0,.6), 0 0 80px rgba(212,168,83,.08); }
+  .brand-title { font-family: 'Newsreader', serif; font-size: 80px; font-weight: 700; color: var(--cream); letter-spacing: -.03em; line-height: 1; text-shadow: 0 4px 40px rgba(0,0,0,.6), 0 0 80px rgba(212,168,83,.1); }
   .brand-subtitle { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: .5em; text-transform: uppercase; color: var(--amber); margin-top: 12px; opacity: .6; }
   .brand-line { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--amber), transparent); margin: 18px auto 0; opacity: .3; }
 
@@ -155,7 +251,7 @@ const STYLES = `
   @keyframes dotPulse { 0%, 100% { opacity: .4; transform: scale(1); } 50% { opacity: 1; transform: scale(1.4); } }
 
   .countdown-block { text-align: center; position: relative; animation: fadeIn .8s ease-out .5s both; }
-  .countdown-digits { font-family: 'JetBrains Mono', monospace; font-size: 160px; font-weight: 700; letter-spacing: .04em; color: var(--cream); line-height: 1; text-shadow: 0 0 100px rgba(212,168,83,.1), 0 6px 40px rgba(0,0,0,.5); transition: color .4s, text-shadow .4s; display: inline-flex; align-items: baseline; }
+  .countdown-digits { font-family: 'JetBrains Mono', monospace; font-size: 160px; font-weight: 700; letter-spacing: .04em; color: var(--cream); line-height: 1; text-shadow: 0 0 100px rgba(212,168,83,.15), 0 6px 40px rgba(0,0,0,.5); transition: color .4s, text-shadow .4s; display: inline-flex; align-items: baseline; }
   .countdown-digits .digit-group { display: inline-flex; position: relative; }
   .countdown-digits .digit { display: inline-block; min-width: .6em; text-align: center; position: relative; }
   .countdown-digits .digit.flip { animation: digitSlam .35s cubic-bezier(.16, 1, .3, 1); }
@@ -173,6 +269,7 @@ const STYLES = `
   .countdown-digits.urgent { color: var(--red); text-shadow: 0 0 120px rgba(196,71,58,.3), 0 6px 40px rgba(0,0,0,.5); }
   .countdown-digits.urgent .colon { color: var(--red); }
 
+  /* ═══ RIGHT PANEL ═══ */
   .right-panel { flex: 0 0 45%; position: relative; display: flex; flex-direction: column; justify-content: center; padding: 40px 40px 40px 20px; animation: panelSlideIn 1s cubic-bezier(.16, 1, .3, 1) .6s both; }
   @keyframes panelSlideIn { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
   .right-panel::before { content: ''; position: absolute; left: 0; top: 10%; bottom: 10%; width: 2px; background: linear-gradient(180deg, transparent, var(--amber), transparent); opacity: .2; }
@@ -234,7 +331,7 @@ const STYLES = `
 `;
 
 /* ═══════════════════════════════════════════════════════════════════
-   SCRIPT — same-origin, no CORS issues
+   SCRIPT — same-origin fetch, no background photos, ambient canvas
    ═══════════════════════════════════════════════════════════════════ */
 const SCRIPT = `
 var P = new URLSearchParams(window.location.search);
@@ -284,10 +381,10 @@ function fetchGallery() {
     });
 }
 
-var activeWorks = [], posterWorks = [], bgWorks = [];
+var activeWorks = [], posterWorks = [];
 var paused = false, totalSeconds = CFG.minutes * 60, remainingSeconds = totalSeconds;
 var countdownInterval = null, posterIdx = 0, posterInterval = null;
-var posterProg = 0, posterProgInterval = null, bgIdx = 0, bgInterval = null;
+var posterProg = 0, posterProgInterval = null;
 var finished = false, prevDigits = ['', '', '', ''], frameCount = 0;
 var consecutiveImgErrors = 0, MAX_CONSECUTIVE_ERRORS = 5;
 
@@ -295,7 +392,7 @@ function genGrain() {
   var c = document.createElement('canvas'); c.width = c.height = 128;
   var x = c.getContext('2d'); if (!x) return;
   var d = x.createImageData(128, 128);
-  for (var i = 0; i < d.data.length; i += 4) { var v = Math.random() * 255; d.data[i] = v; d.data[i+1] = v; d.data[i+2] = v; d.data[i+3] = 12; }
+  for (var i = 0; i < d.data.length; i += 4) { var v = Math.random() * 255; d.data[i] = v; d.data[i+1] = v; d.data[i+2] = v; d.data[i+3] = 10; }
   x.putImageData(d, 0, 0);
   var g = document.createElement('div'); g.className = 'grain-overlay'; g.style.backgroundImage = 'url(' + c.toDataURL('image/png') + ')';
   document.body.appendChild(g);
@@ -305,8 +402,6 @@ function buildFilmHoles() {
   var el = document.getElementById('filmHoles');
   for (var i = 0; i < 12; i++) { var hole = document.createElement('div'); hole.className = 'film-hole'; el.appendChild(hole); }
 }
-
-function condense(t, m) { if (!t || t.length <= m) return t; var s = t.slice(0, m - 1); var l = s.lastIndexOf(' '); if (l > m * .5) s = s.slice(0, l); return s + '...'; }
 
 function updateDisplay() {
   var min = Math.floor(remainingSeconds / 60), sec = remainingSeconds % 60;
@@ -362,41 +457,80 @@ function buildThumbStrip() {
   });
 }
 
-function buildBackground() {
-  var container = document.getElementById('artworkLayer');
-  bgWorks.forEach(function(w, i) {
-    var img = document.createElement('img'); img.className = 'artwork-img' + (i === 0 ? ' active ken-burns-in' : '');
-    img.src = w.u; img.alt = w.t || ''; img.onerror = function() { this.style.display = 'none'; };
-    container.appendChild(img);
-  });
-}
-
-function rotateBackground() {
-  var imgs = document.querySelectorAll('.artwork-layer .artwork-img'); if (imgs.length === 0) return;
-  var current = document.querySelector('.artwork-layer .artwork-img.active');
-  if (!current) { if (imgs[0]) imgs[0].classList.add('active', 'ken-burns-in'); return; }
-  bgIdx = (bgIdx + 1) % bgWorks.length;
-  var next = imgs[bgIdx % imgs.length];
-  current.classList.remove('active', 'ken-burns-in'); current.classList.add('ken-burns-out');
-  next.classList.add('active', 'ken-burns-in'); next.classList.remove('ken-burns-out');
-  setTimeout(function() { current.classList.remove('ken-burns-out'); }, 2500);
-}
-
+/* ═══ AMBIENT PARTICLES — golden dust motes rising slowly ═══ */
 function initParticles() {
   var canvas = document.getElementById('particleCanvas'); if (!canvas) return;
   var ctx = canvas.getContext('2d'); if (!ctx) return;
   canvas.width = 1920; canvas.height = 1080;
   var particles = [];
-  for (var i = 0; i < 80; i++) { particles.push({ x: Math.random() * 1920, y: Math.random() * 1080, vx: (Math.random() - 0.5) * 0.3, vy: -Math.random() * 0.4 - 0.1, size: Math.random() * 2 + 0.5, opacity: Math.random() * 0.5 + 0.1, life: Math.random() * 500 + 200, age: 0 }); }
+  for (var i = 0; i < 100; i++) {
+    particles.push({
+      x: Math.random() * 1920, y: Math.random() * 1080,
+      vx: (Math.random() - 0.5) * 0.25, vy: -Math.random() * 0.35 - 0.05,
+      size: Math.random() * 1.8 + 0.3,
+      opacity: Math.random() * 0.4 + 0.08,
+      life: Math.random() * 600 + 250, age: Math.floor(Math.random() * 400),
+      twinkle: Math.random() * Math.PI * 2
+    });
+  }
   function animate() {
     ctx.clearRect(0, 0, 1920, 1080);
     particles.forEach(function(p) {
       p.x += p.vx; p.y += p.vy; p.age++;
-      if (p.age > p.life || p.y < -10) { p.x = Math.random() * 1920; p.y = 1080 + Math.random() * 20; p.age = 0; }
-      var fadeRatio = p.age < 60 ? p.age / 60 : p.age > p.life - 60 ? (p.life - p.age) / 60 : 1;
-      var alpha = p.opacity * Math.max(0, fadeRatio);
+      p.twinkle += 0.02;
+      if (p.age > p.life || p.y < -10) { p.x = Math.random() * 1920; p.y = 1080 + Math.random() * 30; p.age = 0; }
+      var fadeRatio = p.age < 80 ? p.age / 80 : p.age > p.life - 80 ? (p.life - p.age) / 80 : 1;
+      var twinkleFactor = 0.7 + 0.3 * Math.sin(p.twinkle);
+      var alpha = p.opacity * Math.max(0, fadeRatio) * twinkleFactor;
       ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(212,168,83,' + alpha.toFixed(3) + ')'; ctx.fill();
+      ctx.fillStyle = 'rgba(212,168,83,' + alpha.toFixed(4) + ')'; ctx.fill();
+    });
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+/* ═══ BOKEH — soft out-of-focus light circles floating ═══ */
+function initBokeh() {
+  var canvas = document.getElementById('bokehCanvas'); if (!canvas) return;
+  var ctx = canvas.getContext('2d'); if (!ctx) return;
+  canvas.width = 1920; canvas.height = 1080;
+  var circles = [];
+  var colours = [
+    [212, 168, 83],  // amber
+    [196, 140, 70],  // warm gold
+    [181, 112, 126], // dusty rose
+    [160, 82, 45],   // sienna
+    [200, 160, 90],  // light amber
+  ];
+  for (var i = 0; i < 18; i++) {
+    var c = colours[Math.floor(Math.random() * colours.length)];
+    circles.push({
+      x: Math.random() * 1920, y: Math.random() * 1080,
+      vx: (Math.random() - 0.5) * 0.15, vy: (Math.random() - 0.5) * 0.12,
+      radius: Math.random() * 60 + 25,
+      r: c[0], g: c[1], b: c[2],
+      baseAlpha: Math.random() * 0.035 + 0.01,
+      phase: Math.random() * Math.PI * 2,
+      speed: Math.random() * 0.005 + 0.002
+    });
+  }
+  function animate() {
+    ctx.clearRect(0, 0, 1920, 1080);
+    circles.forEach(function(c) {
+      c.x += c.vx; c.y += c.vy; c.phase += c.speed;
+      // Wrap around edges
+      if (c.x < -c.radius) c.x = 1920 + c.radius;
+      if (c.x > 1920 + c.radius) c.x = -c.radius;
+      if (c.y < -c.radius) c.y = 1080 + c.radius;
+      if (c.y > 1080 + c.radius) c.y = -c.radius;
+      var alpha = c.baseAlpha * (0.6 + 0.4 * Math.sin(c.phase));
+      var grad = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, c.radius);
+      grad.addColorStop(0, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + (alpha * 1.5).toFixed(4) + ')');
+      grad.addColorStop(0.4, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + alpha.toFixed(4) + ')');
+      grad.addColorStop(1, 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',0)');
+      ctx.beginPath(); ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
     });
     requestAnimationFrame(animate);
   }
@@ -414,13 +548,12 @@ function init() {
     if (activeWorks.length === 0) activeWorks = WORKS.slice();
     shuffle(activeWorks);
     posterWorks = activeWorks.slice(0, Math.min(8, activeWorks.length));
-    bgWorks = activeWorks.slice(8, 8 + 20);
     document.getElementById('galleryCount').textContent = activeWorks.length + ' WORKS';
-    buildThumbStrip(); buildBackground(); updatePoster(0); startPosterProgress();
+    buildThumbStrip(); updatePoster(0); startPosterProgress();
     updateDisplay(); countdownInterval = setInterval(tick, 1000);
     posterInterval = setInterval(function() { if (!paused && !finished) advancePoster(); }, CFG.speed * 1000);
-    bgInterval = setInterval(function() { if (!paused && !finished) rotateBackground(); }, 15000);
     initParticles();
+    initBokeh();
   });
 }
 
