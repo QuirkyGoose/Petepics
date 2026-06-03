@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Peet Pics — OBS Overlay</title>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PEET PICS — HOSTED OBS BROWSER OVERLAY
+     Bottom-left "Now Designing" card + Top-left cycling artwork widget
+
+     LIVE ON: https://petepics-github-io.vercel.app/overlay.html
+
+     SETUP PAGE: https://petepics-github-io.vercel.app/obs-setup
+
+     URL PARAMETERS (change text from OBS!):
+       label=TEXT        Main label (default: "NOW DESIGNING")
+       sub=TEXT          Sub-label below the title
+       title=TEXT        Override artwork title
+       gallery=KEY       Gallery key: pobots|prestlers|cultural|pisc|submissions
+       cycle=SECONDS     Artwork cycle interval (default: 12)
+       grain=true|false  Film grain effect (default: true)
+       top=show|hide     Show/hide top-left cycling widget
+       bottom=show|hide  Show/hide bottom-left text card
+
+     KEYBOARD SHORTCUTS:
+       Space  — Advance artwork
+       R      — Random artwork
+       H      — Hide/show all
+       1      — Toggle top widget
+       2      — Toggle bottom card
+     ═══════════════════════════════════════════════════════════════ -->
+
+<style>
+  /* ── Fonts ─────────────────────────────────────────────── */
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400;1,6..72,500;1,6..72,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+  /* ── Reset ─────────────────────────────────────────────── */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: transparent;
+    color: #e8dcc8;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    width: 1920px;
+    height: 1080px;
+  }
+
+  /* ── Theme Variables ───────────────────────────────────── */
+  :root {
+    --vault-bg: #1a1814;
+    --vault-dark: #211e18;
+    --vault-card: #2a2520;
+    --vault-amber: #d4a853;
+    --vault-cream: #e8dcc8;
+    --vault-muted: #9a8d7a;
+    --vault-dim: #8e8374;
+    --vault-red: #c4473a;
+    --vault-rust: #a0522d;
+    --vault-sage: #6b7c5e;
+    --vault-rose: #b5707e;
+    --vault-border: #3d352a;
+    --vault-glow: rgba(212,168,83,0.15);
+    --accent: var(--vault-amber);
+    --accent-bg: rgba(212,168,83,0.08);
+    --accent-glow: rgba(212,168,83,0.25);
+    --accent-44: rgba(212,168,83,0.27);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     BOTTOM-LEFT — "NOW DESIGNING" TEXT CARD
+     ═══════════════════════════════════════════════════════════ */
+
+  .bottom-card {
+    position: fixed;
+    bottom: 32px;
+    left: 32px;
+    z-index: 100;
+    transform: translateX(-130%);
+    opacity: 0;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+    will-change: transform, opacity;
+  }
+
+  .bottom-card.visible {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .bottom-card.hidden-manual {
+    transform: translateX(-130%) !important;
+    opacity: 0 !important;
+  }
+
+  /* Breathing glow border */
+  .bottom-card .glow-border {
+    position: absolute;
+    inset: -2px;
+    border-radius: 6px;
+    border: 1px solid rgba(212,168,83,0.25);
+    animation: breathGlow 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes breathGlow {
+    0%, 100% { opacity: 0.3; box-shadow: 0 0 8px rgba(212,168,83,0.04); }
+    50% { opacity: 0.75; box-shadow: 0 0 24px rgba(212,168,83,0.1), 0 0 48px rgba(212,168,83,0.03); }
+  }
+
+  .bottom-card .card-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: rgba(26, 24, 20, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 4px;
+    padding: 14px 24px 12px;
+    border: 1px solid rgba(212,168,83,0.12);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(212,168,83,0.05);
+    position: relative;
+    overflow: hidden;
+    min-width: 300px;
+    max-width: 440px;
+  }
+
+  /* Top accent line */
+  .bottom-card .accent-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-44), transparent);
+    pointer-events: none;
+  }
+
+  /* Left accent bar */
+  .bottom-card .left-accent {
+    position: absolute;
+    top: 8px; bottom: 8px; left: 0;
+    width: 2px;
+    background: var(--accent);
+    opacity: 0.5;
+    border-radius: 0 2px 2px 0;
+    animation: leftPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes leftPulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.7; }
+  }
+
+  /* Scan line */
+  .bottom-card .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    pointer-events: none;
+    animation: scanDown 8s ease-in-out infinite;
+  }
+
+  @keyframes scanDown {
+    0%, 100% { top: 0%; opacity: 0; }
+    5% { opacity: 0.15; }
+    50% { top: 100%; opacity: 0.08; }
+    55% { opacity: 0; }
+  }
+
+  /* "NOW DESIGNING" label */
+  .now-designing-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1;
+    margin-bottom: 6px;
+    transition: opacity 0.3s;
+    padding-left: 4px;
+  }
+
+  .now-designing-label .dash {
+    font-weight: 400;
+    margin-right: 2px;
+  }
+
+  /* Artwork title */
+  .artwork-title {
+    display: flex;
+    align-items: baseline;
+    line-height: 1.3;
+    transition: opacity 0.3s;
+    padding-left: 4px;
+  }
+
+  .artwork-title .quote {
+    font-family: 'Newsreader', serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: #9a8d7a;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .artwork-title .title-text {
+    font-family: 'Newsreader', serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #e8dcc8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 360px;
+  }
+
+  .artwork-title .title-text.condensed {
+    font-size: 13px;
+    letter-spacing: -0.01em;
+  }
+
+  .artwork-title .title-text.extra-condensed {
+    font-size: 11px;
+    letter-spacing: -0.02em;
+  }
+
+  .artwork-title .cursor {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--accent);
+    margin-left: 2px;
+    animation: cursorBlink 0.7s step-end infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* Sub-label */
+  .sub-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 400;
+    letter-spacing: 0.15em;
+    color: var(--vault-dim);
+    margin-top: 3px;
+    padding-left: 4px;
+    transition: opacity 0.3s;
+  }
+
+  /* Gallery tag + name */
+  .gallery-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 7px;
+    padding-left: 4px;
+    transition: opacity 0.3s;
+  }
+
+  .gallery-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 1px 6px;
+    border-left: 2px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-bg);
+    line-height: 1.4;
+  }
+
+  .gallery-name {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #8e8374;
+    letter-spacing: 0.02em;
+  }
+
+  /* LIVE indicator */
+  .live-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+    padding-left: 4px;
+  }
+
+  .live-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #c4473a;
+    box-shadow: 0 0 6px rgba(196,71,58,0.5), 0 0 12px rgba(196,71,58,0.15);
+    animation: livePulse 2s ease-in-out infinite;
+    display: inline-block;
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  .live-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    color: #c4473a;
+    text-transform: uppercase;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     TOP-LEFT — CYCLING ARTWORK WIDGET
+     ═══════════════════════════════════════════════════════════ */
+
+  .top-card {
+    position: fixed;
+    top: 32px;
+    left: 32px;
+    z-index: 100;
+    transform: translateY(-130%);
+    opacity: 0;
+    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
+    will-change: transform, opacity;
+  }
+
+  .top-card.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .top-card.hidden-manual {
+    transform: translateY(-130%) !important;
+    opacity: 0 !important;
+  }
+
+  .top-card .glow-border {
+    position: absolute;
+    inset: -2px;
+    border-radius: 6px;
+    border: 1px solid rgba(212,168,83,0.25);
+    animation: breathGlow 4s ease-in-out infinite;
+    animation-delay: 2s;
+    pointer-events: none;
+  }
+
+  .top-card .card-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: rgba(26, 24, 20, 0.88);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 4px;
+    padding: 12px 16px 12px 12px;
+    border: 1px solid rgba(212,168,83,0.12);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(212,168,83,0.05);
+    position: relative;
+    overflow: hidden;
+    max-width: 380px;
+  }
+
+  .top-card .accent-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-44), transparent);
+    pointer-events: none;
+  }
+
+  /* Artwork thumbnail frame — film strip style */
+  .thumb-frame {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    padding: 3px;
+    background: var(--accent);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 10px var(--accent-glow);
+    position: relative;
+    transition: box-shadow 0.6s ease;
+  }
+
+  /* Film strip perforations left */
+  .thumb-frame::before {
+    content: '';
+    position: absolute;
+    left: -1px; top: 4px; bottom: 4px;
+    width: 4px;
+    z-index: 4;
+    background: repeating-linear-gradient(180deg,
+      var(--vault-bg) 0px, var(--vault-bg) 2px, transparent 2px, transparent 7px,
+      var(--vault-bg) 7px, var(--vault-bg) 9px, transparent 9px, transparent 14px);
+  }
+
+  /* Film strip perforations right */
+  .thumb-frame::after {
+    content: '';
+    position: absolute;
+    right: -1px; top: 4px; bottom: 4px;
+    width: 4px;
+    z-index: 4;
+    background: repeating-linear-gradient(180deg,
+      var(--vault-bg) 0px, var(--vault-bg) 2px, transparent 2px, transparent 7px,
+      var(--vault-bg) 7px, var(--vault-bg) 9px, transparent 9px, transparent 14px);
+  }
+
+  .thumb-inner {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    background: var(--vault-dark);
+  }
+
+  .thumb-inner img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .thumb-inner img.loaded {
+    opacity: 1;
+  }
+
+  /* Viewfinder corners */
+  .thumb-inner::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    z-index: 3;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, var(--accent), var(--accent)) 0 0 / 10px 1px no-repeat,
+      linear-gradient(to bottom, var(--accent), var(--accent)) 0 0 / 1px 10px no-repeat,
+      linear-gradient(to left, var(--accent), var(--accent)) 100% 0 / 10px 1px no-repeat,
+      linear-gradient(to bottom, var(--accent), var(--accent)) 100% 0 / 1px 10px no-repeat,
+      linear-gradient(to right, var(--accent), var(--accent)) 0 100% / 10px 1px no-repeat,
+      linear-gradient(to top, var(--accent), var(--accent)) 0 100% / 1px 10px no-repeat,
+      linear-gradient(to left, var(--accent), var(--accent)) 100% 100% / 10px 1px no-repeat,
+      linear-gradient(to top, var(--accent), var(--accent)) 100% 100% / 1px 10px no-repeat;
+    opacity: 0.35;
+  }
+
+  .thumb-shimmer {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #1e1b15 25%, #2a2520 50%, #1e1b15 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite linear;
+  }
+
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+
+  /* Thumbnail text content */
+  .thumb-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    padding-top: 2px;
+  }
+
+  .thumb-text .from-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .thumb-text .from-label .mini-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: miniPulse 3s ease-in-out infinite;
+  }
+
+  @keyframes miniPulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  .thumb-text .thumb-title {
+    font-family: 'Newsreader', serif;
+    font-size: 13px;
+    font-weight: 500;
+    color: #e8dcc8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 230px;
+    line-height: 1.3;
+  }
+
+  .thumb-text .thumb-gallery {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    padding: 1px 5px;
+    border-left: 2px solid var(--accent);
+    color: var(--accent);
+    background: var(--accent-bg);
+    line-height: 1.4;
+    margin-top: 4px;
+    display: inline-block;
+    width: fit-content;
+  }
+
+  /* Cycle progress bar */
+  .cycle-bar-track {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+
+  .cycle-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.1s linear;
+    opacity: 0.6;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FILM GRAIN
+     ═══════════════════════════════════════════════════════════ */
+
+  .grain-overlay {
+    position: fixed;
+    inset: -50px;
+    width: 200%;
+    height: 200%;
+    background-repeat: repeat;
+    background-size: 128px 128px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 9999;
+    animation: grainDrift 0.4s steps(6) infinite;
+  }
+
+  @keyframes grainDrift {
+    0%   { transform: translate(0, 0); }
+    10%  { transform: translate(-2%, -2%); }
+    20%  { transform: translate(2%, 0%); }
+    30%  { transform: translate(-2%, 2%); }
+    40%  { transform: translate(2%, -2%); }
+    50%  { transform: translate(-2%, 0%); }
+    60%  { transform: translate(0%, 2%); }
+    70%  { transform: translate(2%, 0%); }
+    80%  { transform: translate(-2%, -2%); }
+    90%  { transform: translate(0%, 2%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     TRANSITION STATES
+     ═══════════════════════════════════════════════════════════ */
+
+  .transitioning .now-designing-label,
+  .transitioning .artwork-title,
+  .transitioning .gallery-info,
+  .transitioning .sub-label {
+    opacity: 0.3;
+  }
+
+  .top-transitioning .from-label,
+  .top-transitioning .thumb-title,
+  .top-transitioning .thumb-gallery {
+    opacity: 0.3;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     GALLERY COLOR VARIANTS
+     ═══════════════════════════════════════════════════════════ */
+
+  .gallery-pobots { --accent: #d4a853; --accent-bg: rgba(212,168,83,0.08); --accent-glow: rgba(212,168,83,0.25); --accent-44: rgba(212,168,83,0.27); }
+  .gallery-prestlers { --accent: #a0522d; --accent-bg: rgba(160,82,45,0.08); --accent-glow: rgba(160,82,45,0.25); --accent-44: rgba(160,82,45,0.27); }
+  .gallery-cultural { --accent: #b5707e; --accent-bg: rgba(181,112,126,0.08); --accent-glow: rgba(181,112,126,0.25); --accent-44: rgba(181,112,126,0.27); }
+  .gallery-pisc { --accent: #6b7c5e; --accent-bg: rgba(107,124,94,0.08); --accent-glow: rgba(107,124,94,0.25); --accent-44: rgba(107,124,94,0.27); }
+  .gallery-submissions { --accent: #6b7c5e; --accent-bg: rgba(107,124,94,0.08); --accent-glow: rgba(107,124,94,0.25); --accent-44: rgba(107,124,94,0.27); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     TOP-LEFT — Cycling Artwork Widget
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="topCard" class="top-card gallery-pobots">
+  <div class="glow-border"></div>
+  <div class="card-inner">
+    <div class="accent-line"></div>
+    <div class="cycle-bar-track"><div class="cycle-bar-fill" id="cycleBar"></div></div>
+
+    <div class="thumb-frame">
+      <div class="thumb-inner">
+        <div class="thumb-shimmer" id="thumbShimmer"></div>
+        <img id="thumbImg" alt="" src="" />
+      </div>
+    </div>
+
+    <div class="thumb-text">
+      <div class="from-label">
+        <span class="mini-dot"></span>
+        <span>FROM THE VAULT</span>
+      </div>
+      <div class="thumb-title" id="thumbTitle">Loading gallery...</div>
+      <div class="thumb-gallery" id="thumbGallery">PBT — Pobots</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BOTTOM-LEFT — "Now Designing" Text Card
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="bottomCard" class="bottom-card gallery-pobots">
+  <div class="glow-border"></div>
+  <div class="card-inner">
+    <div class="accent-line"></div>
+    <div class="left-accent"></div>
+    <div class="scan-line"></div>
+
+    <div class="now-designing-label">
+      <span class="dash">&mdash;</span>
+      <span id="labelText">NOW DESIGNING</span>
+    </div>
+
+    <div class="artwork-title">
+      <span class="quote">&ldquo;</span>
+      <span class="title-text" id="titleText"></span>
+      <span class="quote">&rdquo;</span>
+      <span class="cursor">|</span>
+    </div>
+
+    <div class="sub-label" id="subLabel" style="display:none;"></div>
+
+    <div class="gallery-info">
+      <span class="gallery-tag" id="galleryTag">PBT</span>
+      <span class="gallery-name" id="galleryName">Pobots</span>
+    </div>
+
+    <div class="live-indicator">
+      <span class="live-dot"></span>
+      <span class="live-text">LIVE</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// URL PARAMETER CONFIG — Change these from OBS!
+//
+// Example OBS URL:
+//   https://petepics-github-io.vercel.app/overlay.html?label=NOW+SKETCHING&cycle=8
+//
+// Or use the setup page:
+//   https://petepics-github-io.vercel.app/obs-setup
+// ═══════════════════════════════════════════════════════════════
+
+const PARAMS = new URLSearchParams(window.location.search);
+
+const CONFIG = {
+  label:     PARAMS.get('label')   || 'NOW DESIGNING',
+  sub:       PARAMS.get('sub')     || '',
+  title:     PARAMS.get('title')   || '',
+  gallery:   PARAMS.get('gallery') || 'all',
+  cycleSecs: parseInt(PARAMS.get('cycle')) || 12,
+  showGrain: PARAMS.get('grain')   !== 'false',
+  showTop:   PARAMS.get('top')     !== 'hide',
+  showBottom:PARAMS.get('bottom')  !== 'hide',
+  typewriterSpeed: 38,
+};
+
+// ═══════════════════════════════════════════════════════════════
+// GALLERY DATA — Fetched from the /api/gallery endpoint
+// ═══════════════════════════════════════════════════════════════
+
+const GALLERY_ABBREVIATIONS = {
+  pobots: "PBT", prestlers: "PST", cultural: "CUL", pisc: "PSC", submissions: "SUB"
+};
+
+let allWorks = [];
+let currentCycleIndex = 0;
+
+// ═══════════════════════════════════════════════════════════════
+// ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+let isManualHidden = false;
+let typewriterInterval = null;
+let cycleInterval = null;
+let cycleProgressInterval = null;
+let currentCycleProgress = 0;
+
+// ── Smart text condensing ──────────────────────────────────
+function condenseText(text, maxLen) {
+  if (!text || text.length <= maxLen) return text;
+
+  // Strategy 1: Truncate at last space before maxLen
+  let truncated = text.slice(0, maxLen - 1);
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > maxLen * 0.5) {
+    truncated = truncated.slice(0, lastSpace);
+  }
+  return truncated + '...';
+}
+
+// ── Generate film grain ────────────────────────────────────
+function generateGrain() {
+  const size = 128;
+  const canvas = document.createElement('canvas');
+  canvas.width = size; canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  const imageData = ctx.createImageData(size, size);
+  const data = imageData.data;
+  for (let i = 0; i < data.length; i += 4) {
+    const v = Math.random() * 255;
+    data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = 14;
+  }
+  ctx.putImageData(imageData, 0, 0);
+  const grain = document.createElement('div');
+  grain.className = 'grain-overlay';
+  grain.style.backgroundImage = `url(${canvas.toDataURL('image/png')})`;
+  document.body.appendChild(grain);
+}
+
+// ── Typewriter effect with auto-condense ──────────────────
+function typewrite(text) {
+  const el = document.getElementById('titleText');
+  if (!el) return;
+  clearInterval(typewriterInterval);
+  el.textContent = '';
+  el.classList.remove('condensed', 'extra-condensed');
+
+  // Auto-condense very long titles before typing
+  const displayText = text.length > 55 ? condenseText(text, 50) : text;
+
+  let i = 0;
+  typewriterInterval = setInterval(() => {
+    if (i < displayText.length) {
+      const partial = displayText.slice(0, i + 1);
+      el.textContent = partial;
+      if (partial.length > 50) {
+        el.classList.add('extra-condensed');
+        el.classList.remove('condensed');
+      } else if (partial.length > 35) {
+        el.classList.add('condensed');
+        el.classList.remove('extra-condensed');
+      }
+      i++;
+    } else {
+      clearInterval(typewriterInterval);
+    }
+  }, CONFIG.typewriterSpeed);
+}
+
+// ── Update bottom card ─────────────────────────────────────
+function updateBottomCard(work) {
+  const card = document.getElementById('bottomCard');
+  const galleryTag = document.getElementById('galleryTag');
+  const galleryName = document.getElementById('galleryName');
+
+  // Set gallery class
+  card.className = `bottom-card gallery-${work.gallery || CONFIG.gallery}`;
+  if (!isManualHidden) card.classList.add('visible');
+  else card.classList.add('visible', 'hidden-manual');
+  if (!CONFIG.showBottom) card.classList.add('hidden-manual');
+
+  // Transition
+  card.querySelector('.card-inner').classList.add('transitioning');
+  setTimeout(() => {
+    typewrite(CONFIG.title || work.title || 'Untitled');
+
+    galleryTag.textContent = GALLERY_ABBREVIATIONS[work.gallery] || work.gallery?.slice(0,3).toUpperCase() || 'PBT';
+    galleryName.textContent = work.galleryName || work.gallery || 'Pobots';
+
+    setTimeout(() => {
+      card.querySelector('.card-inner').classList.remove('transitioning');
+    }, 80);
+  }, 350);
+}
+
+// ── Update top card (cycling artwork) ──────────────────────
+function updateTopCard(work) {
+  const card = document.getElementById('topCard');
+  const thumb = document.getElementById('thumbImg');
+  const shimmer = document.getElementById('thumbShimmer');
+  const thumbTitle = document.getElementById('thumbTitle');
+  const thumbGallery = document.getElementById('thumbGallery');
+
+  // Set gallery class
+  card.className = `top-card gallery-${work.gallery || 'pobots'}`;
+  if (!isManualHidden) card.classList.add('visible');
+  else card.classList.add('visible', 'hidden-manual');
+  if (!CONFIG.showTop) card.classList.add('hidden-manual');
+
+  // Transition
+  card.querySelector('.card-inner').classList.add('top-transitioning');
+
+  setTimeout(() => {
+    // Update image
+    shimmer.style.display = 'block';
+    thumb.classList.remove('loaded');
+    thumb.src = work.imageUrl || '';
+    thumb.alt = work.title || '';
+
+    // Update text with auto-condense
+    const title = work.title || 'Unknown';
+    thumbTitle.textContent = title.length > 35 ? condenseText(title, 32) : title;
+
+    // Adjust font size for condensed titles
+    if (title.length > 50) {
+      thumbTitle.style.fontSize = '10px';
+    } else if (title.length > 35) {
+      thumbTitle.style.fontSize = '11px';
+    } else {
+      thumbTitle.style.fontSize = '';
+    }
+
+    const tag = GALLERY_ABBREVIATIONS[work.gallery] || 'UNK';
+    thumbGallery.textContent = `${tag} — ${work.galleryName || work.gallery || 'Gallery'}`;
+
+    setTimeout(() => {
+      card.querySelector('.card-inner').classList.remove('top-transitioning');
+    }, 80);
+  }, 350);
+
+  // Reset cycle progress
+  currentCycleProgress = 0;
+  const bar = document.getElementById('cycleBar');
+  if (bar) bar.style.width = '0%';
+}
+
+// ── Image load handler ─────────────────────────────────────
+document.getElementById('thumbImg').addEventListener('load', function() {
+  this.classList.add('loaded');
+  document.getElementById('thumbShimmer').style.display = 'none';
+});
+
+document.getElementById('thumbImg').addEventListener('error', function() {
+  this.classList.remove('loaded');
+  document.getElementById('thumbShimmer').style.display = 'block';
+});
+
+// ── Cycle progress bar ─────────────────────────────────────
+function startCycleProgress() {
+  const bar = document.getElementById('cycleBar');
+  if (!bar) return;
+  currentCycleProgress = 0;
+  clearInterval(cycleProgressInterval);
+  const tickMs = 100;
+  const totalMs = CONFIG.cycleSecs * 1000;
+  cycleProgressInterval = setInterval(() => {
+    currentCycleProgress += tickMs;
+    const pct = Math.min(100, (currentCycleProgress / totalMs) * 100);
+    bar.style.width = pct + '%';
+  }, tickMs);
+}
+
+// ── Advance to next artwork ────────────────────────────────
+function advanceArtwork() {
+  if (allWorks.length <= 1) return;
+  currentCycleIndex = (currentCycleIndex + 1) % allWorks.length;
+  const work = allWorks[currentCycleIndex];
+  updateTopCard(work);
+  updateBottomCard(work);
+  startCycleProgress();
+}
+
+// ── Random artwork ─────────────────────────────────────────
+function randomArtwork() {
+  if (allWorks.length <= 1) return;
+  let newIdx;
+  do { newIdx = Math.floor(Math.random() * allWorks.length); } while (newIdx === currentCycleIndex);
+  currentCycleIndex = newIdx;
+  const work = allWorks[currentCycleIndex];
+  updateTopCard(work);
+  updateBottomCard(work);
+  startCycleProgress();
+}
+
+// ── Keyboard shortcuts ─────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space') { e.preventDefault(); advanceArtwork(); }
+  if (e.code === 'KeyR') { randomArtwork(); }
+  if (e.code === 'KeyH') {
+    isManualHidden = !isManualHidden;
+    const top = document.getElementById('topCard');
+    const bottom = document.getElementById('bottomCard');
+    if (isManualHidden) {
+      top.classList.add('hidden-manual');
+      bottom.classList.add('hidden-manual');
+    } else {
+      top.classList.remove('hidden-manual');
+      bottom.classList.remove('hidden-manual');
+    }
+  }
+  if (e.code === 'Digit1') {
+    CONFIG.showTop = !CONFIG.showTop;
+    const top = document.getElementById('topCard');
+    if (!CONFIG.showTop) top.classList.add('hidden-manual');
+    else { top.classList.remove('hidden-manual'); if (!isManualHidden) top.classList.add('visible'); }
+  }
+  if (e.code === 'Digit2') {
+    CONFIG.showBottom = !CONFIG.showBottom;
+    const bottom = document.getElementById('bottomCard');
+    if (!CONFIG.showBottom) bottom.classList.add('hidden-manual');
+    else { bottom.classList.remove('hidden-manual'); if (!isManualHidden) bottom.classList.add('visible'); }
+  }
+});
+
+// ── Fetch gallery data ─────────────────────────────────────
+async function fetchGallery() {
+  try {
+    const res = await fetch('/api/gallery');
+    if (!res.ok) throw new Error('API error');
+    const data = await res.json();
+
+    // Build works list, optionally filtered by gallery
+    if (CONFIG.gallery && CONFIG.gallery !== 'all') {
+      const gallery = data.galleries[CONFIG.gallery];
+      if (gallery) {
+        allWorks = gallery.works;
+      } else {
+        allWorks = data.allWorks;
+      }
+    } else {
+      allWorks = data.allWorks;
+    }
+
+    // Shuffle for variety
+    for (let i = allWorks.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allWorks[i], allWorks[j]] = [allWorks[j], allWorks[i]];
+    }
+
+    return allWorks.length > 0;
+  } catch (err) {
+    console.warn('Failed to fetch gallery:', err);
+    return false;
+  }
+}
+
+// ── Initialize ─────────────────────────────────────────────
+async function init() {
+  // Film grain
+  if (CONFIG.showGrain) generateGrain();
+
+  // Apply label from config
+  document.getElementById('labelText').textContent = CONFIG.label;
+
+  // Apply sub-label from config
+  if (CONFIG.sub) {
+    const subEl = document.getElementById('subLabel');
+    subEl.textContent = CONFIG.sub;
+    subEl.style.display = 'block';
+  }
+
+  // Fetch gallery data
+  const ok = await fetchGallery();
+
+  if (ok && allWorks.length > 0) {
+    // Start at a random position
+    currentCycleIndex = 0;
+    const work = allWorks[currentCycleIndex];
+
+    updateTopCard(work);
+    updateBottomCard({
+      title: CONFIG.title || work.title,
+      gallery: work.gallery,
+      galleryName: work.galleryName,
+    });
+
+    // Start auto-cycle
+    startCycleProgress();
+    cycleInterval = setInterval(advanceArtwork, CONFIG.cycleSecs * 1000);
+  } else {
+    // Fallback: show placeholder text
+    const work = { title: CONFIG.title || 'Loading...', gallery: 'pobots', galleryName: 'Pobots', imageUrl: '' };
+    updateBottomCard(work);
+  }
+}
+
+// ── Start ───────────────────────────────────────────────────
+setTimeout(init, 300);
+
+// ═══════════════════════════════════════════════════════════════
+// EXTERNAL API — Call these from OBS scripts or browser console
+// ═══════════════════════════════════════════════════════════════
+
+window.setLabel = function(text) {
+  document.getElementById('labelText').textContent = text || 'NOW DESIGNING';
+};
+
+window.setSubLabel = function(text) {
+  const el = document.getElementById('subLabel');
+  if (text) { el.textContent = text; el.style.display = 'block'; }
+  else { el.style.display = 'none'; }
+};
+
+window.setTitle = function(text) {
+  CONFIG.title = text;
+  if (allWorks.length > 0) {
+    updateBottomCard({ ...allWorks[currentCycleIndex], title: text });
+  }
+};
+
+window.advanceArtwork = advanceArtwork;
+window.randomArtwork = randomArtwork;
+</script>
+
+</body>
+</html>

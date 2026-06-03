@@ -56,7 +56,7 @@ const GALLERY_ORDER = ["pobots", "prestlers", "cultural", "pisc"];
 const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
 const SPREADSHEET_URL = "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
-const FAVS_STORAGE_KEY = "petepics_favourites";
+const FAVS_STORAGE_KEY = "peetpics_favourites";
 
 const ROOMS = [
   { id: "all", label: "All Works", icon: Grid3X3 },
@@ -108,7 +108,7 @@ function useTheme() {
   const [dark, setDark] = useState(() => {
     try {
       if (typeof window === "undefined") return true;
-      const stored = localStorage.getItem("petepics_theme");
+      const stored = localStorage.getItem("peetpics_theme");
       return stored ? stored === "dark" : true;
     } catch {
       return true;
@@ -117,7 +117,7 @@ function useTheme() {
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
-    try { localStorage.setItem("petepics_theme", dark ? "dark" : "light"); } catch {}
+    try { localStorage.setItem("peetpics_theme", dark ? "dark" : "light"); } catch {}
   }, [dark]);
 
   const toggle = useCallback(() => setDark((d) => !d), []);
@@ -510,15 +510,15 @@ function AboutModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
           <button className="about-close" onClick={onClose} aria-label="Close about">
             <X className="w-4 h-4" />
           </button>
-          <h3 className="about-title">About Pete Pics</h3>
+          <h3 className="about-title">About Peet Pics</h3>
           <p className="about-desc">
-            Pete Pics is a permanent collection dedicated to the finest Pete-adjacent artwork,
-            Pobots, Prestlers, and Cultural Artefacts. Curated by AGoodPete on Twitch.
+            Peet Pics is a permanent collection dedicated to the finest Peet-adjacent artwork,
+            Pobots, Prestlers, and Cultural Artefacts. Curated by AGoodPeet on Twitch.
           </p>
           <div className="about-divider" />
           <h4 className="about-subtitle">The Nacky Nook</h4>
           <p className="about-desc">
-            A secret corner of the gallery reserved for the most delightfully unhinged Pete content.
+            A secret corner of the gallery reserved for the most delightfully unhinged Peet content.
             Only the finest absurdist masterpieces earn their place in the Nacky Nook.
           </p>
           <div className="about-divider" />
@@ -821,7 +821,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            <span>Pete</span> Pics
+            <span>Peet</span> Pics
           </motion.h1>
           <motion.p
             className="museum-subtitle"
@@ -837,7 +837,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
           >
-            A permanent collection dedicated to the finest Pete-adjacent artwork, Pobots,
+            A permanent collection dedicated to the finest Peet-adjacent artwork, Pobots,
             Prestlers, and Cultural Artefacts of Our Time.
           </motion.p>
 
@@ -854,7 +854,7 @@ export default function Home() {
             whileTap={{ scale: 0.97 }}
           >
             <TwitchIcon size={18} />
-            <span>Watch AGoodPete on Twitch</span>
+            <span>Watch AGoodPeet on Twitch</span>
           </motion.a>
 
           {/* Enter button */}
@@ -920,10 +920,10 @@ export default function Home() {
           <DoorOpen className="w-4 h-4" />
         </button>
         <div className="nav-logo">
-          <span>Pete</span> Pics
+          <span>Peet</span> Pics
           <a className="nav-twitch-badge" href={TWITCH_URL} target="_blank" rel="noopener noreferrer">
             <TwitchIcon size={12} />
-            AGoodPete
+            AGoodPeet
           </a>
         </div>
 
@@ -1042,7 +1042,7 @@ export default function Home() {
             <div className="mobile-twitch-card">
               <div className="mobile-twitch-card-top">
                 <TwitchIcon size={20} />
-                <span className="mobile-twitch-card-name">AGoodPete</span>
+                <span className="mobile-twitch-card-name">AGoodPeet</span>
               </div>
               <div className="mobile-twitch-card-status">Check back for the next stream</div>
               <a href={TWITCH_URL} target="_blank" rel="noopener noreferrer" className="mobile-twitch-link">
@@ -1078,12 +1078,12 @@ export default function Home() {
             {!searchQuery && currentRoom === "nacky" && (
               <div className="room-header room-wall-nacky">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">✨ Pete Pics — The Nacky Nook</div>
+                  <div className="room-eyebrow">✨ Peet Pics — The Nacky Nook</div>
                   <h2 className="room-title">
                     The <em>Nacky Nook</em>
                   </h2>
                   <p className="room-desc">
-                    A secret corner reserved for the most delightfully unhinged Pete content.
+                    A secret corner reserved for the most delightfully unhinged Peet content.
                     Only the finest absurdist masterpieces earn their place here.
                   </p>
                 </div>
@@ -1097,7 +1097,7 @@ export default function Home() {
             {!searchQuery && currentRoom === "favourites" && (
               <div className="room-header room-wall-fav">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">♥ Pete Pics — Your Collection</div>
+                  <div className="room-eyebrow">♥ Peet Pics — Your Collection</div>
                   <h2 className="room-title">
                     Your <em>Favourites</em>
                   </h2>
@@ -1115,7 +1115,7 @@ export default function Home() {
             {!searchQuery && currentRoom !== "all" && currentRoom !== "nacky" && currentRoom !== "favourites" && data?.galleries[currentRoom] && (
               <div className={`room-header ${data.galleries[currentRoom].wallClass}`}>
                 <div className="room-header-left">
-                  <div className="room-eyebrow">Pete Pics — Permanent Collection</div>
+                  <div className="room-eyebrow">Peet Pics — Permanent Collection</div>
                   <h2 className="room-title">
                     <em>{data.galleries[currentRoom].name}</em>
                   </h2>
@@ -1131,7 +1131,7 @@ export default function Home() {
             {!searchQuery && currentRoom === "all" && (
               <div className="room-header">
                 <div className="room-header-left">
-                  <div className="room-eyebrow">Pete Pics — Full Collection</div>
+                  <div className="room-eyebrow">Peet Pics — Full Collection</div>
                   <h2 className="room-title">
                     All <em>Works</em>
                   </h2>
@@ -1217,9 +1217,9 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="gallery-footer mt-auto">
-        <strong>Pete Pics — The Gallery</strong>
+        <strong>Peet Pics — The Gallery</strong>
         <div className="footer-credit">
-          A collection of the world&apos;s finest Pete-related artwork · Images sourced from
+          A collection of the world&apos;s finest Peet-related artwork · Images sourced from
           postimg.cc
         </div>
         <div className="footer-links">
@@ -1228,7 +1228,7 @@ export default function Home() {
             twitch.tv/AGoodPete
           </a>
           <a className="footer-spreadsheet" href={SPREADSHEET_URL} target="_blank" rel="noopener noreferrer">
-            📊 Pete Pics Spreadsheet
+            📊 Peet Pics Spreadsheet
           </a>
         </div>
       </footer>

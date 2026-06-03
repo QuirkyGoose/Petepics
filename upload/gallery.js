@@ -1,7 +1,7 @@
 'use strict';
 
 /* ═══════════════════════════════════════════════════════════
-   PETE PICS — THE GALLERY  ·  gallery.js v3
+   PEET PICS — THE GALLERY  ·  gallery.js v3
    
    How it works:
    - On load, fetches each postimg gallery via their JSON API
@@ -16,21 +16,21 @@ const GALLERY_DEFS = [
   {
     id:        'pobots',
     name:      'Pobots',
-    tagline:   'Robots. Petes. The intersection thereof.',
+    tagline:   'Robots. Peets. The intersection thereof.',
     wallClass: 'room-wall-1',
     albumHex:  'VML2tRn',
   },
   {
     id:        'prestlers',
     name:      'Prestlers',
-    tagline:   'Pete meets the squared circle and beyond.',
+    tagline:   'Peet meets the squared circle and beyond.',
     wallClass: 'room-wall-2',
     albumHex:  'RFbFrht',
   },
   {
     id:        'cultural',
     name:      'Cultural Pics',
-    tagline:   'Art, culture, and things that are Pete.',
+    tagline:   'Art, culture, and things that are Peet.',
     wallClass: 'room-wall-3',
     albumHex:  'HVYDkG8',
   },
@@ -223,7 +223,7 @@ function renderSingle(container, gallery) {
   const header = el('div', `room-header ${gallery.wallClass}`);
   header.innerHTML = `
     <div class="room-header-left">
-      <div class="room-eyebrow">Pete Pics — Permanent Collection</div>
+      <div class="room-eyebrow">Peet Pics — Permanent Collection</div>
       <h2 class="room-title"><em>${gallery.name}</em></h2>
       <p class="room-desc">${gallery.tagline}</p>
     </div>
@@ -246,7 +246,7 @@ function renderAll(container) {
   const header = el('div', 'room-header');
   header.innerHTML = `
     <div class="room-header-left">
-      <div class="room-eyebrow">Pete Pics — Full Collection</div>
+      <div class="room-eyebrow">Peet Pics — Full Collection</div>
       <h2 class="room-title">All <em>Works</em></h2>
       <p class="room-desc">The complete permanent collection across all four galleries.</p>
     </div>

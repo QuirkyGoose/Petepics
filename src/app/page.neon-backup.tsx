@@ -64,7 +64,7 @@ const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
 const SPREADSHEET_URL =
   "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
-const FAVS_STORAGE_KEY = "petepics_favourites";
+const FAVS_STORAGE_KEY = "peetpics_favourites";
 
 const ROOMS = [
   { id: "all", label: "All Works", icon: Grid3X3 },
@@ -142,7 +142,7 @@ function useTheme() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate theme from localStorage after mount to avoid SSR mismatch
     setMounted(true);
     try {
-      const stored = localStorage.getItem("petepics_theme");
+      const stored = localStorage.getItem("peetpics_theme");
       if (stored) setDark(stored === "dark");
     } catch {}
   }, []);
@@ -154,7 +154,7 @@ function useTheme() {
       dark ? "dark" : "light"
     );
     try {
-      localStorage.setItem("petepics_theme", dark ? "dark" : "light");
+      localStorage.setItem("peetpics_theme", dark ? "dark" : "light");
     } catch {}
   }, [dark, mounted]);
 
@@ -652,17 +652,17 @@ function AboutModal({
           >
             <X className="w-4 h-4" />
           </button>
-          <h3 className="about-title">About Pete Pics</h3>
+          <h3 className="about-title">About Peet Pics</h3>
           <p className="about-desc">
-            Pete Pics is a permanent collection dedicated to the finest
-            Pete-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts.
-            Curated by AGoodPete on Twitch.
+            Peet Pics is a permanent collection dedicated to the finest
+            Peet-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts.
+            Curated by AGoodPeet on Twitch.
           </p>
           <div className="about-divider" />
           <h4 className="about-subtitle">The Nacky Nook</h4>
           <p className="about-desc">
             A secret corner of the gallery reserved for the most delightfully
-            unhinged Pete content. Only the finest absurdist masterpieces earn
+            unhinged Peet content. Only the finest absurdist masterpieces earn
             their place in the Nacky Nook.
           </p>
           <div className="about-divider" />
@@ -1034,7 +1034,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.8 }}
           >
-            <span>Pete</span> Pics
+            <span>Peet</span> Pics
           </motion.h1>
 
           {/* Monospace subtitle with typing cursor */}
@@ -1055,7 +1055,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.8 }}
           >
-            A permanent collection dedicated to the finest Pete-adjacent artwork,
+            A permanent collection dedicated to the finest Peet-adjacent artwork,
             Pobots, Prestlers, and Cultural Artefacts of Our Time.
           </motion.p>
 
@@ -1080,7 +1080,7 @@ export default function Home() {
             transition={{ delay: 1.05, duration: 0.6 }}
           >
             <TwitchIcon size={18} />
-            <span>Watch AGoodPete on Twitch</span>
+            <span>Watch AGoodPeet on Twitch</span>
           </motion.a>
 
           {/* Enter button */}
@@ -1142,7 +1142,7 @@ export default function Home() {
           <DoorOpen className="w-4 h-4" />
         </button>
         <div className="nav-logo">
-          <span>Pete</span> Pics
+          <span>Peet</span> Pics
           <a
             className="nav-twitch-badge"
             href={TWITCH_URL}
@@ -1150,7 +1150,7 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <TwitchIcon size={12} />
-            AGoodPete
+            AGoodPeet
           </a>
         </div>
 
@@ -1283,7 +1283,7 @@ export default function Home() {
             <div className="mobile-twitch-card">
               <div className="mobile-twitch-card-top">
                 <TwitchIcon size={20} />
-                <span className="mobile-twitch-card-name">AGoodPete</span>
+                <span className="mobile-twitch-card-name">AGoodPeet</span>
               </div>
               <div className="mobile-twitch-card-status">
                 Check back for the next stream
@@ -1328,14 +1328,14 @@ export default function Home() {
               <div className="room-header room-wall-nacky">
                 <div className="room-header-left">
                   <div className="room-eyebrow">
-                    ✨ Pete Pics — The Nacky Nook
+                    ✨ Peet Pics — The Nacky Nook
                   </div>
                   <h2 className="room-title">
                     The <em>Nacky Nook</em>
                   </h2>
                   <p className="room-desc">
                     A secret corner reserved for the most delightfully unhinged
-                    Pete content. Only the finest absurdist masterpieces earn
+                    Peet content. Only the finest absurdist masterpieces earn
                     their place here.
                   </p>
                 </div>
@@ -1350,7 +1350,7 @@ export default function Home() {
               <div className="room-header room-wall-fav">
                 <div className="room-header-left">
                   <div className="room-eyebrow">
-                    ♥ Pete Pics — Your Collection
+                    ♥ Peet Pics — Your Collection
                   </div>
                   <h2 className="room-title">
                     Your <em>Favourites</em>
@@ -1377,7 +1377,7 @@ export default function Home() {
                 >
                   <div className="room-header-left">
                     <div className="room-eyebrow">
-                      Pete Pics — Permanent Collection
+                      Peet Pics — Permanent Collection
                     </div>
                     <h2 className="room-title">
                       <em>{data.galleries[currentRoom].name}</em>
@@ -1397,13 +1397,13 @@ export default function Home() {
               <div className="room-header room-wall-1">
                 <div className="room-header-left">
                   <div className="room-eyebrow">
-                    Pete Pics — The Permanent Collection
+                    Peet Pics — The Permanent Collection
                   </div>
                   <h2 className="room-title">
                     The <em>Collection</em>
                   </h2>
                   <p className="room-desc">
-                    Browse the complete archive of Pete-adjacent artwork across
+                    Browse the complete archive of Peet-adjacent artwork across
                     all galleries.
                   </p>
                 </div>
@@ -1484,8 +1484,8 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="gallery-footer">
-        <strong>Pete Pics</strong>
-        <span>A permanent collection of Pete-adjacent artwork</span>
+        <strong>Peet Pics</strong>
+        <span>A permanent collection of Peet-adjacent artwork</span>
         <div className="footer-links">
           <a
             href={TWITCH_URL}
@@ -1494,7 +1494,7 @@ export default function Home() {
             className="footer-twitch-link"
           >
             <TwitchIcon size={14} />
-            AGoodPete on Twitch
+            AGoodPeet on Twitch
           </a>
           <a
             href={SPREADSHEET_URL}

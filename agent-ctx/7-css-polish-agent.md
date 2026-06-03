@@ -1,7 +1,7 @@
 # Task 7 — CSS Polish Agent Work Record
 
 ## Task
-Add enhanced CSS animations, visual polish, frame numbers, and fix room-header positioning for "The Vault" Pete Pics Gallery.
+Add enhanced CSS animations, visual polish, frame numbers, and fix room-header positioning for "The Vault" Peet Pics Gallery.
 
 ## Changes Made
 

@@ -1,12 +1,12 @@
-# Pete Pics — The Gallery — Worklog
+# Peet Pics — The Gallery — Worklog
 
 ## Project Overview
-Redesign of "Pete Pics — The Gallery" from a static HTML/CSS/JS site to a modern Next.js 16 application with proper image loading, museum-themed aesthetics, and robust functionality.
+Redesign of "Peet Pics — The Gallery" from a static HTML/CSS/JS site to a modern Next.js 16 application with proper image loading, museum-themed aesthetics, and robust functionality.
 
 ---
 Task ID: 1
 Agent: Main Developer
-Task: Complete redesign of Pete Pics Gallery website
+Task: Complete redesign of Peet Pics Gallery website
 
 Work Log:
 - Analyzed original uploaded files (index.html, gallery.css, gallery.js)
@@ -101,13 +101,13 @@ Work Log:
 - Analyzed the original live site at https://petepics.page.gd using web-reader
 - Identified all missing features by comparing original HTML to our implementation
 - **Added Twitch channel integration**:
-  - Twitch entrance card on landing page ("Watch AGoodPete on Twitch" with purple styling)
-  - Nav Twitch badge next to "Pete Pics" logo (links to twitch.tv/AGoodPete)
+  - Twitch entrance card on landing page ("Watch AGoodPeet on Twitch" with purple styling)
+  - Nav Twitch badge next to "Peet Pics" logo (links to twitch.tv/AGoodPeet)
   - Footer Twitch link with icon
   - Mobile menu Twitch card with status and link
   - Custom Twitch SVG icon component (matches original site)
 - **Added Spreadsheet link**:
-  - Footer link to Google Sheets (📊 Pete Pics Spreadsheet)
+  - Footer link to Google Sheets (📊 Peet Pics Spreadsheet)
   - Links to the original petepics spreadsheet URL
 - **Added Nacky Nook gallery room**:
   - New nav tab with Sparkles icon and purple styling
@@ -125,7 +125,7 @@ Work Log:
   - Dynamic count in nav tab and stats bar
 - **Added About modal**:
   - Opens with Info button or "?" keyboard shortcut
-  - Contains: About Pete Pics, The Nacky Nook description, Keyboard Shortcuts
+  - Contains: About Peet Pics, The Nacky Nook description, Keyboard Shortcuts
   - Full keyboard shortcuts list: ← → Navigate, Z Zoom, F Favourite, R Random, T Theme, ? Shortcuts, Esc Close
   - Twitch link at bottom
   - Animated with framer-motion (fade + scale)
@@ -159,12 +159,12 @@ Work Log:
   - About modal with museum-themed styling
   - Responsive mobile lightbox bar
   - Nav tab visibility: desktop tabs hidden below 900px, hamburger menu shows
-- Updated layout.tsx metadata with AGoodPete author, Twitch URL, OpenGraph, Twitter cards
+- Updated layout.tsx metadata with AGoodPeet author, Twitch URL, OpenGraph, Twitter cards
 - Fixed lint errors: lazy initialization for useState with localStorage (avoids setState-in-effect warnings)
 - All features tested and passing via agent-browser QA
 
 Stage Summary:
-- **Twitch integration** — entrance card, nav badge, footer link, mobile card (twitch.tv/AGoodPete)
+- **Twitch integration** — entrance card, nav badge, footer link, mobile card (twitch.tv/AGoodPeet)
 - **Spreadsheet link** — footer link to Google Sheets
 - **Nacky Nook** — special gallery room with purple theme (174 curated works)
 - **Favourites** — localStorage-persisted with heart badges, red-themed room
@@ -570,7 +570,7 @@ Work Log:
   Gallery Page Enhancements:
   5. Smooth room transition — AnimatePresence with mode="wait" on gallery content, fade in/out on room switch
   6. Ambient sound toggle button (UI only, Volume2/VolumeX icons)
-  7. Improved footer with "Built with ❤️ by the Pete Pics community" and version "v6.0"
+  7. Improved footer with "Built with ❤️ by the Peet Pics community" and version "v6.0"
 
   Card Enhancements:
   8. Subtle tilt/3D perspective on card hover — `perspective(800px) rotateY(-1deg)` transform

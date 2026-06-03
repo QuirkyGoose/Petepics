@@ -26,11 +26,11 @@ interface GalleryResponse {
 }
 
 const GALLERY_META: Record<string, { name: string; tagline: string; wallClass: string }> = {
-  pobots: { name: "Pobots", tagline: "Robots. Petes. The intersection thereof.", wallClass: "room-wall-1" },
-  prestlers: { name: "Prestlers", tagline: "Pete meets the squared circle and beyond.", wallClass: "room-wall-2" },
-  cultural: { name: "Cultural Pics", tagline: "Art, culture, and things that are Pete.", wallClass: "room-wall-3" },
+  pobots: { name: "Pobots", tagline: "Robots. Peets. The intersection thereof.", wallClass: "room-wall-1" },
+  prestlers: { name: "Prestlers", tagline: "Peet meets the squared circle and beyond.", wallClass: "room-wall-2" },
+  cultural: { name: "Cultural Pics", tagline: "Art, culture, and things that are Peet.", wallClass: "room-wall-3" },
   pisc: { name: "Pisc", tagline: "A miscellany. A cornucopia. A Pisc.", wallClass: "room-wall-4" },
-  submissions: { name: "Submissions", tagline: "Community contributions — submit your own Pete Pics via the spreadsheet.", wallClass: "room-wall-submissions" },
+  submissions: { name: "Submissions", tagline: "Community contributions — submit your own Peet Pics via the spreadsheet.", wallClass: "room-wall-submissions" },
 };
 
 const GALLERY_DEFS = [

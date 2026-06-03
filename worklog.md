@@ -1,12 +1,12 @@
-# Pete Pics — The Gallery — Worklog
+# Peet Pics — The Gallery — Worklog
 
 ## Project Overview
-Redesign of "Pete Pics — The Gallery" from a static HTML/CSS/JS site to a modern Next.js 16 application with proper image loading, museum-themed aesthetics, and robust functionality.
+Redesign of "Peet Pics — The Gallery" from a static HTML/CSS/JS site to a modern Next.js 16 application with proper image loading, museum-themed aesthetics, and robust functionality.
 
 ---
 Task ID: 1
 Agent: Main Developer
-Task: Complete redesign of Pete Pics Gallery website
+Task: Complete redesign of Peet Pics Gallery website
 
 Work Log:
 - Analyzed original uploaded files (index.html, gallery.css, gallery.js)
@@ -101,13 +101,13 @@ Work Log:
 - Analyzed the original live site at https://petepics.page.gd using web-reader
 - Identified all missing features by comparing original HTML to our implementation
 - **Added Twitch channel integration**:
-  - Twitch entrance card on landing page ("Watch AGoodPete on Twitch" with purple styling)
-  - Nav Twitch badge next to "Pete Pics" logo (links to twitch.tv/AGoodPete)
+  - Twitch entrance card on landing page ("Watch AGoodPeet on Twitch" with purple styling)
+  - Nav Twitch badge next to "Peet Pics" logo (links to twitch.tv/AGoodPeet)
   - Footer Twitch link with icon
   - Mobile menu Twitch card with status and link
   - Custom Twitch SVG icon component (matches original site)
 - **Added Spreadsheet link**:
-  - Footer link to Google Sheets (📊 Pete Pics Spreadsheet)
+  - Footer link to Google Sheets (📊 Peet Pics Spreadsheet)
   - Links to the original petepics spreadsheet URL
 - **Added Nacky Nook gallery room**:
   - New nav tab with Sparkles icon and purple styling
@@ -125,7 +125,7 @@ Work Log:
   - Dynamic count in nav tab and stats bar
 - **Added About modal**:
   - Opens with Info button or "?" keyboard shortcut
-  - Contains: About Pete Pics, The Nacky Nook description, Keyboard Shortcuts
+  - Contains: About Peet Pics, The Nacky Nook description, Keyboard Shortcuts
   - Full keyboard shortcuts list: ← → Navigate, Z Zoom, F Favourite, R Random, T Theme, ? Shortcuts, Esc Close
   - Twitch link at bottom
   - Animated with framer-motion (fade + scale)
@@ -159,12 +159,12 @@ Work Log:
   - About modal with museum-themed styling
   - Responsive mobile lightbox bar
   - Nav tab visibility: desktop tabs hidden below 900px, hamburger menu shows
-- Updated layout.tsx metadata with AGoodPete author, Twitch URL, OpenGraph, Twitter cards
+- Updated layout.tsx metadata with AGoodPeet author, Twitch URL, OpenGraph, Twitter cards
 - Fixed lint errors: lazy initialization for useState with localStorage (avoids setState-in-effect warnings)
 - All features tested and passing via agent-browser QA
 
 Stage Summary:
-- **Twitch integration** — entrance card, nav badge, footer link, mobile card (twitch.tv/AGoodPete)
+- **Twitch integration** — entrance card, nav badge, footer link, mobile card (twitch.tv/AGoodPeet)
 - **Spreadsheet link** — footer link to Google Sheets
 - **Nacky Nook** — special gallery room with purple theme (174 curated works)
 - **Favourites** — localStorage-persisted with heart badges, red-themed room
@@ -570,7 +570,7 @@ Work Log:
   Gallery Page Enhancements:
   5. Smooth room transition — AnimatePresence with mode="wait" on gallery content, fade in/out on room switch
   6. Ambient sound toggle button (UI only, Volume2/VolumeX icons)
-  7. Improved footer with "Built with ❤️ by the Pete Pics community" and version "v6.0"
+  7. Improved footer with "Built with ❤️ by the Peet Pics community" and version "v6.0"
 
   Card Enhancements:
   8. Subtle tilt/3D perspective on card hover — `perspective(800px) rotateY(-1deg)` transform
@@ -996,7 +996,7 @@ Work Log:
   - Light theme vault-dim (#6b6355) on #f5f0e6: 5.22:1 already passes AA
 - **Heading hierarchy fix**:
   - Found no h1 element on the page (accessibility violation)
-  - Added h1 wrapping Pete Pics in the nav logo
+  - Added h1 wrapping Peet Pics in the nav logo
   - Updated CSS: .nav-logo h1 with inherited font styles, display: inline, margin: 0
   - Moved .nav-logo span color style to .nav-logo h1 span for proper specificity
 - **ARIA improvements**:
@@ -1014,7 +1014,7 @@ Work Log:
   - .lb-filmstrip-thumb:focus-visible — amber outline for film strip thumbnails
 - QA tested with agent-browser:
   - Page loads correctly with proper title
-  - h1 Pete Pics confirmed in nav (only 1 h1 on page)
+  - h1 Peet Pics confirmed in nav (only 1 h1 on page)
   - 60 artwork cards rendered with descriptive alt text
   - No JavaScript errors
   - Lint passes clean with zero errors
@@ -1023,7 +1023,7 @@ Work Log:
 Stage Summary:
 - Font consistency verified — all 3 fonts used consistently, no legacy fonts in active code
 - WCAG contrast fixed — vault-muted improved from 4.41:1 to 5.46:1 (passes AA)
-- Heading hierarchy fixed — h1 added for Pete Pics in nav
+- Heading hierarchy fixed — h1 added for Peet Pics in nav
 - ARIA improvements — aria-current, aria-describedby, aria-roledescription added
 - Focus states added — keyboard navigation now visible on cards, tabs, lightbox buttons
 - Lint clean, zero errors
@@ -1173,16 +1173,16 @@ Work Log:
   - Added `.room-wall-submissions` wall gradient
   - Submissions room returns empty visibleWorks array (no gallery images)
   - When submissions tab is active, shows a dedicated submissions panel instead of "no results"
-  - Submissions panel includes: Upload icon in circle, "Submit Your Pete Pics" title, description text, CTA button linking to spreadsheet, note about review process
+  - Submissions panel includes: Upload icon in circle, "Submit Your Peet Pics" title, description text, CTA button linking to spreadsheet, note about review process
   - Room count ("0 Works") hidden for submissions room
   - Eyebrow: "COMMUNITY SUBMISSIONS"
-  - Description: "Community contributions — submit your own Pete Pics via the spreadsheet."
+  - Description: "Community contributions — submit your own Peet Pics via the spreadsheet."
 - **Brought back category descriptions under titles**:
   - Room descriptions now show for ALL rooms (not just favourites/nacky)
   - All Works: "The complete archive — every work across all collections."
   - Favourites: "Your personal collection of the finest works, hand-picked and preserved."
   - Nacky Nook: "A secret corner reserved for the most delightfully unhinged Pete content."
-  - Submissions: "Community contributions — submit your own Pete Pics via the spreadsheet."
+  - Submissions: "Community contributions — submit your own Peet Pics via the spreadsheet."
   - Gallery rooms (Pobots, Prestlers, Cultural Pics, Pisc): Use the `tagline` from the API's `GALLERY_META`
     - Pobots: "Robots. Petes. The intersection thereof."
     - Prestlers: "Pete meets the squared circle and beyond."

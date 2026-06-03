@@ -1,6 +1,6 @@
 # Task 9 — Feature Enhancement Agent
 
-## Task: Add 4 new features + 15 styling improvements to Pete Pics "The Vault"
+## Task: Add 4 new features + 15 styling improvements to Peet Pics "The Vault"
 
 ## Work Completed:
 - Removed unused imports: `Palette` and `GALLERY_ORDER`

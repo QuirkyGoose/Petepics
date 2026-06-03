@@ -73,9 +73,9 @@ const FRAME_STYLES = ["frame-oak", "frame-gold", "frame-ebony", "frame-silver"];
 const TWITCH_URL = "https://twitch.tv/AGoodPete";
 const SPREADSHEET_URL =
   "https://docs.google.com/spreadsheets/d/1wScbL0TrHCmo17wN_vx8LxzWRA-K6BDfMekyY6JsI0A/edit?gid=0#gid=0";
-const FAVS_STORAGE_KEY = "petepics_favourites";
-const VIEWMODE_STORAGE_KEY = "petepics_viewmode";
-const RECENT_STORAGE_KEY = "petepics_recently_viewed";
+const FAVS_STORAGE_KEY = "peetpics_favourites";
+const VIEWMODE_STORAGE_KEY = "peetpics_viewmode";
+const RECENT_STORAGE_KEY = "peetpics_recently_viewed";
 
 const ROOMS = [
   { id: "all", label: "All Works", icon: Grid3X3 },
@@ -158,7 +158,7 @@ function useTheme() {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- hydrate theme from localStorage after mount to avoid SSR mismatch
     setMounted(true);
     try {
-      const stored = localStorage.getItem("petepics_theme");
+      const stored = localStorage.getItem("peetpics_theme");
       if (stored) setDark(stored === "dark");
     } catch {}
   }, []);
@@ -170,7 +170,7 @@ function useTheme() {
       dark ? "dark" : "light"
     );
     try {
-      localStorage.setItem("petepics_theme", dark ? "dark" : "light");
+      localStorage.setItem("peetpics_theme", dark ? "dark" : "light");
     } catch {}
   }, [dark, mounted]);
 
@@ -604,7 +604,7 @@ function Lightbox({
               </button>
               <a
                 className="lb-social-btn"
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${work.title}" from Pete Pics!`)}&url=${encodeURIComponent(work.imageUrl)}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${work.title}" from Peet Pics!`)}&url=${encodeURIComponent(work.imageUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Share on X/Twitter"
@@ -613,7 +613,7 @@ function Lightbox({
               </a>
               <a
                 className="lb-social-btn"
-                href={`https://reddit.com/submit?title=${encodeURIComponent(`${work.title} - Pete Pics`)}&url=${encodeURIComponent(work.imageUrl)}`}
+                href={`https://reddit.com/submit?title=${encodeURIComponent(`${work.title} - Peet Pics`)}&url=${encodeURIComponent(work.imageUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Share on Reddit"
@@ -897,7 +897,7 @@ function AboutModal({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "petepics-favourites.json";
+      a.download = "peetpics-favourites.json";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -970,17 +970,17 @@ function AboutModal({
           >
             <X className="w-4 h-4" />
           </button>
-          <h3 className="about-title">About Pete Pics</h3>
+          <h3 className="about-title">About Peet Pics</h3>
           <p className="about-desc">
-            Pete Pics is a permanent collection dedicated to the finest
-            Pete-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts.
-            Curated by AGoodPete on Twitch.
+            Peet Pics is a permanent collection dedicated to the finest
+            Peet-adjacent artwork, Pobots, Prestlers, and Cultural Artefacts.
+            Curated by AGoodPeet on Twitch.
           </p>
           <div className="about-divider" />
           <h4 className="about-subtitle">The Nacky Nook</h4>
           <p className="about-desc">
             A secret corner of the gallery reserved for the most delightfully
-            unhinged Pete content. Only the finest absurdist masterpieces earn
+            unhinged Peet content. Only the finest absurdist masterpieces earn
             their place in the Nacky Nook.
           </p>
           <div className="about-divider" />
@@ -1535,7 +1535,7 @@ export default function Home() {
       {!immersiveMode && (
       <nav className="gallery-nav" role="navigation" aria-label="Main navigation" suppressHydrationWarning>
         <div className="nav-logo">
-          <h1><span>Pete</span> Pics</h1>
+          <h1><span>Peet</span> Pics</h1>
           <a
             className="nav-twitch-badge"
             href={TWITCH_URL}
@@ -1543,7 +1543,7 @@ export default function Home() {
             rel="noopener noreferrer"
           >
             <TwitchIcon size={12} />
-            AGoodPete
+            AGoodPeet
           </a>
           <span className="nav-logo-subtitle">THE VAULT</span>
         </div>
@@ -1771,7 +1771,7 @@ export default function Home() {
                 rel="noopener noreferrer"
               >
                 <TwitchIcon size={16} />
-                AGoodPete on Twitch
+                AGoodPeet on Twitch
               </a>
               <a
                 className="mobile-menu-item"
@@ -1779,7 +1779,7 @@ export default function Home() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                📊 Pete Pics Spreadsheet
+                📊 Peet Pics Spreadsheet
               </a>
               <div className="mobile-menu-divider" />
               <button
@@ -1867,9 +1867,9 @@ export default function Home() {
               : currentRoom === "favourites"
               ? "Your personal collection of the finest works, hand-picked and preserved."
               : currentRoom === "nacky"
-              ? "A secret corner reserved for the most delightfully unhinged Pete content."
+              ? "A secret corner reserved for the most delightfully unhinged Peet content."
               : currentRoom === "submissions"
-              ? "Community contributions — submit your own Pete Pics via the spreadsheet."
+              ? "Community contributions — submit your own Peet Pics via the spreadsheet."
               : data?.galleries[currentRoom]?.tagline || ""}
           </p>
         </div>
@@ -1989,9 +1989,9 @@ export default function Home() {
                     <div className="submissions-icon-wrap">
                       <Upload className="w-8 h-8" />
                     </div>
-                    <h3 className="submissions-title">Submit Your Pete Pics</h3>
+                    <h3 className="submissions-title">Submit Your Peet Pics</h3>
                     <p className="submissions-text">
-                      Have a Pete-related image that deserves a place in the archive?
+                      Have a Peet-related image that deserves a place in the archive?
                       Add it to the community spreadsheet and it may be featured
                       in a future update to the gallery.
                     </p>
@@ -2134,7 +2134,7 @@ export default function Home() {
         <div className="vault-footer-filmstrip" aria-hidden="true" />
         <div className="vault-footer-inner">
           <div className="vault-footer-brand">
-            Built with ❤️ by the Pete Pics community
+            Built with ❤️ by the Peet Pics community
           </div>
           <div className="vault-footer-emblem" aria-hidden="true">
             <Film className="w-5 h-5" />
@@ -2147,7 +2147,7 @@ export default function Home() {
               rel="noopener noreferrer"
             >
               <TwitchIcon size={14} />
-              AGoodPete on Twitch
+              AGoodPeet on Twitch
             </a>
             <a
               className="footer-link footer-link-animated"
@@ -2155,7 +2155,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              📊 Pete Pics Spreadsheet
+              📊 Peet Pics Spreadsheet
             </a>
           </div>
           <div className="vault-footer-version">v7.0 · EST. 2024</div>

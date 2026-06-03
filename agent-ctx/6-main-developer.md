@@ -1,7 +1,7 @@
 # Task 6 — The Vault Visual Redesign
 
 ## Task
-Ground-up visual redesign of Pete Pics Gallery from "Neon Arcade Gallery" to "The Vault" — a retro-futuristic film archive concept.
+Ground-up visual redesign of Peet Pics Gallery from "Neon Arcade Gallery" to "The Vault" — a retro-futuristic film archive concept.
 
 ## Agent
 Main Developer
