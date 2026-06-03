@@ -6,1035 +6,276 @@
 <title>Peet Pics — OBS Overlay</title>
 
 <!-- ═══════════════════════════════════════════════════════════════
-     PEET PICS — HOSTED OBS BROWSER OVERLAY
-     Bottom-left "Now Designing" card + Top-left cycling artwork widget
+     PEET PICS — SELF-CONTAINED OBS BROWSER OVERLAY
+     100% self-contained. No API calls. All data embedded.
 
-     LIVE ON: https://petepics-github-io.vercel.app/overlay.html
+     HOW TO USE IN OBS:
+     1. Add a Browser Source
+     2. Check "Local file" → point to this HTML file
+     3. Width: 1920, Height: 1080
 
-     SETUP PAGE: https://petepics-github-io.vercel.app/obs-setup
+     — OR hosted on the website —
+     URL: https://petepics-github-io.vercel.app/overlay.html
 
-     URL PARAMETERS (change text from OBS!):
+     CUSTOMISE VIA URL PARAMETERS:
        label=TEXT        Main label (default: "NOW DESIGNING")
-       sub=TEXT          Sub-label below the title
+       sub=TEXT          Sub-label text
        title=TEXT        Override artwork title
-       gallery=KEY       Gallery key: pobots|prestlers|cultural|pisc|submissions
-       cycle=SECONDS     Artwork cycle interval (default: 12)
-       grain=true|false  Film grain effect (default: true)
-       top=show|hide     Show/hide top-left cycling widget
-       bottom=show|hide  Show/hide bottom-left text card
+       gallery=KEY       pobots|prestlers|cultural|pisc|submissions|all
+       cycle=SECONDS     Cycle interval (default: 12)
+       grain=true|false  Film grain (default: true)
+       top=show|hide     Top-left cycling widget
+       bottom=show|hide  Bottom-left text card
 
      KEYBOARD SHORTCUTS:
-       Space  — Advance artwork
-       R      — Random artwork
-       H      — Hide/show all
-       1      — Toggle top widget
-       2      — Toggle bottom card
+       Space — Advance   R — Random   H — Hide/Show
+       1 — Toggle top    2 — Toggle bottom
      ═══════════════════════════════════════════════════════════════ -->
 
 <style>
-  /* ── Fonts ─────────────────────────────────────────────── */
   @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,300;1,6..72,400;1,6..72,500;1,6..72,600&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
-
-  /* ── Reset ─────────────────────────────────────────────── */
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: transparent;
-    color: #e8dcc8;
-    font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow: hidden;
-    width: 1920px;
-    height: 1080px;
-  }
-
-  /* ── Theme Variables ───────────────────────────────────── */
-  :root {
-    --vault-bg: #1a1814;
-    --vault-dark: #211e18;
-    --vault-card: #2a2520;
-    --vault-amber: #d4a853;
-    --vault-cream: #e8dcc8;
-    --vault-muted: #9a8d7a;
-    --vault-dim: #8e8374;
-    --vault-red: #c4473a;
-    --vault-rust: #a0522d;
-    --vault-sage: #6b7c5e;
-    --vault-rose: #b5707e;
-    --vault-border: #3d352a;
-    --vault-glow: rgba(212,168,83,0.15);
-    --accent: var(--vault-amber);
-    --accent-bg: rgba(212,168,83,0.08);
-    --accent-glow: rgba(212,168,83,0.25);
-    --accent-44: rgba(212,168,83,0.27);
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     BOTTOM-LEFT — "NOW DESIGNING" TEXT CARD
-     ═══════════════════════════════════════════════════════════ */
-
-  .bottom-card {
-    position: fixed;
-    bottom: 32px;
-    left: 32px;
-    z-index: 100;
-    transform: translateX(-130%);
-    opacity: 0;
-    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
-    will-change: transform, opacity;
-  }
-
-  .bottom-card.visible {
-    transform: translateX(0);
-    opacity: 1;
-  }
-
-  .bottom-card.hidden-manual {
-    transform: translateX(-130%) !important;
-    opacity: 0 !important;
-  }
-
-  /* Breathing glow border */
-  .bottom-card .glow-border {
-    position: absolute;
-    inset: -2px;
-    border-radius: 6px;
-    border: 1px solid rgba(212,168,83,0.25);
-    animation: breathGlow 4s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @keyframes breathGlow {
-    0%, 100% { opacity: 0.3; box-shadow: 0 0 8px rgba(212,168,83,0.04); }
-    50% { opacity: 0.75; box-shadow: 0 0 24px rgba(212,168,83,0.1), 0 0 48px rgba(212,168,83,0.03); }
-  }
-
-  .bottom-card .card-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    background: rgba(26, 24, 20, 0.88);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 4px;
-    padding: 14px 24px 12px;
-    border: 1px solid rgba(212,168,83,0.12);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(212,168,83,0.05);
-    position: relative;
-    overflow: hidden;
-    min-width: 300px;
-    max-width: 440px;
-  }
-
-  /* Top accent line */
-  .bottom-card .accent-line {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent-44), transparent);
-    pointer-events: none;
-  }
-
-  /* Left accent bar */
-  .bottom-card .left-accent {
-    position: absolute;
-    top: 8px; bottom: 8px; left: 0;
-    width: 2px;
-    background: var(--accent);
-    opacity: 0.5;
-    border-radius: 0 2px 2px 0;
-    animation: leftPulse 4s ease-in-out infinite;
-  }
-
-  @keyframes leftPulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 0.7; }
-  }
-
-  /* Scan line */
-  .bottom-card .scan-line {
-    position: absolute;
-    left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0;
-    pointer-events: none;
-    animation: scanDown 8s ease-in-out infinite;
-  }
-
-  @keyframes scanDown {
-    0%, 100% { top: 0%; opacity: 0; }
-    5% { opacity: 0.15; }
-    50% { top: 100%; opacity: 0.08; }
-    55% { opacity: 0; }
-  }
-
-  /* "NOW DESIGNING" label */
-  .now-designing-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    line-height: 1;
-    margin-bottom: 6px;
-    transition: opacity 0.3s;
-    padding-left: 4px;
-  }
-
-  .now-designing-label .dash {
-    font-weight: 400;
-    margin-right: 2px;
-  }
-
-  /* Artwork title */
-  .artwork-title {
-    display: flex;
-    align-items: baseline;
-    line-height: 1.3;
-    transition: opacity 0.3s;
-    padding-left: 4px;
-  }
-
-  .artwork-title .quote {
-    font-family: 'Newsreader', serif;
-    font-size: 17px;
-    font-weight: 400;
-    color: #9a8d7a;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .artwork-title .title-text {
-    font-family: 'Newsreader', serif;
-    font-size: 15px;
-    font-weight: 500;
-    color: #e8dcc8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 360px;
-  }
-
-  .artwork-title .title-text.condensed {
-    font-size: 13px;
-    letter-spacing: -0.01em;
-  }
-
-  .artwork-title .title-text.extra-condensed {
-    font-size: 11px;
-    letter-spacing: -0.02em;
-  }
-
-  .artwork-title .cursor {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    font-weight: 300;
-    color: var(--accent);
-    margin-left: 2px;
-    animation: cursorBlink 0.7s step-end infinite;
-    flex-shrink: 0;
-  }
-
-  @keyframes cursorBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-  }
-
-  /* Sub-label */
-  .sub-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    font-weight: 400;
-    letter-spacing: 0.15em;
-    color: var(--vault-dim);
-    margin-top: 3px;
-    padding-left: 4px;
-    transition: opacity 0.3s;
-  }
-
-  /* Gallery tag + name */
-  .gallery-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 7px;
-    padding-left: 4px;
-    transition: opacity 0.3s;
-  }
-
-  .gallery-tag {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    padding: 1px 6px;
-    border-left: 2px solid var(--accent);
-    color: var(--accent);
-    background: var(--accent-bg);
-    line-height: 1.4;
-  }
-
-  .gallery-name {
-    font-family: 'Inter', sans-serif;
-    font-size: 11px;
-    font-weight: 400;
-    color: #8e8374;
-    letter-spacing: 0.02em;
-  }
-
-  /* LIVE indicator */
-  .live-indicator {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 6px;
-    padding-left: 4px;
-  }
-
-  .live-dot {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    background: #c4473a;
-    box-shadow: 0 0 6px rgba(196,71,58,0.5), 0 0 12px rgba(196,71,58,0.15);
-    animation: livePulse 2s ease-in-out infinite;
-    display: inline-block;
-  }
-
-  @keyframes livePulse {
-    0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.3); }
-  }
-
-  .live-text {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    font-weight: 600;
-    letter-spacing: 0.25em;
-    color: #c4473a;
-    text-transform: uppercase;
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     TOP-LEFT — CYCLING ARTWORK WIDGET
-     ═══════════════════════════════════════════════════════════ */
-
-  .top-card {
-    position: fixed;
-    top: 32px;
-    left: 32px;
-    z-index: 100;
-    transform: translateY(-130%);
-    opacity: 0;
-    transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease;
-    will-change: transform, opacity;
-  }
-
-  .top-card.visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  .top-card.hidden-manual {
-    transform: translateY(-130%) !important;
-    opacity: 0 !important;
-  }
-
-  .top-card .glow-border {
-    position: absolute;
-    inset: -2px;
-    border-radius: 6px;
-    border: 1px solid rgba(212,168,83,0.25);
-    animation: breathGlow 4s ease-in-out infinite;
-    animation-delay: 2s;
-    pointer-events: none;
-  }
-
-  .top-card .card-inner {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    background: rgba(26, 24, 20, 0.88);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 4px;
-    padding: 12px 16px 12px 12px;
-    border: 1px solid rgba(212,168,83,0.12);
-    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 24px rgba(212,168,83,0.05);
-    position: relative;
-    overflow: hidden;
-    max-width: 380px;
-  }
-
-  .top-card .accent-line {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent-44), transparent);
-    pointer-events: none;
-  }
-
-  /* Artwork thumbnail frame — film strip style */
-  .thumb-frame {
-    flex-shrink: 0;
-    width: 80px;
-    height: 80px;
-    padding: 3px;
-    background: var(--accent);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 10px var(--accent-glow);
-    position: relative;
-    transition: box-shadow 0.6s ease;
-  }
-
-  /* Film strip perforations left */
-  .thumb-frame::before {
-    content: '';
-    position: absolute;
-    left: -1px; top: 4px; bottom: 4px;
-    width: 4px;
-    z-index: 4;
-    background: repeating-linear-gradient(180deg,
-      var(--vault-bg) 0px, var(--vault-bg) 2px, transparent 2px, transparent 7px,
-      var(--vault-bg) 7px, var(--vault-bg) 9px, transparent 9px, transparent 14px);
-  }
-
-  /* Film strip perforations right */
-  .thumb-frame::after {
-    content: '';
-    position: absolute;
-    right: -1px; top: 4px; bottom: 4px;
-    width: 4px;
-    z-index: 4;
-    background: repeating-linear-gradient(180deg,
-      var(--vault-bg) 0px, var(--vault-bg) 2px, transparent 2px, transparent 7px,
-      var(--vault-bg) 7px, var(--vault-bg) 9px, transparent 9px, transparent 14px);
-  }
-
-  .thumb-inner {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-    background: var(--vault-dark);
-  }
-
-  .thumb-inner img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-
-  .thumb-inner img.loaded {
-    opacity: 1;
-  }
-
-  /* Viewfinder corners */
-  .thumb-inner::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    z-index: 3;
-    pointer-events: none;
-    background:
-      linear-gradient(to right, var(--accent), var(--accent)) 0 0 / 10px 1px no-repeat,
-      linear-gradient(to bottom, var(--accent), var(--accent)) 0 0 / 1px 10px no-repeat,
-      linear-gradient(to left, var(--accent), var(--accent)) 100% 0 / 10px 1px no-repeat,
-      linear-gradient(to bottom, var(--accent), var(--accent)) 100% 0 / 1px 10px no-repeat,
-      linear-gradient(to right, var(--accent), var(--accent)) 0 100% / 10px 1px no-repeat,
-      linear-gradient(to top, var(--accent), var(--accent)) 0 100% / 1px 10px no-repeat,
-      linear-gradient(to left, var(--accent), var(--accent)) 100% 100% / 10px 1px no-repeat,
-      linear-gradient(to top, var(--accent), var(--accent)) 100% 100% / 1px 10px no-repeat;
-    opacity: 0.35;
-  }
-
-  .thumb-shimmer {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, #1e1b15 25%, #2a2520 50%, #1e1b15 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.4s infinite linear;
-  }
-
-  @keyframes shimmer {
-    from { background-position: 200% 0; }
-    to { background-position: -200% 0; }
-  }
-
-  /* Thumbnail text content */
-  .thumb-text {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    min-width: 0;
-    padding-top: 2px;
-  }
-
-  .thumb-text .from-label {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 8px;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 3px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .thumb-text .from-label .mini-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--accent);
-    animation: miniPulse 3s ease-in-out infinite;
-  }
-
-  @keyframes miniPulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-  }
-
-  .thumb-text .thumb-title {
-    font-family: 'Newsreader', serif;
-    font-size: 13px;
-    font-weight: 500;
-    color: #e8dcc8;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 230px;
-    line-height: 1.3;
-  }
-
-  .thumb-text .thumb-gallery {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    padding: 1px 5px;
-    border-left: 2px solid var(--accent);
-    color: var(--accent);
-    background: var(--accent-bg);
-    line-height: 1.4;
-    margin-top: 4px;
-    display: inline-block;
-    width: fit-content;
-  }
-
-  /* Cycle progress bar */
-  .cycle-bar-track {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: rgba(0,0,0,0.3);
-    overflow: hidden;
-  }
-
-  .cycle-bar-fill {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.1s linear;
-    opacity: 0.6;
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     FILM GRAIN
-     ═══════════════════════════════════════════════════════════ */
-
-  .grain-overlay {
-    position: fixed;
-    inset: -50px;
-    width: 200%;
-    height: 200%;
-    background-repeat: repeat;
-    background-size: 128px 128px;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 9999;
-    animation: grainDrift 0.4s steps(6) infinite;
-  }
-
-  @keyframes grainDrift {
-    0%   { transform: translate(0, 0); }
-    10%  { transform: translate(-2%, -2%); }
-    20%  { transform: translate(2%, 0%); }
-    30%  { transform: translate(-2%, 2%); }
-    40%  { transform: translate(2%, -2%); }
-    50%  { transform: translate(-2%, 0%); }
-    60%  { transform: translate(0%, 2%); }
-    70%  { transform: translate(2%, 0%); }
-    80%  { transform: translate(-2%, -2%); }
-    90%  { transform: translate(0%, 2%); }
-    100% { transform: translate(0, 0); }
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     TRANSITION STATES
-     ═══════════════════════════════════════════════════════════ */
-
-  .transitioning .now-designing-label,
-  .transitioning .artwork-title,
-  .transitioning .gallery-info,
-  .transitioning .sub-label {
-    opacity: 0.3;
-  }
-
-  .top-transitioning .from-label,
-  .top-transitioning .thumb-title,
-  .top-transitioning .thumb-gallery {
-    opacity: 0.3;
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     GALLERY COLOR VARIANTS
-     ═══════════════════════════════════════════════════════════ */
-
-  .gallery-pobots { --accent: #d4a853; --accent-bg: rgba(212,168,83,0.08); --accent-glow: rgba(212,168,83,0.25); --accent-44: rgba(212,168,83,0.27); }
-  .gallery-prestlers { --accent: #a0522d; --accent-bg: rgba(160,82,45,0.08); --accent-glow: rgba(160,82,45,0.25); --accent-44: rgba(160,82,45,0.27); }
-  .gallery-cultural { --accent: #b5707e; --accent-bg: rgba(181,112,126,0.08); --accent-glow: rgba(181,112,126,0.25); --accent-44: rgba(181,112,126,0.27); }
-  .gallery-pisc { --accent: #6b7c5e; --accent-bg: rgba(107,124,94,0.08); --accent-glow: rgba(107,124,94,0.25); --accent-44: rgba(107,124,94,0.27); }
-  .gallery-submissions { --accent: #6b7c5e; --accent-bg: rgba(107,124,94,0.08); --accent-glow: rgba(107,124,94,0.25); --accent-44: rgba(107,124,94,0.27); }
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:transparent;color:#e8dcc8;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;width:1920px;height:1080px}
+  :root{--vault-bg:#1a1814;--vault-dark:#211e18;--vault-amber:#d4a853;--vault-cream:#e8dcc8;--vault-muted:#9a8d7a;--vault-dim:#8e8374;--vault-red:#c4473a;--accent:var(--vault-amber);--accent-bg:rgba(212,168,83,0.08);--accent-glow:rgba(212,168,83,0.25);--accent-44:rgba(212,168,83,0.27)}
+
+  /* ═══ BOTTOM CARD ═══ */
+  .bottom-card{position:fixed;bottom:32px;left:32px;z-index:100;transform:translateX(-130%);opacity:0;transition:transform .9s cubic-bezier(.16,1,.3,1),opacity .9s ease;will-change:transform,opacity}
+  .bottom-card.visible{transform:translateX(0);opacity:1}
+  .bottom-card.hidden-manual{transform:translateX(-130%)!important;opacity:0!important}
+  .bottom-card .glow-border{position:absolute;inset:-2px;border-radius:6px;border:1px solid rgba(212,168,83,.25);animation:breathGlow 4s ease-in-out infinite;pointer-events:none}
+  @keyframes breathGlow{0%,100%{opacity:.3;box-shadow:0 0 8px rgba(212,168,83,.04)}50%{opacity:.75;box-shadow:0 0 24px rgba(212,168,83,.1),0 0 48px rgba(212,168,83,.03)}}
+  .bottom-card .card-inner{display:flex;flex-direction:column;gap:0;background:rgba(26,24,20,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:4px;padding:14px 24px 12px;border:1px solid rgba(212,168,83,.12);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 24px rgba(212,168,83,.05);position:relative;overflow:hidden;min-width:300px;max-width:440px}
+  .bottom-card .accent-line{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-44),transparent);pointer-events:none}
+  .bottom-card .left-accent{position:absolute;top:8px;bottom:8px;left:0;width:2px;background:var(--accent);opacity:.5;border-radius:0 2px 2px 0;animation:leftPulse 4s ease-in-out infinite}
+  @keyframes leftPulse{0%,100%{opacity:.3}50%{opacity:.7}}
+  .bottom-card .scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;pointer-events:none;animation:scanDown 8s ease-in-out infinite}
+  @keyframes scanDown{0%,100%{top:0%;opacity:0}5%{opacity:.15}50%{top:100%;opacity:.08}55%{opacity:0}}
+  .now-designing-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:4px;line-height:1;margin-bottom:6px;padding-left:4px;transition:opacity .3s}
+  .now-designing-label .dash{font-weight:400;margin-right:2px}
+  .artwork-title{display:flex;align-items:baseline;line-height:1.3;padding-left:4px;transition:opacity .3s}
+  .artwork-title .quote{font-family:'Newsreader',serif;font-size:17px;font-weight:400;color:#9a8d7a;line-height:1;flex-shrink:0}
+  .artwork-title .title-text{font-family:'Newsreader',serif;font-size:15px;font-weight:500;color:#e8dcc8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px}
+  .artwork-title .title-text.condensed{font-size:13px;letter-spacing:-.01em}
+  .artwork-title .title-text.extra-condensed{font-size:11px;letter-spacing:-.02em}
+  .artwork-title .cursor{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:300;color:var(--accent);margin-left:2px;animation:cursorBlink .7s step-end infinite;flex-shrink:0}
+  @keyframes cursorBlink{0%,100%{opacity:1}50%{opacity:0}}
+  .sub-label{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:400;letter-spacing:.15em;color:var(--vault-dim);margin-top:3px;padding-left:4px;transition:opacity .3s}
+  .gallery-info{display:flex;align-items:center;gap:8px;margin-top:7px;padding-left:4px;transition:opacity .3s}
+  .gallery-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;padding:1px 6px;border-left:2px solid var(--accent);color:var(--accent);background:var(--accent-bg);line-height:1.4}
+  .gallery-name{font-family:'Inter',sans-serif;font-size:11px;font-weight:400;color:#8e8374;letter-spacing:.02em}
+  .live-indicator{display:flex;align-items:center;gap:6px;margin-top:6px;padding-left:4px}
+  .live-dot{width:5px;height:5px;border-radius:50%;background:#c4473a;box-shadow:0 0 6px rgba(196,71,58,.5),0 0 12px rgba(196,71,58,.15);animation:livePulse 2s ease-in-out infinite}
+  @keyframes livePulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+  .live-text{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;letter-spacing:.25em;color:#c4473a;text-transform:uppercase}
+
+  /* ═══ TOP CARD ═══ */
+  .top-card{position:fixed;top:32px;left:32px;z-index:100;transform:translateY(-130%);opacity:0;transition:transform .9s cubic-bezier(.16,1,.3,1),opacity .9s ease;will-change:transform,opacity}
+  .top-card.visible{transform:translateY(0);opacity:1}
+  .top-card.hidden-manual{transform:translateY(-130%)!important;opacity:0!important}
+  .top-card .glow-border{position:absolute;inset:-2px;border-radius:6px;border:1px solid rgba(212,168,83,.25);animation:breathGlow 4s ease-in-out infinite;animation-delay:2s;pointer-events:none}
+  .top-card .card-inner{display:flex;align-items:flex-start;gap:14px;background:rgba(26,24,20,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:4px;padding:12px 16px 12px 12px;border:1px solid rgba(212,168,83,.12);box-shadow:0 8px 40px rgba(0,0,0,.5),0 0 24px rgba(212,168,83,.05);position:relative;overflow:hidden;max-width:380px}
+  .top-card .accent-line{position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent-44),transparent);pointer-events:none}
+  .thumb-frame{flex-shrink:0;width:80px;height:80px;padding:3px;background:var(--accent);box-shadow:0 4px 16px rgba(0,0,0,.4),0 0 10px var(--accent-glow);position:relative}
+  .thumb-frame::before{content:'';position:absolute;left:-1px;top:4px;bottom:4px;width:4px;z-index:4;background:repeating-linear-gradient(180deg,var(--vault-bg) 0px,var(--vault-bg) 2px,transparent 2px,transparent 7px,var(--vault-bg) 7px,var(--vault-bg) 9px,transparent 9px,transparent 14px)}
+  .thumb-frame::after{content:'';position:absolute;right:-1px;top:4px;bottom:4px;width:4px;z-index:4;background:repeating-linear-gradient(180deg,var(--vault-bg) 0px,var(--vault-bg) 2px,transparent 2px,transparent 7px,var(--vault-bg) 7px,var(--vault-bg) 9px,transparent 9px,transparent 14px)}
+  .thumb-inner{width:100%;height:100%;overflow:hidden;position:relative;background:var(--vault-dark)}
+  .thumb-inner img{width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity .5s ease}
+  .thumb-inner img.loaded{opacity:1}
+  .thumb-inner::after{content:'';position:absolute;inset:4px;z-index:3;pointer-events:none;background:linear-gradient(to right,var(--accent),var(--accent)) 0 0/10px 1px no-repeat,linear-gradient(to bottom,var(--accent),var(--accent)) 0 0/1px 10px no-repeat,linear-gradient(to left,var(--accent),var(--accent)) 100% 0/10px 1px no-repeat,linear-gradient(to bottom,var(--accent),var(--accent)) 100% 0/1px 10px no-repeat,linear-gradient(to right,var(--accent),var(--accent)) 0 100%/10px 1px no-repeat,linear-gradient(to top,var(--accent),var(--accent)) 0 100%/1px 10px no-repeat,linear-gradient(to left,var(--accent),var(--accent)) 100% 100%/10px 1px no-repeat,linear-gradient(to top,var(--accent),var(--accent)) 100% 100%/1px 10px no-repeat;opacity:.35}
+  .thumb-shimmer{position:absolute;inset:0;background:linear-gradient(90deg,#1e1b15 25%,#2a2520 50%,#1e1b15 75%);background-size:200% 100%;animation:shimmer 1.4s infinite linear}
+  @keyframes shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+  .thumb-text{display:flex;flex-direction:column;gap:1px;min-width:0;padding-top:2px}
+  .thumb-text .from-label{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:3px;display:flex;align-items:center;gap:4px}
+  .thumb-text .from-label .mini-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);animation:miniPulse 3s ease-in-out infinite}
+  @keyframes miniPulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .thumb-text .thumb-title{font-family:'Newsreader',serif;font-size:13px;font-weight:500;color:#e8dcc8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px;line-height:1.3}
+  .thumb-text .thumb-gallery{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;padding:1px 5px;border-left:2px solid var(--accent);color:var(--accent);background:var(--accent-bg);line-height:1.4;margin-top:4px;display:inline-block;width:fit-content}
+  .cycle-bar-track{position:absolute;bottom:0;left:0;right:0;height:2px;background:rgba(0,0,0,.3);overflow:hidden}
+  .cycle-bar-fill{height:100%;background:var(--accent);width:0%;transition:width .1s linear;opacity:.6}
+
+  /* ═══ GRAIN ═══ */
+  .grain-overlay{position:fixed;inset:-50px;width:200%;height:200%;background-repeat:repeat;background-size:128px 128px;opacity:.3;pointer-events:none;z-index:9999;animation:grainDrift .4s steps(6) infinite}
+  @keyframes grainDrift{0%{transform:translate(0,0)}10%{transform:translate(-2%,-2%)}20%{transform:translate(2%,0%)}30%{transform:translate(-2%,2%)}40%{transform:translate(2%,-2%)}50%{transform:translate(-2%,0%)}60%{transform:translate(0%,2%)}70%{transform:translate(2%,0%)}80%{transform:translate(-2%,-2%)}90%{transform:translate(0%,2%)}100%{transform:translate(0,0)}}
+
+  /* ═══ TRANSITIONS ═══ */
+  .transitioning .now-designing-label,.transitioning .artwork-title,.transitioning .gallery-info,.transitioning .sub-label{opacity:.3}
+  .top-transitioning .from-label,.top-transitioning .thumb-title,.top-transitioning .thumb-gallery{opacity:.3}
+
+  /* ═══ GALLERY COLORS ═══ */
+  .gallery-pobots{--accent:#d4a853;--accent-bg:rgba(212,168,83,.08);--accent-glow:rgba(212,168,83,.25);--accent-44:rgba(212,168,83,.27)}
+  .gallery-prestlers{--accent:#a0522d;--accent-bg:rgba(160,82,45,.08);--accent-glow:rgba(160,82,45,.25);--accent-44:rgba(160,82,45,.27)}
+  .gallery-cultural{--accent:#b5707e;--accent-bg:rgba(181,112,126,.08);--accent-glow:rgba(181,112,126,.25);--accent-44:rgba(181,112,126,.27)}
+  .gallery-pisc{--accent:#6b7c5e;--accent-bg:rgba(107,124,94,.08);--accent-glow:rgba(107,124,94,.25);--accent-44:rgba(107,124,94,.27)}
+  .gallery-submissions{--accent:#6b7c5e;--accent-bg:rgba(107,124,94,.08);--accent-glow:rgba(107,124,94,.25);--accent-44:rgba(107,124,94,.27)}
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     TOP-LEFT — Cycling Artwork Widget
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- TOP-LEFT: Cycling Artwork Widget -->
 <div id="topCard" class="top-card gallery-pobots">
   <div class="glow-border"></div>
   <div class="card-inner">
     <div class="accent-line"></div>
     <div class="cycle-bar-track"><div class="cycle-bar-fill" id="cycleBar"></div></div>
-
     <div class="thumb-frame">
       <div class="thumb-inner">
         <div class="thumb-shimmer" id="thumbShimmer"></div>
         <img id="thumbImg" alt="" src="" />
       </div>
     </div>
-
     <div class="thumb-text">
-      <div class="from-label">
-        <span class="mini-dot"></span>
-        <span>FROM THE VAULT</span>
-      </div>
-      <div class="thumb-title" id="thumbTitle">Loading gallery...</div>
+      <div class="from-label"><span class="mini-dot"></span><span>FROM THE VAULT</span></div>
+      <div class="thumb-title" id="thumbTitle"></div>
       <div class="thumb-gallery" id="thumbGallery">PBT — Pobots</div>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     BOTTOM-LEFT — "Now Designing" Text Card
-     ═══════════════════════════════════════════════════════════════ -->
+<!-- BOTTOM-LEFT: Now Designing Text Card -->
 <div id="bottomCard" class="bottom-card gallery-pobots">
   <div class="glow-border"></div>
   <div class="card-inner">
     <div class="accent-line"></div>
     <div class="left-accent"></div>
     <div class="scan-line"></div>
-
-    <div class="now-designing-label">
-      <span class="dash">&mdash;</span>
-      <span id="labelText">NOW DESIGNING</span>
-    </div>
-
-    <div class="artwork-title">
-      <span class="quote">&ldquo;</span>
-      <span class="title-text" id="titleText"></span>
-      <span class="quote">&rdquo;</span>
-      <span class="cursor">|</span>
-    </div>
-
+    <div class="now-designing-label"><span class="dash">&mdash;</span><span id="labelText">NOW DESIGNING</span></div>
+    <div class="artwork-title"><span class="quote">&ldquo;</span><span class="title-text" id="titleText"></span><span class="quote">&rdquo;</span><span class="cursor">|</span></div>
     <div class="sub-label" id="subLabel" style="display:none;"></div>
-
-    <div class="gallery-info">
-      <span class="gallery-tag" id="galleryTag">PBT</span>
-      <span class="gallery-name" id="galleryName">Pobots</span>
-    </div>
-
-    <div class="live-indicator">
-      <span class="live-dot"></span>
-      <span class="live-text">LIVE</span>
-    </div>
+    <div class="gallery-info"><span class="gallery-tag" id="galleryTag">PBT</span><span class="gallery-name" id="galleryName">Pobots</span></div>
+    <div class="live-indicator"><span class="live-dot"></span><span class="live-text">LIVE</span></div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════════════
-// URL PARAMETER CONFIG — Change these from OBS!
-//
-// Example OBS URL:
-//   https://petepics-github-io.vercel.app/overlay.html?label=NOW+SKETCHING&cycle=8
-//
-// Or use the setup page:
-//   https://petepics-github-io.vercel.app/obs-setup
+// URL PARAMETERS
 // ═══════════════════════════════════════════════════════════════
-
-const PARAMS = new URLSearchParams(window.location.search);
-
-const CONFIG = {
-  label:     PARAMS.get('label')   || 'NOW DESIGNING',
-  sub:       PARAMS.get('sub')     || '',
-  title:     PARAMS.get('title')   || '',
-  gallery:   PARAMS.get('gallery') || 'all',
-  cycleSecs: parseInt(PARAMS.get('cycle')) || 12,
-  showGrain: PARAMS.get('grain')   !== 'false',
-  showTop:   PARAMS.get('top')     !== 'hide',
-  showBottom:PARAMS.get('bottom')  !== 'hide',
+const P = new URLSearchParams(window.location.search);
+const CFG = {
+  label: P.get('label')||'NOW DESIGNING',
+  sub: P.get('sub')||'',
+  title: P.get('title')||'',
+  gallery: P.get('gallery')||'all',
+  cycleSecs: parseInt(P.get('cycle'))||12,
+  showGrain: P.get('grain')!=='false',
+  showTop: P.get('top')!=='hide',
+  showBottom: P.get('bottom')!=='hide',
   typewriterSpeed: 38,
 };
 
 // ═══════════════════════════════════════════════════════════════
-// GALLERY DATA — Fetched from the /api/gallery endpoint
+// EMBEDDED GALLERY DATA — 90 works across all 5 galleries
 // ═══════════════════════════════════════════════════════════════
-
-const GALLERY_ABBREVIATIONS = {
-  pobots: "PBT", prestlers: "PST", cultural: "CUL", pisc: "PSC", submissions: "SUB"
-};
-
-let allWorks = [];
-let currentCycleIndex = 0;
+const ABBR = {pobots:"PBT",prestlers:"PST",cultural:"CUL",pisc:"PSC",submissions:"SUB"};
+const WORKS = [
+{"t":"15 14 Peetrs","g":"pobots","u":"https://i.postimg.cc/MMtxmbkk/15-14-Peters.png"},
+{"t":"24 Hour Party Peetbot","g":"pobots","u":"https://i.postimg.cc/DJhygw82/24-Hour-Party-Petebot.png"},
+{"t":"Aqua Peet","g":"pobots","u":"https://i.postimg.cc/T5wx7LG2/Aqua-Pete.png"},
+{"t":"Bigger Bubba","g":"pobots","u":"https://i.postimg.cc/wty6Hss7/Bigger-Bubba.png"},
+{"t":"Bobo Bob Martin","g":"pobots","u":"https://i.postimg.cc/4nNXNMcv/Bobo-Bob-Martin.png"},
+{"t":"Buckminster Puller's House","g":"pobots","u":"https://i.postimg.cc/jDCWw2J9/Buckminster-Puller-s-House-and-Car.png"},
+{"t":"Carmen Electra's Subterranean Blues","g":"pobots","u":"https://i.postimg.cc/phm5wTPn/Carmen-Electra-s-Subterranean-Battlebots-Blues.png"},
+{"t":"Clown Conquering King","g":"pobots","u":"https://i.postimg.cc/NLfQfVXx/Clown-Conquering-King.png"},
+{"t":"Cristal Baschet","g":"pobots","u":"https://i.postimg.cc/R3N0FD2S/Cristal-Baschet.png"},
+{"t":"Dr Theopolis P Wildebeast","g":"pobots","u":"https://i.postimg.cc/7f3J8jrX/Dr-Theopolis-P-Wildebeast.png"},
+{"t":"Eric Biscoff Fully Speculoos Team","g":"pobots","u":"https://i.postimg.cc/YjwmntJN/Eric-Biscoff-Fully-Speculoos-Team.png"},
+{"t":"Flensburger Peetr","g":"pobots","u":"https://i.postimg.cc/bZbhBjXx/Flensburger-Peter.png"},
+{"t":"Gordon Peetcock","g":"pobots","u":"https://i.postimg.cc/F19HkzMj/Gordon-Petecock.png"},
+{"t":"Half Mannequinette","g":"pobots","u":"https://i.postimg.cc/bswrWrLS/Half-Mannequinette-(Robotica).png"},
+{"t":"High Peetformance Podcast","g":"pobots","u":"https://i.postimg.cc/7J7GLWG2/High-Peteformance-Podcast.png"},
+{"t":"Amillion Botts","g":"pobots","u":"https://i.postimg.cc/cg3478x1/Amillion-Botts.png"},
+{"t":"2 Become 1 but Smoking Gunns","g":"prestlers","u":"https://i.postimg.cc/bsYXR2gL/2-Become-1-but-its-the-Smoking-Gunns.png"},
+{"t":"Alba Fyre Storm","g":"prestlers","u":"https://i.postimg.cc/HrJhS0yF/Alba-Fyre-Storm.png"},
+{"t":"Arn Hammer Toothpaste","g":"prestlers","u":"https://i.postimg.cc/ctmKY8mD/Arn-Hammer-Toothpaste.png"},
+{"t":"Baewatch (all Arn)","g":"prestlers","u":"https://i.postimg.cc/yWt6QjJp/Baewatch-(they-are-all-Arn).png"},
+{"t":"Bio Gunt","g":"prestlers","u":"https://i.postimg.cc/qN88MzVh/Bio-Gunt.png"},
+{"t":"Bruce Hart","g":"prestlers","u":"https://i.postimg.cc/2qkBkG7M/Bruce-Hart.jpg"},
+{"t":"Campeet the Shockmaster","g":"prestlers","u":"https://i.postimg.cc/Xr2zLHq8/Campete-the-Shockmaster.png"},
+{"t":"D Generation Z","g":"prestlers","u":"https://i.postimg.cc/2q6x5Cz6/D-Generation-Z.png"},
+{"t":"Dean Moolenko","g":"prestlers","u":"https://i.postimg.cc/6ycR4Fbd/Dean-Moolenko.png"},
+{"t":"Dis Peet MGM Studios","g":"prestlers","u":"https://i.postimg.cc/QBfKH76D/Dis-Pete-MGM-Studios.jpg"},
+{"t":"Eric Biscoff","g":"prestlers","u":"https://i.postimg.cc/Wdr7F5ZS/Eric-Biscoff.png"},
+{"t":"Four Men And A Little Sherri","g":"prestlers","u":"https://i.postimg.cc/mhDh6hm4/Four-Men-And-A-Little-Sherri.png"},
+{"t":"Geoff Goon","g":"prestlers","u":"https://i.postimg.cc/N5nXxRYs/Geoff-Goon.png"},
+{"t":"Gimp Peet","g":"prestlers","u":"https://i.postimg.cc/xNJmrdyg/Gimp-Pete.png"},
+{"t":"Harlem Peat","g":"prestlers","u":"https://i.postimg.cc/TL2hxPGg/Harlem-Peat.png"},
+{"t":"Hull Rules","g":"prestlers","u":"https://i.postimg.cc/8F2rVGcH/Hull-Rules.png"},
+{"t":"4 Lads Spelling PEET in the WCW","g":"prestlers","u":"https://i.postimg.cc/nC32fsxJ/4-Lads-Spelling-out-PETE-in-the-WCW-crowd.png"},
+{"t":"A Peet Pic Threatening The Good Friday Agreement","g":"cultural","u":"https://i.postimg.cc/TKrPWb3n/A-Peet-Pic-That-Threatens-The-Sanctity-Of-The-Good-Friday-Agreement.png"},
+{"t":"Cait and Peo in Titanic","g":"cultural","u":"https://i.postimg.cc/RqyCsd3y/Cait-and-Peo-in-Titanic.png"},
+{"t":"Dr Dot Massaging Celebrities","g":"cultural","u":"https://i.postimg.cc/Q9PDzNMf/Dr-Dot-Massaging-Celebrities.png"},
+{"t":"Geoffrey Kool Kat Allen","g":"cultural","u":"https://i.postimg.cc/ZWq7tkgH/Geoffrey-Kool-Kat-Allen.png"},
+{"t":"Glenda Gunge being gunged","g":"cultural","u":"https://i.postimg.cc/LnjSypF8/Glenda-Gunge-being-gunged-by-Dave-Benson-Phillips.png"},
+{"t":"Kissing The Barney Stone","g":"cultural","u":"https://i.postimg.cc/9rH5wnwm/Kissing-The-Barney-Stone.png"},
+{"t":"Pleetwood Cack Poumours","g":"cultural","u":"https://i.postimg.cc/yDfbjQxj/Pleetwood-Cack-Poumours.png"},
+{"t":"Poondanny","g":"cultural","u":"https://i.postimg.cc/ZC4sStyv/Poondanny.png"},
+{"t":"Saint Uncle Andy","g":"cultural","u":"https://i.postimg.cc/YGQR5brR/Saint-Uncle-Andy.png"},
+{"t":"Throwing a Peety","g":"cultural","u":"https://i.postimg.cc/PNjnP7wr/Throwing-a-Petey.png"},
+{"t":"Uncle Andy The Barbie of Belfast","g":"cultural","u":"https://i.postimg.cc/hzR6QJfF/Uncle-Andy-The-Barbie-of-Belfast.png"},
+{"t":"Pattle Of The Poyne","g":"cultural","u":"https://i.postimg.cc/yD6GF4Vn/Pattle-Of-The-Poyne.png"},
+{"t":"10 Things I Peet About You","g":"pisc","u":"https://i.postimg.cc/LnhSp1PX/10-Things-I-Pete-About-You.png"},
+{"t":"AGood Honest Petter","g":"pisc","u":"https://i.postimg.cc/FdjtTyw8/AGood-Honest-Petter.png"},
+{"t":"AGood Peet Waterman","g":"pisc","u":"https://i.postimg.cc/gnxsdz2p/AGood-Pete-Waterman.png"},
+{"t":"Albrot's Ultimate Boob Dream","g":"pisc","u":"https://i.postimg.cc/bsV5HVsG/Albrot-s-Ultimate-Boob-Dream.png"},
+{"t":"Barr Monster and Pikki","g":"pisc","u":"https://i.postimg.cc/Dm2YV3Gd/Barr-Monster-and-Pikki.png"},
+{"t":"Big Peet Little Peet","g":"pisc","u":"https://i.postimg.cc/s1Yymzrr/Big-Pete-Little-Pete.png"},
+{"t":"Carol Vore derman","g":"pisc","u":"https://i.postimg.cc/xJsZx66n/Carol-Vore-derman.png"},
+{"t":"Chef Peet (Mummbles)","g":"pisc","u":"https://i.postimg.cc/dkdFzPZb/Chef-Pete-(Mummbles).png"},
+{"t":"Comic Pelief feat The Peet Claimers","g":"pisc","u":"https://i.postimg.cc/qzBRCq3d/Comic-Pelief-feat-The-Pete-Claimers.png"},
+{"t":"Dear Deidre Peet Pants","g":"pisc","u":"https://i.postimg.cc/tZ5bXdD6/Dear-Deidre-Pete-Pants-Casebook.png"},
+{"t":"Donald Pump Pump (Satire)","g":"pisc","u":"https://i.postimg.cc/LYB9JF49/Donald-Pump-Pump-(Satire).png"},
+{"t":"Easter Punny","g":"pisc","u":"https://i.postimg.cc/LJRJDDw9/Easter-Punny.png"},
+{"t":"Fredi and the Friends (SCTV)","g":"pisc","u":"https://i.postimg.cc/DWSnPbv8/Fredi-and-the-Friends-(SCTV).png"},
+{"t":"Fanny Praddock (Cait)","g":"pisc","u":"https://i.postimg.cc/67VJ0LsW/Fanny-Praddock-(Cait).png"},
+{"t":"Kindly donated by disconnecteddan","g":"submissions","u":"https://i.postimg.cc/wtZjskdt/Kindly-donated-to-the-collection-by-disconnecteddan.jpg"},
+{"t":"Kindly donated by Harry Hardy","g":"submissions","u":"https://i.postimg.cc/t1xYkckv/Kindly-donated-to-the-collection-by-Harry-Hardy.png"},
+{"t":"Kindly donated by Alex Kidd","g":"submissions","u":"https://i.postimg.cc/V0yTMJ67/Kindly-donated-to-the-collection-by-Alex-Kidd-In-Shinobi-World.png"},
+{"t":"Kindly donated by Breadsanta","g":"submissions","u":"https://i.postimg.cc/MMxx230w/Kindly-donated-to-the-collection-by-Breadsanta.jpg"},
+{"t":"Million Dollar Moomin by AJMckenna","g":"submissions","u":"https://i.postimg.cc/fJcC2H2T/Million-Dollar-Moomin-Kindly-donated-to-the-collection-by-AJMckenna.jpg"},
+{"t":"Jerifier by sagebirt","g":"submissions","u":"https://i.postimg.cc/wtpQhDcR/Jerifier-Kindly-donated-to-the-collection-by-sagebirt.jpg"},
+{"t":"Kindly donated by Cait MKearns","g":"submissions","u":"https://i.postimg.cc/756kqTTV/Kindly-donated-to-the-collection-by-Cait-MKearns.png"},
+{"t":"Kindly donated by The Ross Is Cookin","g":"submissions","u":"https://i.postimg.cc/TKT9ZrFC/Kindly-donated-to-the-collection-by-The-Ross-Is-Cookin.jpg"},
+];
 
 // ═══════════════════════════════════════════════════════════════
 // ENGINE
 // ═══════════════════════════════════════════════════════════════
+let isHidden=false, twInt=null, cycInt=null, progInt=null, curIdx=0, prog=0;
+let activeWorks = CFG.gallery==='all' ? [...WORKS] : WORKS.filter(w=>w.g===CFG.gallery);
 
-let isManualHidden = false;
-let typewriterInterval = null;
-let cycleInterval = null;
-let cycleProgressInterval = null;
-let currentCycleProgress = 0;
+// Shuffle
+for(let i=activeWorks.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[activeWorks[i],activeWorks[j]]=[activeWorks[j],activeWorks[i]];}
 
-// ── Smart text condensing ──────────────────────────────────
-function condenseText(text, maxLen) {
-  if (!text || text.length <= maxLen) return text;
+function condense(text,max){if(!text||text.length<=max)return text;let t=text.slice(0,max-1);const s=t.lastIndexOf(' ');if(s>max*.5)t=t.slice(0,s);return t+'...'}
 
-  // Strategy 1: Truncate at last space before maxLen
-  let truncated = text.slice(0, maxLen - 1);
-  const lastSpace = truncated.lastIndexOf(' ');
-  if (lastSpace > maxLen * 0.5) {
-    truncated = truncated.slice(0, lastSpace);
-  }
-  return truncated + '...';
-}
+function genGrain(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');if(!x)return;const d=x.createImageData(128,128);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=v;d.data[i+1]=v;d.data[i+2]=v;d.data[i+3]=14}x.putImageData(d,0,0);const g=document.createElement('div');g.className='grain-overlay';g.style.backgroundImage=`url(${c.toDataURL('image/png')})`;document.body.appendChild(g)}
 
-// ── Generate film grain ────────────────────────────────────
-function generateGrain() {
-  const size = 128;
-  const canvas = document.createElement('canvas');
-  canvas.width = size; canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-  const imageData = ctx.createImageData(size, size);
-  const data = imageData.data;
-  for (let i = 0; i < data.length; i += 4) {
-    const v = Math.random() * 255;
-    data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = 14;
-  }
-  ctx.putImageData(imageData, 0, 0);
-  const grain = document.createElement('div');
-  grain.className = 'grain-overlay';
-  grain.style.backgroundImage = `url(${canvas.toDataURL('image/png')})`;
-  document.body.appendChild(grain);
-}
+function typewrite(text){const el=document.getElementById('titleText');if(!el)return;clearInterval(twInt);el.textContent='';el.classList.remove('condensed','extra-condensed');const d=text.length>55?condense(text,50):text;let i=0;twInt=setInterval(()=>{if(i<d.length){const p=d.slice(0,i+1);el.textContent=p;if(p.length>50){el.classList.add('extra-condensed');el.classList.remove('condensed')}else if(p.length>35){el.classList.add('condensed');el.classList.remove('extra-condensed')}i++}else clearInterval(twInt)},CFG.typewriterSpeed)}
 
-// ── Typewriter effect with auto-condense ──────────────────
-function typewrite(text) {
-  const el = document.getElementById('titleText');
-  if (!el) return;
-  clearInterval(typewriterInterval);
-  el.textContent = '';
-  el.classList.remove('condensed', 'extra-condensed');
+function updateBottom(w){const c=document.getElementById('bottomCard');c.className=`bottom-card gallery-${w.g||'pobots'}`;if(!isHidden)c.classList.add('visible');else c.classList.add('visible','hidden-manual');if(!CFG.showBottom)c.classList.add('hidden-manual');c.querySelector('.card-inner').classList.add('transitioning');setTimeout(()=>{typewrite(CFG.title||w.t||'Untitled');document.getElementById('galleryTag').textContent=ABBR[w.g]||'PBT';document.getElementById('galleryName').textContent=w.g||'Pobots';setTimeout(()=>c.querySelector('.card-inner').classList.remove('transitioning'),80)},350)}
 
-  // Auto-condense very long titles before typing
-  const displayText = text.length > 55 ? condenseText(text, 50) : text;
+function updateTop(w){const c=document.getElementById('topCard'),img=document.getElementById('thumbImg'),sh=document.getElementById('thumbShimmer'),tt=document.getElementById('thumbTitle'),tg=document.getElementById('thumbGallery');c.className=`top-card gallery-${w.g||'pobots'}`;if(!isHidden)c.classList.add('visible');else c.classList.add('visible','hidden-manual');if(!CFG.showTop)c.classList.add('hidden-manual');c.querySelector('.card-inner').classList.add('top-transitioning');setTimeout(()=>{sh.style.display='block';img.classList.remove('loaded');img.src=w.u||'';img.alt=w.t||'';const title=w.t||'Unknown';tt.textContent=title.length>35?condense(title,32):title;if(title.length>50)tt.style.fontSize='10px';else if(title.length>35)tt.style.fontSize='11px';else tt.style.fontSize='';tg.textContent=`${ABBR[w.g]||'UNK'} — ${w.g==='pobots'?'Pobots':w.g==='prestlers'?'Prestlers':w.g==='cultural'?'Cultural Pics':w.g==='pisc'?'Pisc':'Submissions'}`;setTimeout(()=>c.querySelector('.card-inner').classList.remove('top-transitioning'),80)},350);prog=0;const bar=document.getElementById('cycleBar');if(bar)bar.style.width='0%'}
 
-  let i = 0;
-  typewriterInterval = setInterval(() => {
-    if (i < displayText.length) {
-      const partial = displayText.slice(0, i + 1);
-      el.textContent = partial;
-      if (partial.length > 50) {
-        el.classList.add('extra-condensed');
-        el.classList.remove('condensed');
-      } else if (partial.length > 35) {
-        el.classList.add('condensed');
-        el.classList.remove('extra-condensed');
-      }
-      i++;
-    } else {
-      clearInterval(typewriterInterval);
-    }
-  }, CONFIG.typewriterSpeed);
-}
+document.getElementById('thumbImg').addEventListener('load',function(){this.classList.add('loaded');document.getElementById('thumbShimmer').style.display='none'});
+document.getElementById('thumbImg').addEventListener('error',function(){this.classList.remove('loaded');document.getElementById('thumbShimmer').style.display='block'});
 
-// ── Update bottom card ─────────────────────────────────────
-function updateBottomCard(work) {
-  const card = document.getElementById('bottomCard');
-  const galleryTag = document.getElementById('galleryTag');
-  const galleryName = document.getElementById('galleryName');
+function startProg(){const bar=document.getElementById('cycleBar');if(!bar)return;prog=0;clearInterval(progInt);const ms=100,total=CFG.cycleSecs*1000;progInt=setInterval(()=>{prog+=ms;bar.style.width=Math.min(100,prog/total*100)+'%'},ms)}
 
-  // Set gallery class
-  card.className = `bottom-card gallery-${work.gallery || CONFIG.gallery}`;
-  if (!isManualHidden) card.classList.add('visible');
-  else card.classList.add('visible', 'hidden-manual');
-  if (!CONFIG.showBottom) card.classList.add('hidden-manual');
+function advance(){if(activeWorks.length<=1)return;curIdx=(curIdx+1)%activeWorks.length;const w=activeWorks[curIdx];updateTop(w);updateBottom(w);startProg()}
+function random(){if(activeWorks.length<=1)return;let n;do{n=Math.floor(Math.random()*activeWorks.length)}while(n===curIdx);curIdx=n;const w=activeWorks[curIdx];updateTop(w);updateBottom(w);startProg()}
 
-  // Transition
-  card.querySelector('.card-inner').classList.add('transitioning');
-  setTimeout(() => {
-    typewrite(CONFIG.title || work.title || 'Untitled');
+document.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();advance()}if(e.code==='KeyR')random();if(e.code==='KeyH'){isHidden=!isHidden;const t=document.getElementById('topCard'),b=document.getElementById('bottomCard');if(isHidden){t.classList.add('hidden-manual');b.classList.add('hidden-manual')}else{t.classList.remove('hidden-manual');b.classList.remove('hidden-manual')}}if(e.code==='Digit1'){CFG.showTop=!CFG.showTop;const t=document.getElementById('topCard');if(!CFG.showTop)t.classList.add('hidden-manual');else{t.classList.remove('hidden-manual');if(!isHidden)t.classList.add('visible')}}if(e.code==='Digit2'){CFG.showBottom=!CFG.showBottom;const b=document.getElementById('bottomCard');if(!CFG.showBottom)b.classList.add('hidden-manual');else{b.classList.remove('hidden-manual');if(!isHidden)b.classList.add('visible')}}});
 
-    galleryTag.textContent = GALLERY_ABBREVIATIONS[work.gallery] || work.gallery?.slice(0,3).toUpperCase() || 'PBT';
-    galleryName.textContent = work.galleryName || work.gallery || 'Pobots';
+function init(){if(CFG.showGrain)genGrain();document.getElementById('labelText').textContent=CFG.label;if(CFG.sub){const s=document.getElementById('subLabel');s.textContent=CFG.sub;s.style.display='block'}if(activeWorks.length>0){curIdx=0;const w=activeWorks[0];updateTop(w);updateBottom({t:CFG.title||w.t,g:w.g});startProg();cycInt=setInterval(advance,CFG.cycleSecs*1000)}else{updateBottom({t:'No artworks found',g:'pobots'})}}
 
-    setTimeout(() => {
-      card.querySelector('.card-inner').classList.remove('transitioning');
-    }, 80);
-  }, 350);
-}
+setTimeout(init,300);
 
-// ── Update top card (cycling artwork) ──────────────────────
-function updateTopCard(work) {
-  const card = document.getElementById('topCard');
-  const thumb = document.getElementById('thumbImg');
-  const shimmer = document.getElementById('thumbShimmer');
-  const thumbTitle = document.getElementById('thumbTitle');
-  const thumbGallery = document.getElementById('thumbGallery');
-
-  // Set gallery class
-  card.className = `top-card gallery-${work.gallery || 'pobots'}`;
-  if (!isManualHidden) card.classList.add('visible');
-  else card.classList.add('visible', 'hidden-manual');
-  if (!CONFIG.showTop) card.classList.add('hidden-manual');
-
-  // Transition
-  card.querySelector('.card-inner').classList.add('top-transitioning');
-
-  setTimeout(() => {
-    // Update image
-    shimmer.style.display = 'block';
-    thumb.classList.remove('loaded');
-    thumb.src = work.imageUrl || '';
-    thumb.alt = work.title || '';
-
-    // Update text with auto-condense
-    const title = work.title || 'Unknown';
-    thumbTitle.textContent = title.length > 35 ? condenseText(title, 32) : title;
-
-    // Adjust font size for condensed titles
-    if (title.length > 50) {
-      thumbTitle.style.fontSize = '10px';
-    } else if (title.length > 35) {
-      thumbTitle.style.fontSize = '11px';
-    } else {
-      thumbTitle.style.fontSize = '';
-    }
-
-    const tag = GALLERY_ABBREVIATIONS[work.gallery] || 'UNK';
-    thumbGallery.textContent = `${tag} — ${work.galleryName || work.gallery || 'Gallery'}`;
-
-    setTimeout(() => {
-      card.querySelector('.card-inner').classList.remove('top-transitioning');
-    }, 80);
-  }, 350);
-
-  // Reset cycle progress
-  currentCycleProgress = 0;
-  const bar = document.getElementById('cycleBar');
-  if (bar) bar.style.width = '0%';
-}
-
-// ── Image load handler ─────────────────────────────────────
-document.getElementById('thumbImg').addEventListener('load', function() {
-  this.classList.add('loaded');
-  document.getElementById('thumbShimmer').style.display = 'none';
-});
-
-document.getElementById('thumbImg').addEventListener('error', function() {
-  this.classList.remove('loaded');
-  document.getElementById('thumbShimmer').style.display = 'block';
-});
-
-// ── Cycle progress bar ─────────────────────────────────────
-function startCycleProgress() {
-  const bar = document.getElementById('cycleBar');
-  if (!bar) return;
-  currentCycleProgress = 0;
-  clearInterval(cycleProgressInterval);
-  const tickMs = 100;
-  const totalMs = CONFIG.cycleSecs * 1000;
-  cycleProgressInterval = setInterval(() => {
-    currentCycleProgress += tickMs;
-    const pct = Math.min(100, (currentCycleProgress / totalMs) * 100);
-    bar.style.width = pct + '%';
-  }, tickMs);
-}
-
-// ── Advance to next artwork ────────────────────────────────
-function advanceArtwork() {
-  if (allWorks.length <= 1) return;
-  currentCycleIndex = (currentCycleIndex + 1) % allWorks.length;
-  const work = allWorks[currentCycleIndex];
-  updateTopCard(work);
-  updateBottomCard(work);
-  startCycleProgress();
-}
-
-// ── Random artwork ─────────────────────────────────────────
-function randomArtwork() {
-  if (allWorks.length <= 1) return;
-  let newIdx;
-  do { newIdx = Math.floor(Math.random() * allWorks.length); } while (newIdx === currentCycleIndex);
-  currentCycleIndex = newIdx;
-  const work = allWorks[currentCycleIndex];
-  updateTopCard(work);
-  updateBottomCard(work);
-  startCycleProgress();
-}
-
-// ── Keyboard shortcuts ─────────────────────────────────────
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') { e.preventDefault(); advanceArtwork(); }
-  if (e.code === 'KeyR') { randomArtwork(); }
-  if (e.code === 'KeyH') {
-    isManualHidden = !isManualHidden;
-    const top = document.getElementById('topCard');
-    const bottom = document.getElementById('bottomCard');
-    if (isManualHidden) {
-      top.classList.add('hidden-manual');
-      bottom.classList.add('hidden-manual');
-    } else {
-      top.classList.remove('hidden-manual');
-      bottom.classList.remove('hidden-manual');
-    }
-  }
-  if (e.code === 'Digit1') {
-    CONFIG.showTop = !CONFIG.showTop;
-    const top = document.getElementById('topCard');
-    if (!CONFIG.showTop) top.classList.add('hidden-manual');
-    else { top.classList.remove('hidden-manual'); if (!isManualHidden) top.classList.add('visible'); }
-  }
-  if (e.code === 'Digit2') {
-    CONFIG.showBottom = !CONFIG.showBottom;
-    const bottom = document.getElementById('bottomCard');
-    if (!CONFIG.showBottom) bottom.classList.add('hidden-manual');
-    else { bottom.classList.remove('hidden-manual'); if (!isManualHidden) bottom.classList.add('visible'); }
-  }
-});
-
-// ── Fetch gallery data ─────────────────────────────────────
-async function fetchGallery() {
-  try {
-    const res = await fetch('/api/gallery');
-    if (!res.ok) throw new Error('API error');
-    const data = await res.json();
-
-    // Build works list, optionally filtered by gallery
-    if (CONFIG.gallery && CONFIG.gallery !== 'all') {
-      const gallery = data.galleries[CONFIG.gallery];
-      if (gallery) {
-        allWorks = gallery.works;
-      } else {
-        allWorks = data.allWorks;
-      }
-    } else {
-      allWorks = data.allWorks;
-    }
-
-    // Shuffle for variety
-    for (let i = allWorks.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [allWorks[i], allWorks[j]] = [allWorks[j], allWorks[i]];
-    }
-
-    return allWorks.length > 0;
-  } catch (err) {
-    console.warn('Failed to fetch gallery:', err);
-    return false;
-  }
-}
-
-// ── Initialize ─────────────────────────────────────────────
-async function init() {
-  // Film grain
-  if (CONFIG.showGrain) generateGrain();
-
-  // Apply label from config
-  document.getElementById('labelText').textContent = CONFIG.label;
-
-  // Apply sub-label from config
-  if (CONFIG.sub) {
-    const subEl = document.getElementById('subLabel');
-    subEl.textContent = CONFIG.sub;
-    subEl.style.display = 'block';
-  }
-
-  // Fetch gallery data
-  const ok = await fetchGallery();
-
-  if (ok && allWorks.length > 0) {
-    // Start at a random position
-    currentCycleIndex = 0;
-    const work = allWorks[currentCycleIndex];
-
-    updateTopCard(work);
-    updateBottomCard({
-      title: CONFIG.title || work.title,
-      gallery: work.gallery,
-      galleryName: work.galleryName,
-    });
-
-    // Start auto-cycle
-    startCycleProgress();
-    cycleInterval = setInterval(advanceArtwork, CONFIG.cycleSecs * 1000);
-  } else {
-    // Fallback: show placeholder text
-    const work = { title: CONFIG.title || 'Loading...', gallery: 'pobots', galleryName: 'Pobots', imageUrl: '' };
-    updateBottomCard(work);
-  }
-}
-
-// ── Start ───────────────────────────────────────────────────
-setTimeout(init, 300);
-
-// ═══════════════════════════════════════════════════════════════
-// EXTERNAL API — Call these from OBS scripts or browser console
-// ═══════════════════════════════════════════════════════════════
-
-window.setLabel = function(text) {
-  document.getElementById('labelText').textContent = text || 'NOW DESIGNING';
-};
-
-window.setSubLabel = function(text) {
-  const el = document.getElementById('subLabel');
-  if (text) { el.textContent = text; el.style.display = 'block'; }
-  else { el.style.display = 'none'; }
-};
-
-window.setTitle = function(text) {
-  CONFIG.title = text;
-  if (allWorks.length > 0) {
-    updateBottomCard({ ...allWorks[currentCycleIndex], title: text });
-  }
-};
-
-window.advanceArtwork = advanceArtwork;
-window.randomArtwork = randomArtwork;
+// External API
+window.setLabel=t=>{document.getElementById('labelText').textContent=t||'NOW DESIGNING'};
+window.setSubLabel=t=>{const e=document.getElementById('subLabel');if(t){e.textContent=t;e.style.display='block'}else e.style.display='none'};
+window.setTitle=t=>{CFG.title=t;if(activeWorks.length)updateBottom({...activeWorks[curIdx],t})};
+window.advanceArtwork=advance;
+window.randomArtwork=random;
 </script>
-
 </body>
 </html>

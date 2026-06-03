@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,height=1080">
+<title>Peet Pics — Stream Countdown</title>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PEET PICS — 10-MINUTE STREAM STARTING COUNTDOWN
+     Self-contained HTML with rotating artwork carousel.
+
+     HOW TO USE IN OBS:
+     1. Add a Browser Source
+     2. Check "Local file" → point to this HTML file
+     3. Width: 1920, Height: 1080
+
+     URL PARAMETERS:
+       minutes=NUM       Countdown duration (default: 10)
+       label=TEXT         Heading text (default: "STARTING SOON")
+       gallery=KEY        Filter: pobots|prestlers|cultural|pisc|submissions|all
+       speed=SECONDS      Artwork cycle speed (default: 8)
+       grain=true|false   Film grain effect (default: true)
+       sound=true|false   Tick sound in last 10s (default: false)
+
+     KEYBOARD SHORTCUTS:
+       Space — Pause/Resume
+       R     — Reset countdown
+       H     — Hide/Show
+     ═══════════════════════════════════════════════════════════════ -->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,300;1,6..72,400;1,6..72,500;1,6..72,600&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0C0A09;color:#e8dcc8;font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow:hidden;width:1920px;height:1080px;position:relative}
+  :root{--amber:#d4a853;--cream:#e8dcc8;--muted:#9a8d7a;--dim:#8e8374;--dark:#1a1814;--darker:#0C0A09;--card:#2a2520;--border:#3d352a;--red:#c4473a;--accent:var(--amber)}
+
+  /* ═══ BACKGROUND ARTWORK ═══ */
+  .bg-artwork{position:fixed;inset:0;z-index:0;overflow:hidden}
+  .bg-artwork img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.5s ease;filter:brightness(.25) saturate(.6) blur(2px)}
+  .bg-artwork img.active{opacity:1}
+
+  /* Dark overlay on top of bg image */
+  .bg-overlay{position:fixed;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(12,10,9,.7) 0%,rgba(12,10,9,.92) 70%,rgba(12,10,9,.98) 100%)}
+
+  /* ═══ VIGNETTE ═══ */
+  .vignette{position:fixed;inset:0;z-index:2;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(12,10,9,.6) 100%)}
+
+  /* ═══ FILM GRAIN ═══ */
+  .grain-overlay{position:fixed;inset:-50px;width:200%;height:200%;background-repeat:repeat;background-size:128px 128px;opacity:.2;pointer-events:none;z-index:99;animation:grainDrift .4s steps(6) infinite}
+  @keyframes grainDrift{0%{transform:translate(0,0)}10%{transform:translate(-2%,-2%)}20%{transform:translate(2%,0%)}30%{transform:translate(-2%,2%)}40%{transform:translate(2%,-2%)}50%{transform:translate(-2%,0%)}60%{transform:translate(0%,2%)}70%{transform:translate(2%,0%)}80%{transform:translate(-2%,-2%)}90%{transform:translate(0%,2%)}100%{transform:translate(0,0)}}
+
+  /* ═══ SCAN LINE ═══ */
+  .scan-line{position:fixed;left:0;right:0;height:2px;z-index:10;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(212,168,83,.08),transparent);animation:scanMove 8s ease-in-out infinite}
+  @keyframes scanMove{0%,100%{top:-2px;opacity:0}5%{opacity:1}50%{top:100%;opacity:.5}55%{opacity:0}}
+
+  /* ═══ MAIN CONTENT ═══ */
+  .content{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
+
+  /* Logo / Title */
+  .logo-area{text-align:center;margin-bottom:32px}
+  .logo-title{font-family:'Newsreader',serif;font-size:48px;font-weight:600;color:var(--cream);letter-spacing:-.01em;line-height:1.1;text-shadow:0 2px 20px rgba(0,0,0,.5)}
+  .logo-subtitle{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.35em;text-transform:uppercase;color:var(--amber);margin-top:8px;opacity:.8}
+  .logo-accent{width:80px;height:1px;background:linear-gradient(90deg,transparent,var(--amber),transparent);margin:16px auto 0;opacity:.5}
+
+  /* Countdown */
+  .countdown-area{text-align:center;margin-bottom:40px}
+  .countdown-digits{font-family:'JetBrains Mono',monospace;font-size:140px;font-weight:700;letter-spacing:.05em;color:var(--cream);line-height:1;text-shadow:0 0 60px rgba(212,168,83,.15),0 4px 30px rgba(0,0,0,.5);transition:color .3s,text-shadow .3s;position:relative}
+  .countdown-digits .colon{color:var(--amber);opacity:.6;animation:colonPulse 1s step-end infinite}
+  @keyframes colonPulse{0%,100%{opacity:.6}50%{opacity:.2}}
+  .countdown-digits.urgent{color:var(--red);text-shadow:0 0 80px rgba(196,71,58,.3),0 4px 30px rgba(0,0,0,.5)}
+  .countdown-digits.urgent .colon{color:var(--red)}
+  .countdown-label{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--muted);margin-top:12px}
+
+  /* Heading label */
+  .heading-label{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:.35em;text-transform:uppercase;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:10px;justify-content:center}
+  .heading-dot{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 8px rgba(196,71,58,.5);animation:dotPulse 2s ease-in-out infinite}
+  @keyframes dotPulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+
+  /* ═══ ARTWORK CAROUSEL ═══ */
+  .carousel-area{width:900px;max-width:90%;margin:0 auto}
+  .carousel-track{position:relative;height:200px;overflow:hidden;border-radius:4px;background:rgba(26,24,20,.5);border:1px solid rgba(212,168,83,.08)}
+  .carousel-inner{display:flex;height:100%;transition:transform .8s cubic-bezier(.16,1,.3,1);will-change:transform}
+  .carousel-slide{flex:0 0 100%;height:100%;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .carousel-slide img{max-height:180px;max-width:85%;object-fit:contain;opacity:0;transition:opacity .5s ease .2s;filter:drop-shadow(0 4px 20px rgba(0,0,0,.5))}
+  .carousel-slide img.loaded{opacity:1}
+
+  /* Carousel slide info */
+  .carousel-info{position:absolute;bottom:0;left:0;right:0;padding:8px 16px;background:linear-gradient(transparent,rgba(12,10,9,.9));display:flex;justify-content:space-between;align-items:flex-end}
+  .carousel-info .slide-title{font-family:'Newsreader',serif;font-size:13px;font-weight:500;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%;opacity:.8}
+  .carousel-info .slide-gallery{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;padding:2px 6px;border-left:2px solid var(--amber);color:var(--amber);background:rgba(212,168,83,.08);line-height:1.4}
+
+  /* Carousel navigation dots */
+  .carousel-dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
+  .carousel-dot{width:24px;height:3px;border-radius:2px;background:rgba(212,168,83,.2);cursor:pointer;transition:all .3s}
+  .carousel-dot.active{background:var(--amber);width:40px;box-shadow:0 0 8px rgba(212,168,83,.3)}
+
+  /* Progress bar at bottom of carousel */
+  .carousel-progress{height:2px;background:rgba(0,0,0,.3);border-radius:0 0 4px 4px;overflow:hidden;margin-top:-2px;position:relative;z-index:1}
+  .carousel-progress-fill{height:100%;background:var(--amber);width:0%;opacity:.5;transition:width .1s linear}
+
+  /* ═══ BOTTOM INFO BAR ═══ */
+  .info-bar{position:fixed;bottom:0;left:0;right:0;z-index:30;padding:16px 32px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(transparent,rgba(12,10,9,.8))}
+  .info-bar-left{display:flex;align-items:center;gap:12px}
+  .info-bar-right{display:flex;align-items:center;gap:16px}
+  .info-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);padding:3px 8px;border:1px solid rgba(212,168,83,.12);border-radius:2px}
+  .info-link{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:500;letter-spacing:.1em;color:var(--amber);text-decoration:none;opacity:.6;transition:opacity .3s}
+  .info-link:hover{opacity:1}
+
+  /* ═══ PAUSE OVERLAY ═══ */
+  .pause-overlay{position:fixed;inset:0;z-index:50;background:rgba(12,10,9,.7);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+  .pause-overlay.visible{opacity:1;pointer-events:auto}
+  .pause-text{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--amber);text-shadow:0 0 30px rgba(212,168,83,.3)}
+
+  /* ═══ FINISHED STATE ═══ */
+  .finished .countdown-digits{color:var(--amber);text-shadow:0 0 100px rgba(212,168,83,.4),0 4px 30px rgba(0,0,0,.5);animation:finishedPulse 1.5s ease-in-out infinite}
+  @keyframes finishedPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.8;transform:scale(1.02)}}
+  .finished .heading-label{color:var(--amber)}
+
+  /* ═══ GALLERY COLORS ═══ */
+  .gallery-pobots{--accent:#d4a853}
+  .gallery-prestlers{--accent:#a0522d}
+  .gallery-cultural{--accent:#b5707e}
+  .gallery-pisc{--accent:#6b7c5e}
+  .gallery-submissions{--accent:#6b7c5e}
+</style>
+</head>
+<body>
+
+<!-- Background rotating artwork -->
+<div class="bg-artwork" id="bgArtwork"></div>
+<div class="bg-overlay"></div>
+<div class="vignette"></div>
+<div class="scan-line"></div>
+
+<!-- Main content -->
+<div class="content" id="mainContent">
+  <div class="logo-area">
+    <div class="logo-title">Peet Pics</div>
+    <div class="logo-subtitle">The Permanent Collection</div>
+    <div class="logo-accent"></div>
+  </div>
+
+  <div class="heading-label">
+    <span class="heading-dot"></span>
+    <span id="headingText">STARTING SOON</span>
+  </div>
+
+  <div class="countdown-area">
+    <div class="countdown-digits" id="countdown">
+      <span id="cdMin">10</span><span class="colon">:</span><span id="cdSec">00</span>
+    </div>
+    <div class="countdown-label">minutes remaining</div>
+  </div>
+
+  <!-- Artwork Carousel -->
+  <div class="carousel-area">
+    <div class="carousel-track">
+      <div class="carousel-inner" id="carouselInner"></div>
+      <div class="carousel-info">
+        <span class="slide-title" id="slideTitle">Loading gallery...</span>
+        <span class="slide-gallery" id="slideGallery">PBT</span>
+      </div>
+    </div>
+    <div class="carousel-progress"><div class="carousel-progress-fill" id="carouselProgress"></div></div>
+    <div class="carousel-dots" id="carouselDots"></div>
+  </div>
+</div>
+
+<!-- Bottom info bar -->
+<div class="info-bar">
+  <div class="info-bar-left">
+    <span class="info-tag">LIVE</span>
+    <a href="https://twitch.tv/AGoodPete" target="_blank" class="info-link">twitch.tv/AGoodPete</a>
+  </div>
+  <div class="info-bar-right">
+    <span class="info-tag" id="galleryCount">90 WORKS</span>
+    <a href="https://petepics-github-io.vercel.app/" target="_blank" class="info-link">PETEPICS</a>
+  </div>
+</div>
+
+<!-- Pause overlay -->
+<div class="pause-overlay" id="pauseOverlay">
+  <div class="pause-text">PAUSED</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════════════
+const P = new URLSearchParams(window.location.search);
+const CFG = {
+  minutes: parseInt(P.get('minutes'))||10,
+  label: P.get('label')||'STARTING SOON',
+  gallery: P.get('gallery')||'all',
+  speed: parseInt(P.get('speed'))||8,
+  showGrain: P.get('grain')!=='false',
+  sound: P.get('sound')==='true',
+};
+
+// ═══════════════════════════════════════════════════════════════
+// EMBEDDED GALLERY DATA
+// ═══════════════════════════════════════════════════════════════
+const ABBR = {pobots:"PBT",prestlers:"PST",cultural:"CUL",pisc:"PSC",submissions:"SUB"};
+const GNAME = {pobots:"Pobots",prestlers:"Prestlers",cultural:"Cultural Pics",pisc:"Pisc",submissions:"Submissions"};
+const WORKS = [
+{"t":"15 14 Peetrs","g":"pobots","u":"https://i.postimg.cc/MMtxmbkk/15-14-Peters.png"},
+{"t":"24 Hour Party Peetbot","g":"pobots","u":"https://i.postimg.cc/DJhygw82/24-Hour-Party-Petebot.png"},
+{"t":"Aqua Peet","g":"pobots","u":"https://i.postimg.cc/T5wx7LG2/Aqua-Pete.png"},
+{"t":"Bigger Bubba","g":"pobots","u":"https://i.postimg.cc/wty6Hss7/Bigger-Bubba.png"},
+{"t":"Bobo Bob Martin","g":"pobots","u":"https://i.postimg.cc/4nNXNMcv/Bobo-Bob-Martin.png"},
+{"t":"Carmen Electra's Blues","g":"pobots","u":"https://i.postimg.cc/phm5wTPn/Carmen-Electra-s-Subterranean-Battlebots-Blues.png"},
+{"t":"Clown Conquering King","g":"pobots","u":"https://i.postimg.cc/NLfQfVXx/Clown-Conquering-King.png"},
+{"t":"Cristal Baschet","g":"pobots","u":"https://i.postimg.cc/R3N0FD2S/Cristal-Baschet.png"},
+{"t":"Dr Theopolis P Wildebeast","g":"pobots","u":"https://i.postimg.cc/7f3J8jrX/Dr-Theopolis-P-Wildebeast.png"},
+{"t":"Eric Biscoff Speculoos Team","g":"pobots","u":"https://i.postimg.cc/YjwmntJN/Eric-Biscoff-Fully-Speculoos-Team.png"},
+{"t":"Flensburger Peetr","g":"pobots","u":"https://i.postimg.cc/bZbhBjXx/Flensburger-Peter.png"},
+{"t":"Gordon Peetcock","g":"pobots","u":"https://i.postimg.cc/F19HkzMj/Gordon-Petecock.png"},
+{"t":"Half Mannequinette","g":"pobots","u":"https://i.postimg.cc/bswrWrLS/Half-Mannequinette-(Robotica).png"},
+{"t":"High Peetformance Podcast","g":"pobots","u":"https://i.postimg.cc/7J7GLWG2/High-Peteformance-Podcast.png"},
+{"t":"Amillion Botts","g":"pobots","u":"https://i.postimg.cc/cg3478x1/Amillion-Botts.png"},
+{"t":"2 Become 1 but Smoking Gunns","g":"prestlers","u":"https://i.postimg.cc/bsYXR2gL/2-Become-1-but-its-the-Smoking-Gunns.png"},
+{"t":"Alba Fyre Storm","g":"prestlers","u":"https://i.postimg.cc/HrJhS0yF/Alba-Fyre-Storm.png"},
+{"t":"Arn Hammer Toothpaste","g":"prestlers","u":"https://i.postimg.cc/ctmKY8mD/Arn-Hammer-Toothpaste.png"},
+{"t":"Baewatch (all Arn)","g":"prestlers","u":"https://i.postimg.cc/yWt6QjJp/Baewatch-(they-are-all-Arn).png"},
+{"t":"Bio Gunt","g":"prestlers","u":"https://i.postimg.cc/qN88MzVh/Bio-Gunt.png"},
+{"t":"Bruce Hart","g":"prestlers","u":"https://i.postimg.cc/2qkBkG7M/Bruce-Hart.jpg"},
+{"t":"Campeet the Shockmaster","g":"prestlers","u":"https://i.postimg.cc/Xr2zLHq8/Campete-the-Shockmaster.png"},
+{"t":"D Generation Z","g":"prestlers","u":"https://i.postimg.cc/2q6x5Cz6/D-Generation-Z.png"},
+{"t":"Dean Moolenko","g":"prestlers","u":"https://i.postimg.cc/6ycR4Fbd/Dean-Moolenko.png"},
+{"t":"Dis Peet MGM Studios","g":"prestlers","u":"https://i.postimg.cc/QBfKH76D/Dis-Pete-MGM-Studios.jpg"},
+{"t":"Four Men And A Little Sherri","g":"prestlers","u":"https://i.postimg.cc/mhDh6hm4/Four-Men-And-A-Little-Sherri.png"},
+{"t":"Geoff Goon","g":"prestlers","u":"https://i.postimg.cc/N5nXxRYs/Geoff-Goon.png"},
+{"t":"Gimp Peet","g":"prestlers","u":"https://i.postimg.cc/xNJmrdyg/Gimp-Pete.png"},
+{"t":"Harlem Peat","g":"prestlers","u":"https://i.postimg.cc/TL2hxPGg/Harlem-Peat.png"},
+{"t":"Hull Rules","g":"prestlers","u":"https://i.postimg.cc/8F2rVGcH/Hull-Rules.png"},
+{"t":"4 Lads Spelling PEET in the WCW","g":"prestlers","u":"https://i.postimg.cc/nC32fsxJ/4-Lads-Spelling-out-PETE-in-the-WCW-crowd.png"},
+{"t":"A Peet Pic Threatening Good Friday Agreement","g":"cultural","u":"https://i.postimg.cc/TKrPWb3n/A-Peet-Pic-That-Threatens-The-Sanctity-Of-The-Good-Friday-Agreement.png"},
+{"t":"Cait and Peo in Titanic","g":"cultural","u":"https://i.postimg.cc/RqyCsd3y/Cait-and-Peo-in-Titanic.png"},
+{"t":"Dr Dot Massaging Celebrities","g":"cultural","u":"https://i.postimg.cc/Q9PDzNMf/Dr-Dot-Massaging-Celebrities.png"},
+{"t":"Geoffrey Kool Kat Allen","g":"cultural","u":"https://i.postimg.cc/ZWq7tkgH/Geoffrey-Kool-Kat-Allen.png"},
+{"t":"Glenda Gunge being gunged","g":"cultural","u":"https://i.postimg.cc/LnjSypF8/Glenda-Gunge-being-gunged-by-Dave-Benson-Phillips.png"},
+{"t":"Kissing The Barney Stone","g":"cultural","u":"https://i.postimg.cc/9rH5wnwm/Kissing-The-Barney-Stone.png"},
+{"t":"Pleetwood Cack Poumours","g":"cultural","u":"https://i.postimg.cc/yDfbjQxj/Pleetwood-Cack-Poumours.png"},
+{"t":"Poondanny","g":"cultural","u":"https://i.postimg.cc/ZC4sStyv/Poondanny.png"},
+{"t":"Saint Uncle Andy","g":"cultural","u":"https://i.postimg.cc/YGQR5brR/Saint-Uncle-Andy.png"},
+{"t":"Throwing a Peety","g":"cultural","u":"https://i.postimg.cc/PNjnP7wr/Throwing-a-Petey.png"},
+{"t":"Uncle Andy The Barbie of Belfast","g":"cultural","u":"https://i.postimg.cc/hzR6QJfF/Uncle-Andy-The-Barbie-of-Belfast.png"},
+{"t":"Pattle Of The Poyne","g":"cultural","u":"https://i.postimg.cc/yD6GF4Vn/Pattle-Of-The-Poyne.png"},
+{"t":"10 Things I Peet About You","g":"pisc","u":"https://i.postimg.cc/LnhSp1PX/10-Things-I-Pete-About-You.png"},
+{"t":"AGood Honest Petter","g":"pisc","u":"https://i.postimg.cc/FdjtTyw8/AGood-Honest-Petter.png"},
+{"t":"AGood Peet Waterman","g":"pisc","u":"https://i.postimg.cc/gnxsdz2p/AGood-Pete-Waterman.png"},
+{"t":"Albrot's Ultimate Boob Dream","g":"pisc","u":"https://i.postimg.cc/bsV5HVsG/Albrot-s-Ultimate-Boob-Dream.png"},
+{"t":"Barr Monster and Pikki","g":"pisc","u":"https://i.postimg.cc/Dm2YV3Gd/Barr-Monster-and-Pikki.png"},
+{"t":"Big Peet Little Peet","g":"pisc","u":"https://i.postimg.cc/s1Yymzrr/Big-Pete-Little-Pete.png"},
+{"t":"Carol Vore derman","g":"pisc","u":"https://i.postimg.cc/xJsZx66n/Carol-Vore-derman.png"},
+{"t":"Chef Peet (Mummbles)","g":"pisc","u":"https://i.postimg.cc/dkdFzPZb/Chef-Pete-(Mummbles).png"},
+{"t":"Comic Pelief feat Peet Claimers","g":"pisc","u":"https://i.postimg.cc/qzBRCq3d/Comic-Pelief-feat-The-Pete-Claimers.png"},
+{"t":"Dear Deidre Peet Pants","g":"pisc","u":"https://i.postimg.cc/tZ5bXdD6/Dear-Deidre-Pete-Pants-Casebook.png"},
+{"t":"Donald Pump Pump (Satire)","g":"pisc","u":"https://i.postimg.cc/LYB9JF49/Donald-Pump-Pump-(Satire).png"},
+{"t":"Easter Punny","g":"pisc","u":"https://i.postimg.cc/LJRJDDw9/Easter-Punny.png"},
+{"t":"Fredi and the Friends","g":"pisc","u":"https://i.postimg.cc/DWSnPbv8/Fredi-and-the-Friends-(SCTV).png"},
+{"t":"Fanny Praddock (Cait)","g":"pisc","u":"https://i.postimg.cc/67VJ0LsW/Fanny-Praddock-(Cait).png"},
+{"t":"Kindly donated by disconnecteddan","g":"submissions","u":"https://i.postimg.cc/wtZjskdt/Kindly-donated-to-the-collection-by-disconnecteddan.jpg"},
+{"t":"Kindly donated by Harry Hardy","g":"submissions","u":"https://i.postimg.cc/t1xYkckv/Kindly-donated-to-the-collection-by-Harry-Hardy.png"},
+{"t":"Kindly donated by Alex Kidd","g":"submissions","u":"https://i.postimg.cc/V0yTMJ67/Kindly-donated-to-the-collection-by-Alex-Kidd-In-Shinobi-World.png"},
+{"t":"Kindly donated by Breadsanta","g":"submissions","u":"https://i.postimg.cc/MMxx230w/Kindly-donated-to-the-collection-by-Breadsanta.jpg"},
+{"t":"Million Dollar Moomin by AJMckenna","g":"submissions","u":"https://i.postimg.cc/fJcC2H2T/Million-Dollar-Moomin-Kindly-donated-to-the-collection-by-AJMckenna.jpg"},
+{"t":"Jerifier by sagebirt","g":"submissions","u":"https://i.postimg.cc/wtpQhDcR/Jerifier-Kindly-donated-to-the-collection-by-sagebirt.jpg"},
+{"t":"Kindly donated by Cait MKearns","g":"submissions","u":"https://i.postimg.cc/756kqTTV/Kindly-donated-to-the-collection-by-Cait-MKearns.png"},
+{"t":"Kindly donated by The Ross Is Cookin","g":"submissions","u":"https://i.postimg.cc/TKT9ZrFC/Kindly-donated-to-the-collection-by-The-Ross-Is-Cookin.jpg"},
+];
+
+// ═══════════════════════════════════════════════════════════════
+// ENGINE
+// ═══════════════════════════════════════════════════════════════
+let activeWorks = CFG.gallery==='all' ? [...WORKS] : WORKS.filter(w=>w.g===CFG.gallery);
+for(let i=activeWorks.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[activeWorks[i],activeWorks[j]]=[activeWorks[j],activeWorks[i]];}
+
+// Pick subset for carousel (max 12)
+const CAROUSEL_COUNT = Math.min(12, activeWorks.length);
+const carouselWorks = activeWorks.slice(0, CAROUSEL_COUNT);
+// Pick subset for background rotation
+const BG_COUNT = Math.min(8, activeWorks.length);
+const bgWorks = activeWorks.slice(0, BG_COUNT);
+
+let paused = false;
+let totalSeconds = CFG.minutes * 60;
+let remainingSeconds = totalSeconds;
+let countdownInterval = null;
+let carouselIdx = 0;
+let carouselInterval = null;
+let carouselProg = 0;
+let carouselProgInterval = null;
+let bgIdx = 0;
+let bgInterval = null;
+let finished = false;
+
+// ── Grain ──
+function genGrain(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');if(!x)return;const d=x.createImageData(128,128);for(let i=0;i<d.data.length;i+=4){const v=Math.random()*255;d.data[i]=v;d.data[i+1]=v;d.data[i+2]=v;d.data[i+3]=12}x.putImageData(d,0,0);const g=document.createElement('div');g.className='grain-overlay';g.style.backgroundImage=`url(${c.toDataURL('image/png')})`;document.body.appendChild(g)}
+
+// ── Text condensing ──
+function condense(t,m){if(!t||t.length<=m)return t;let s=t.slice(0,m-1);const l=s.lastIndexOf(' ');if(l>m*.5)s=s.slice(0,l);return s+'...'}
+
+// ── Update countdown display ──
+function updateDisplay(){
+  const min = Math.floor(remainingSeconds/60);
+  const sec = remainingSeconds%60;
+  document.getElementById('cdMin').textContent = String(min).padStart(2,'0');
+  document.getElementById('cdSec').textContent = String(sec).padStart(2,'0');
+
+  const cd = document.getElementById('countdown');
+  if(remainingSeconds <= 30 && remainingSeconds > 0){
+    cd.classList.add('urgent');
+  } else {
+    cd.classList.remove('urgent');
+  }
+
+  if(remainingSeconds <= 0 && !finished){
+    finished = true;
+    document.getElementById('mainContent').classList.add('finished');
+    document.getElementById('headingText').textContent = 'WE\'RE LIVE';
+    cd.classList.remove('urgent');
+    // Stop carousel auto-cycle but keep showing
+    clearInterval(carouselInterval);
+    clearInterval(carouselProgInterval);
+  }
+}
+
+// ── Countdown tick ──
+function tick(){
+  if(paused || finished) return;
+  remainingSeconds--;
+  if(remainingSeconds < 0) remainingSeconds = 0;
+  updateDisplay();
+}
+
+// ── Build carousel ──
+function buildCarousel(){
+  const inner = document.getElementById('carouselInner');
+  const dots = document.getElementById('carouselDots');
+  inner.innerHTML = '';
+  dots.innerHTML = '';
+
+  carouselWorks.forEach((w, i) => {
+    // Slide
+    const slide = document.createElement('div');
+    slide.className = 'carousel-slide';
+    const img = document.createElement('img');
+    img.src = w.u;
+    img.alt = w.t;
+    img.loading = 'lazy';
+    img.onload = function(){ this.classList.add('loaded'); };
+    slide.appendChild(img);
+    inner.appendChild(slide);
+
+    // Dot
+    const dot = document.createElement('div');
+    dot.className = 'carousel-dot' + (i===0?' active':'');
+    dot.onclick = () => goToSlide(i);
+    dots.appendChild(dot);
+  });
+
+  // Set gallery count
+  document.getElementById('galleryCount').textContent = `${activeWorks.length} WORKS`;
+
+  // Show first slide info
+  updateSlideInfo(0);
+}
+
+function updateSlideInfo(idx){
+  const w = carouselWorks[idx];
+  if(!w) return;
+  document.getElementById('slideTitle').textContent = condense(w.t, 50);
+  document.getElementById('slideGallery').textContent = `${ABBR[w.g]||'UNK'} — ${GNAME[w.g]||w.g}`;
+}
+
+function goToSlide(idx){
+  carouselIdx = idx;
+  const inner = document.getElementById('carouselInner');
+  inner.style.transform = `translateX(-${idx * 100}%)`;
+
+  // Update dots
+  document.querySelectorAll('.carousel-dot').forEach((d,i) => {
+    d.classList.toggle('active', i===idx);
+  });
+
+  updateSlideInfo(idx);
+  carouselProg = 0;
+  const bar = document.getElementById('carouselProgress');
+  if(bar) bar.style.width = '0%';
+}
+
+function advanceCarousel(){
+  carouselIdx = (carouselIdx + 1) % carouselWorks.length;
+  goToSlide(carouselIdx);
+}
+
+function startCarouselProgress(){
+  carouselProg = 0;
+  clearInterval(carouselProgInterval);
+  const tick = 100;
+  const total = CFG.speed * 1000;
+  carouselProgInterval = setInterval(() => {
+    if(paused) return;
+    carouselProg += tick;
+    const bar = document.getElementById('carouselProgress');
+    if(bar) bar.style.width = Math.min(100, carouselProg/total*100) + '%';
+  }, tick);
+}
+
+// ── Background artwork rotation ──
+function buildBackground(){
+  const container = document.getElementById('bgArtwork');
+  bgWorks.forEach((w,i) => {
+    const img = document.createElement('img');
+    img.src = w.u;
+    img.alt = '';
+    img.loading = 'lazy';
+    if(i===0) img.classList.add('active');
+    container.appendChild(img);
+  });
+}
+
+function rotateBackground(){
+  const imgs = document.querySelectorAll('#bgArtwork img');
+  if(imgs.length <= 1) return;
+  imgs[bgIdx].classList.remove('active');
+  bgIdx = (bgIdx + 1) % imgs.length;
+  imgs[bgIdx].classList.add('active');
+}
+
+// ── Keyboard shortcuts ──
+document.addEventListener('keydown', e => {
+  if(e.code === 'Space'){
+    e.preventDefault();
+    paused = !paused;
+    document.getElementById('pauseOverlay').classList.toggle('visible', paused);
+  }
+  if(e.code === 'KeyR'){
+    remainingSeconds = totalSeconds;
+    finished = false;
+    paused = false;
+    document.getElementById('mainContent').classList.remove('finished');
+    document.getElementById('headingText').textContent = CFG.label;
+    document.getElementById('pauseOverlay').classList.remove('visible');
+    updateDisplay();
+  }
+  if(e.code === 'KeyH'){
+    const content = document.getElementById('mainContent');
+    content.style.opacity = content.style.opacity === '0' ? '1' : '0';
+  }
+});
+
+// ── Init ──
+function init(){
+  if(CFG.showGrain) genGrain();
+  document.getElementById('headingText').textContent = CFG.label;
+  updateDisplay();
+  buildCarousel();
+  buildBackground();
+
+  // Start countdown
+  countdownInterval = setInterval(tick, 1000);
+
+  // Start carousel
+  carouselInterval = setInterval(() => {
+    if(!paused && !finished) advanceCarousel();
+  }, CFG.speed * 1000);
+  startCarouselProgress();
+
+  // Start bg rotation
+  bgInterval = setInterval(() => {
+    if(!paused) rotateBackground();
+  }, 15000);
+}
+
+setTimeout(init, 300);
+</script>
+</body>
+</html>
