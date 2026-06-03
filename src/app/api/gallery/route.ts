@@ -194,6 +194,17 @@ async function refreshFromApi(): Promise<GalleryResponse | null> {
 let memoryCache: { data: GalleryResponse; timestamp: number } | null = null;
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
 
+// CORS headers — allows OBS Browser Source (local file://) to fetch this API
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
@@ -201,7 +212,7 @@ export async function GET(request: Request) {
 
     // 1. Check memory cache (10-min TTL)
     if (!forceRefresh && memoryCache && Date.now() - memoryCache.timestamp < CACHE_TTL) {
-      return NextResponse.json(memoryCache.data);
+      return NextResponse.json(memoryCache.data, { headers: CORS_HEADERS });
     }
 
     // 2. Check file cache (2-hour TTL)
@@ -209,7 +220,7 @@ export async function GET(request: Request) {
       const fileCache = readCacheFile();
       if (fileCache && Date.now() - fileCache.timestamp < 2 * 60 * 60 * 1000) {
         memoryCache = fileCache;
-        return NextResponse.json(fileCache.data);
+        return NextResponse.json(fileCache.data, { headers: CORS_HEADERS });
       }
     }
 
@@ -230,7 +241,7 @@ export async function GET(request: Request) {
         }).catch(() => {});
       }
 
-      return NextResponse.json(response);
+      return NextResponse.json(response, { headers: CORS_HEADERS });
     }
 
     // 4. Fall back to API fetch
@@ -238,25 +249,25 @@ export async function GET(request: Request) {
     if (apiData) {
       memoryCache = { data: apiData, timestamp: Date.now() };
       writeCacheFile(apiData);
-      return NextResponse.json(apiData);
+      return NextResponse.json(apiData, { headers: CORS_HEADERS });
     }
 
     // 5. Last resort — stale file cache
     const staleCache = readCacheFile();
-    if (staleCache) return NextResponse.json(staleCache.data);
+    if (staleCache) return NextResponse.json(staleCache.data, { headers: CORS_HEADERS });
 
     return NextResponse.json(
       { error: "Failed to fetch gallery data", galleries: {}, allWorks: [], totalWorks: 0 },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   } catch (error) {
     console.error("Gallery fetch error:", error);
-    if (memoryCache) return NextResponse.json(memoryCache.data);
+    if (memoryCache) return NextResponse.json(memoryCache.data, { headers: CORS_HEADERS });
     const staleCache = readCacheFile();
-    if (staleCache) return NextResponse.json(staleCache.data);
+    if (staleCache) return NextResponse.json(staleCache.data, { headers: CORS_HEADERS });
     return NextResponse.json(
       { error: "Failed to fetch gallery data", galleries: {}, allWorks: [], totalWorks: 0 },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }
