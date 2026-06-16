@@ -34,6 +34,7 @@ import {
   Expand,
   ChevronDown,
   RefreshCw,
+  MoreHorizontal,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
@@ -275,7 +276,7 @@ function LazyImage({ src, alt }: { src: string; alt: string }) {
   }
 
   return (
-    <div className="relative overflow-hidden bg-[var(--vault-dark)] min-h-[80px]">
+    <div className="relative overflow-hidden bg-[var(--vault-dark)] min-h-[80px] w-full h-full">
       {!loaded && <div className="img-shimmer" />}
       <img
         ref={imgRef}
@@ -283,7 +284,7 @@ function LazyImage({ src, alt }: { src: string; alt: string }) {
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onError={() => setError(true)}
-        className={`w-full h-auto object-cover transition-all duration-500 group-hover:scale-105 ${
+        className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${
           loaded ? "opacity-100" : "opacity-0"
         }`}
       />
@@ -532,6 +533,25 @@ function Lightbox({
         >
           <div className={`lb-frame ${compareActive ? "lb-frame-compare" : ""}`}>
             <div className="lb-spotlight" aria-hidden="true" />
+
+            {/* Floating prev / next arrows over the image */}
+            <button
+              className="lb-arrow lb-arrow-prev"
+              onClick={onPrev}
+              aria-label="Previous artwork"
+              title="Previous (←)"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+            <button
+              className="lb-arrow lb-arrow-next"
+              onClick={onNext}
+              aria-label="Next artwork"
+              title="Next (→)"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
             <div className="lb-frame-inner" onClick={onToggleZoom}>
               <img
                 src={work.imageUrl}
@@ -571,82 +591,73 @@ function Lightbox({
               />
             </div>
 
-            <div className="lb-nav">
-              <button className="lb-btn" onClick={onPrev}>
-                <ChevronLeft className="w-4 h-4 mr-1" /> Prev
-              </button>
-              <button className="lb-btn" onClick={onNext}>
-                Next <ChevronRight className="w-4 h-4 ml-1" />
-              </button>
-            </div>
-
-            <div className="lb-actions-row">
+            <div className="lb-actions-row lb-actions-row-icons">
               <button
-                className={`lb-action-btn ${isFav ? "lb-action-btn-active" : ""}`}
+                className={`lb-action-btn lb-action-btn-icon ${isFav ? "lb-action-btn-active" : ""}`}
                 onClick={onToggleFav}
-                title={
-                  isFav ? "Remove from favourites" : "Add to favourites"
-                }
+                title={isFav ? "Remove from favourites (F)" : "Add to favourites (F)"}
+                aria-label={isFav ? "Remove from favourites" : "Add to favourites"}
               >
                 <Heart
                   className="w-4 h-4"
                   fill={isFav ? "currentColor" : "none"}
                 />
-                <span>{isFav ? "Favourited" : "Favourite"}</span>
               </button>
               <button
-                className="lb-action-btn"
+                className="lb-action-btn lb-action-btn-icon"
                 onClick={onShare}
                 title="Copy image link"
+                aria-label="Share image link"
               >
                 <Share2 className="w-4 h-4" />
-                <span>Share</span>
               </button>
               <a
-                className="lb-social-btn"
+                className="lb-social-btn lb-action-btn-icon"
                 href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out "${work.title}" from Peet Pics!`)}&url=${encodeURIComponent(work.imageUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Share on X/Twitter"
+                aria-label="Share on X/Twitter"
               >
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
               <a
-                className="lb-social-btn"
+                className="lb-social-btn lb-action-btn-icon"
                 href={`https://reddit.com/submit?title=${encodeURIComponent(`${work.title} - Peet Pics`)}&url=${encodeURIComponent(work.imageUrl)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Share on Reddit"
+                aria-label="Share on Reddit"
               >
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.841.09 3.502.624 4.739 1.433.449-.455 1.072-.737 1.764-.737a2.49 2.49 0 0 1 2.49 2.49c0 1.103-.723 2.038-1.723 2.37.046.2.07.41.07.622 0 3.12-3.264 5.644-7.277 5.644-4.014 0-7.278-2.523-7.278-5.644 0-.222.024-.437.07-.647C4.772 13.6 4.049 12.665 4.049 11.562a2.49 2.49 0 0 1 2.49-2.49c.683 0 1.3.27 1.748.722 1.247-.812 2.92-1.35 4.773-1.434l.885-4.148a.348.348 0 0 1 .14-.208.35.35 0 0 1 .247-.042l2.896.613a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.941.913.457 0 2.099-.071 2.94-.913a.328.328 0 0 0 0-.463.327.327 0 0 0-.462 0c-.548.549-1.897.787-2.478.787-.58 0-1.93-.24-2.478-.787a.326.326 0 0 0-.232-.094z"/></svg>
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.841.09 3.502.624 4.739 1.433.449-.455 1.072-.737 1.764-.737a2.49 2.49 0 0 1 2.49 2.49c0 1.103-.723 2.038-1.723 2.37.046.2.07.41.07.622 0 3.12-3.264 5.644-7.277 5.644-4.014 0-7.278-2.523-7.278-5.644 0-.222.024-.437.07-.647C4.772 13.6 4.049 12.665 4.049 11.562a2.49 2.49 0 0 1 2.49-2.49c.683 0 1.3.27 1.748.722 1.247-.812 2.92-1.35 4.773-1.434l.885-4.148a.348.348 0 0 1 .14-.208.35.35 0 0 1 .247-.042l2.896.613a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.941.913.457 0 2.099-.071 2.94-.913a.328.328 0 0 0 0-.463.327.327 0 0 0-.462 0c-.548.549-1.897.787-2.478.787-.58 0-1.93-.24-2.478-.787a.326.326 0 0 0-.232-.094z"/></svg>
               </a>
               <button
-                className="lb-action-btn"
+                className="lb-action-btn lb-action-btn-icon"
                 onClick={onDownload}
-                title="Download image"
+                title="Download image (D)"
+                aria-label="Download image"
               >
                 <Download className="w-4 h-4" />
-                <span>Download</span>
               </button>
               <button
-                className={`lb-action-btn ${compareActive ? "lb-action-btn-active" : ""}`}
+                className={`lb-action-btn lb-action-btn-icon ${compareActive ? "lb-action-btn-active" : ""}`}
                 onClick={onToggleCompare}
                 title="Compare with next (C)"
+                aria-label="Compare with next artwork"
               >
                 <Columns2 className="w-4 h-4" />
-                <span>Compare</span>
               </button>
               <button
-                className={`lb-action-btn-slideshow ${slideshowActive ? "active" : ""}`}
+                className={`lb-action-btn-slideshow lb-action-btn-icon ${slideshowActive ? "active" : ""}`}
                 onClick={onToggleSlideshow}
-                title={slideshowActive ? "Pause slideshow" : "Start slideshow"}
+                title={slideshowActive ? "Pause slideshow (S)" : "Start slideshow (S)"}
+                aria-label={slideshowActive ? "Pause slideshow" : "Start slideshow"}
               >
                 {slideshowActive ? (
                   <Pause className="w-4 h-4" />
                 ) : (
                   <Play className="w-4 h-4" />
                 )}
-                <span>{slideshowActive ? "Pause" : "Slideshow"}</span>
               </button>
             </div>
 
@@ -1110,6 +1121,7 @@ export default function Home() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [immersiveToolbarVisible, setImmersiveToolbarVisible] = useState(true);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
@@ -1164,6 +1176,26 @@ export default function Home() {
       clearTimeout(timeout);
     };
   }, [immersiveMode]);
+
+  /* Close Tools dropdown on outside click or Escape */
+  useEffect(() => {
+    if (!toolsOpen) return;
+    function onDocClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-tools-dropdown]")) {
+        setToolsOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setToolsOpen(false);
+    }
+    document.addEventListener("mousedown", onDocClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [toolsOpen]);
 
   /* FEATURE 1: Hash-Based Deep Linking — read hash on mount */
   useEffect(() => {
@@ -1559,13 +1591,22 @@ export default function Home() {
                 : room.id === "nacky"
                 ? nackyCount
                 : data?.galleries[room.id]?.works.length || 0;
+            const isActive = currentRoom === room.id;
             return (
               <button
                 key={room.id}
-                className={`nav-tab ${currentRoom === room.id ? "active" : ""} ${room.id === "nacky" ? "nav-tab-nacky" : ""} ${room.id === "favourites" ? "nav-tab-fav" : ""} ${room.id === "submissions" ? "nav-tab-submissions" : ""}`}
+                className={`nav-tab ${isActive ? "active" : ""} ${room.id === "nacky" ? "nav-tab-nacky" : ""} ${room.id === "favourites" ? "nav-tab-fav" : ""} ${room.id === "submissions" ? "nav-tab-submissions" : ""}`}
                 onClick={() => handleRoomChange(room.id)}
-                aria-current={currentRoom === room.id ? "page" : undefined}
+                aria-current={isActive ? "page" : undefined}
               >
+                {isActive && (
+                  <motion.span
+                    layoutId="nav-tab-active-indicator"
+                    className="nav-tab-indicator"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
                 {room.id === "nacky" && <Sparkles className="w-3 h-3" />}
                 {room.id === "favourites" && <Heart className="w-3 h-3" />}
                 {room.id === "submissions" && <Upload className="w-3 h-3" />}
@@ -1608,43 +1649,17 @@ export default function Home() {
 
           <button
             className="nav-action-btn"
-            onClick={handleRandom}
-            title="Random Artwork (R)"
-            aria-label="View random artwork"
-          >
-            <Shuffle className="w-4 h-4" />
-          </button>
-
-          <button
-            className={`nav-action-btn ${refreshing ? "nav-action-btn-refreshing" : ""}`}
-            onClick={handleRefresh}
-            title="Refresh gallery from source"
-            aria-label="Refresh gallery data"
-            disabled={refreshing}
-          >
-            <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-          </button>
-
-          <button
-            className="nav-action-btn"
-            onClick={() => setStatsOpen(true)}
-            title="Vault Manifest"
-            aria-label="Collection stats"
-          >
-            <BarChart3 className="w-4 h-4" />
-          </button>
-
-          <button
-            className="nav-action-btn"
             onClick={toggleTheme}
             title="Toggle Theme (T)"
             aria-label="Toggle theme"
           >
-            {themeMounted && dark ? (
-              <Sun className="w-4 h-4" />
-            ) : (
-              <Moon className="w-4 h-4" />
-            )}
+            <span className="theme-icon-wrap" key={themeMounted && dark ? "sun" : "moon"}>
+              {themeMounted && dark ? (
+                <Sun className="w-4 h-4" />
+              ) : (
+                <Moon className="w-4 h-4" />
+              )}
+            </span>
           </button>
 
           <button
@@ -1660,23 +1675,77 @@ export default function Home() {
             )}
           </button>
 
-          <button
-            className="nav-action-btn"
-            onClick={() => setImmersiveMode(true)}
-            title="Immersive Mode (I)"
-            aria-label="Enter immersive mode"
-          >
-            <Expand className="w-4 h-4" />
-          </button>
-
-          <button
-            className="nav-action-btn"
-            onClick={() => setAboutOpen(true)}
-            title="About & Shortcuts (?)"
-            aria-label="About and keyboard shortcuts"
-          >
-            <Info className="w-4 h-4" />
-          </button>
+          {/* Tools dropdown — groups secondary actions to declutter the bar */}
+          <div className="nav-tools-dropdown" data-tools-dropdown>
+            <button
+              className={`nav-action-btn nav-tools-btn ${toolsOpen ? "nav-tools-btn-open" : ""}`}
+              onClick={() => setToolsOpen((p) => !p)}
+              title="Tools"
+              aria-label="Tools menu"
+              aria-expanded={toolsOpen}
+              aria-haspopup="menu"
+            >
+              <MoreHorizontal className="w-4 h-4" />
+            </button>
+            <AnimatePresence>
+              {toolsOpen && (
+                <motion.div
+                  className="nav-tools-menu"
+                  role="menu"
+                  initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                  transition={{ duration: 0.16, ease: "easeOut" }}
+                >
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { handleRandom(); setToolsOpen(false); }}
+                  >
+                    <Shuffle className="w-4 h-4" />
+                    <span>Random Artwork</span>
+                    <kbd>R</kbd>
+                  </button>
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { handleRefresh(); setToolsOpen(false); }}
+                    disabled={refreshing}
+                  >
+                    <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                    <span>{refreshing ? "Refreshing…" : "Refresh Gallery"}</span>
+                  </button>
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { setStatsOpen(true); setToolsOpen(false); }}
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span>Vault Manifest</span>
+                  </button>
+                  <div className="nav-tools-divider" />
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { setImmersiveMode(true); setToolsOpen(false); }}
+                  >
+                    <Expand className="w-4 h-4" />
+                    <span>Immersive Mode</span>
+                    <kbd>I</kbd>
+                  </button>
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { setAboutOpen(true); setToolsOpen(false); }}
+                  >
+                    <Info className="w-4 h-4" />
+                    <span>About &amp; Shortcuts</span>
+                    <kbd>?</kbd>
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           <button
             className="nav-action-btn nav-menu-btn"
@@ -1740,7 +1809,7 @@ export default function Home() {
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              {ROOMS.map((room) => {
+              {ROOMS.map((room, idx) => {
                 const count =
                   room.id === "all"
                     ? data?.totalWorks || 0
@@ -1750,17 +1819,20 @@ export default function Home() {
                     ? nackyCount
                     : data?.galleries[room.id]?.works.length || 0;
                 return (
-                  <button
+                  <motion.button
                     key={room.id}
                     className={`mobile-menu-item ${currentRoom === room.id ? "mobile-menu-item-active" : ""}`}
                     onClick={() => handleRoomChange(room.id)}
+                    initial={{ opacity: 0, x: 30 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.06 + idx * 0.04, duration: 0.3, ease: "easeOut" }}
                   >
                     {room.id === "nacky" && <Sparkles className="w-4 h-4" />}
                     {room.id === "favourites" && <Heart className="w-4 h-4" />}
                     {room.id === "submissions" && <Upload className="w-4 h-4" />}
                     {room.label}
                     <span className="mobile-menu-count">{count}</span>
-                  </button>
+                  </motion.button>
                 );
               })}
               <div className="mobile-menu-divider" />
@@ -2009,11 +2081,51 @@ export default function Home() {
                       The spreadsheet is open to everyone — feel free to add your finds!
                     </p>
                   </div>
+                ) : currentRoom === "favourites" ? (
+                  <div className="empty-state empty-state-fav" role="status">
+                    <motion.div
+                      className="empty-state-icon"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    >
+                      <Heart className="w-12 h-12" />
+                    </motion.div>
+                    <h3 className="empty-state-title">No Favourites Yet</h3>
+                    <p className="empty-state-text">
+                      Your personal collection is empty. Click the heart icon on any artwork
+                      to save it here — your favourites stay between visits.
+                    </p>
+                    <button
+                      className="empty-state-cta"
+                      onClick={() => handleRoomChange("all")}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      Browse All Works
+                    </button>
+                  </div>
                 ) : (
-                  <div className="no-results">
-                    {currentRoom === "favourites"
-                      ? "No favourites yet — click the heart on any artwork to save it here."
-                      : "No works found matching your search."}
+                  <div className="empty-state empty-state-search" role="status">
+                    <motion.div
+                      className="empty-state-icon"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, ease: "easeOut" }}
+                    >
+                      <Search className="w-12 h-12" />
+                    </motion.div>
+                    <h3 className="empty-state-title">No Matches Found</h3>
+                    <p className="empty-state-text">
+                      Nothing in the vault matches &ldquo;{searchQuery}&rdquo;. Try a different
+                      search term or browse the full archive.
+                    </p>
+                    <button
+                      className="empty-state-cta"
+                      onClick={() => setSearchQuery("")}
+                    >
+                      <X className="w-4 h-4" />
+                      Clear Search
+                    </button>
                   </div>
                 )
               ) : viewMode === "list" ? (
