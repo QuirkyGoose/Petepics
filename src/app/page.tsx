@@ -1599,14 +1599,6 @@ export default function Home() {
                 onClick={() => handleRoomChange(room.id)}
                 aria-current={isActive ? "page" : undefined}
               >
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-tab-active-indicator"
-                    className="nav-tab-indicator"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
                 {room.id === "nacky" && <Sparkles className="w-3 h-3" />}
                 {room.id === "favourites" && <Heart className="w-3 h-3" />}
                 {room.id === "submissions" && <Upload className="w-3 h-3" />}

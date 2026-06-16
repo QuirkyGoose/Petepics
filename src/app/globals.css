@@ -529,6 +529,29 @@ body {
   box-shadow: 0 2px 8px var(--vault-glow);
 }
 
+/* Amber background that fades in smoothly when tab becomes active
+   (replaces the Framer Motion layoutId slider which caused a brief
+   solid-color flash across the nav bar during transitions) */
+.nav-tab::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--vault-amber);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 0;
+}
+
+.nav-tab > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-tab.active::before {
+  opacity: 0.12;
+}
+
 /* ── Count badge on tabs ── */
 .nav-tab-count {
   font-family: 'JetBrains Mono', monospace;
