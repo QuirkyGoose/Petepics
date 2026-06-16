@@ -4073,6 +4073,13 @@ body {
   transition: opacity 0.35s ease;
 }
 
+/* Image dimensions in the EXIF info (next to film ref) */
+.lb-exif-dims {
+  color: var(--vault-dim);
+  font-size: 0.85em;
+  margin-left: 0.3em;
+}
+
 /* Room header — subtle entrance animation */
 .room-eyebrow,
 .room-title,

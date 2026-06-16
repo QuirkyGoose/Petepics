@@ -46,6 +46,10 @@ interface GalleryWork {
   gallery: string;
   galleryName: string;
   imageUrl: string;
+  fullImageUrl?: string;
+  width?: number;
+  height?: number;
+  thumbUrl?: string;
 }
 
 interface GalleryData {
@@ -341,7 +345,7 @@ function ArtworkCard({
       <span className="sprocket-number" aria-hidden="true">{sprocketNum}</span>
       <div className={`frame ${frameStyle}`} onClick={onClick}>
         <div className="frame-inner">
-          <LazyImage src={work.imageUrl} alt={`${work.title} — ${work.galleryName} artwork`} />
+          <LazyImage src={work.thumbUrl || work.imageUrl} alt={`${work.title} — ${work.galleryName} artwork`} />
           <span className="frame-number" aria-hidden="true">#{index + 1}</span>
           <span className={`card-gallery-tag ${tagClass}`}>
             {GALLERY_ABBREVIATIONS[work.gallery] || work.gallery.slice(0, 3).toUpperCase()}
@@ -411,7 +415,7 @@ function ListCard({
       onKeyDown={onKeyDown}
     >
       <div className="list-card-thumb">
-        <img src={work.imageUrl} alt={`${work.title} — thumbnail`} loading="lazy" />
+        <img src={work.thumbUrl || work.imageUrl} alt={`${work.title} — thumbnail`} loading="lazy" />
       </div>
       <div className="list-card-info">
         <div className="list-card-title">{work.title}</div>
@@ -576,7 +580,12 @@ function Lightbox({
           <div className="lb-info" id="lb-info">
             <div className="lb-gallery-tag">{work.galleryName}</div>
             <h2 className="lb-title">{work.title}</h2>
-            <div className="lb-exif-ref">{filmRef}</div>
+            <div className="lb-exif-ref">
+              {filmRef}
+              {work.width && work.height && (
+                <span className="lb-exif-dims"> · {work.width}×{work.height}px</span>
+              )}
+            </div>
             <div className="lb-position">
               {position + 1} / {total}
               {slideshowActive && (
@@ -693,7 +702,7 @@ function Lightbox({
                   role="img"
                   aria-label={`${w.title} — thumbnail ${actualIdx + 1}`}
                 >
-                  <img src={w.imageUrl} alt="" />
+                  <img src={w.thumbUrl || w.imageUrl} alt="" />
                 </button>
               );
             })}
@@ -1898,7 +1907,7 @@ export default function Home() {
                 }}
                 title={w.title}
               >
-                <img src={w.imageUrl} alt={w.title} />
+                <img src={w.thumbUrl || w.imageUrl} alt={w.title} />
               </button>
             ))}
           </div>

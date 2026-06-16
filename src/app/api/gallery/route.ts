@@ -9,6 +9,9 @@ interface GalleryWork {
   gallery: string;
   galleryName: string;
   imageUrl: string;
+  fullImageUrl?: string;
+  width?: number;
+  height?: number;
 }
 
 interface GalleryData {
@@ -136,17 +139,30 @@ async function refreshFromApi(): Promise<GalleryResponse | null> {
         const result = await fetchGalleryPage(def.albumHex, page);
 
         for (const img of result.images) {
-          const [id, , name, ext] = img as [string, string, string, string, ...unknown[]];
+          // postimg API returns: [thumbId, fullResId, name, ext, width, height, thumbUrl, ...]
+          const [thumbId, fullResId, name, ext, width, height] = img as [
+            string, string, string, string, number, number, ...unknown[]
+          ];
           const file = `${name.replace(/ /g, "-")}.${ext}`;
-          const imageUrl = `https://i.postimg.cc/${id}/${file}`;
+          // Use fullResId for the main imageUrl (high quality) and thumbId for a small variant
+          const imageUrl = fullResId
+            ? `https://i.postimg.cc/${fullResId}/${file}`
+            : `https://i.postimg.cc/${thumbId}/${file}`;
+          // Thumbnail URL for gallery card display (faster load)
+          const thumbUrl = `https://i.postimg.cc/${thumbId}/${file}`;
           const work: GalleryWork = {
-            id,
+            id: thumbId,
             file,
             title: deriveTitle(name),
             gallery: def.id,
             galleryName: meta.name,
             imageUrl,
+            fullImageUrl: imageUrl,
+            width: typeof width === "number" ? width : undefined,
+            height: typeof height === "number" ? height : undefined,
           };
+          // Stash thumb URL on the work via a custom field (kept out of type to avoid breaking)
+          (work as GalleryWork & { thumbUrl?: string }).thumbUrl = thumbUrl;
 
           allWorks.push(work);
           galleries[def.id].works.push(work);
