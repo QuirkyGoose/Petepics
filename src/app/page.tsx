@@ -1103,6 +1103,275 @@ function Toast({ message, visible }: { message: string; visible: boolean }) {
   );
 }
 
+/* ── Fullscreen Slideshow Mode ───────────────────────────── */
+const SLIDESHOW_SPEEDS = [
+  { label: "3s", value: 3000 },
+  { label: "5s", value: 5000 },
+  { label: "10s", value: 10000 },
+  { label: "15s", value: 15000 },
+];
+const SLIDESHOW_SPEED_KEY = "peetpics_slideshow_speed";
+
+function SlideshowMode({
+  isOpen,
+  onClose,
+  works,
+  startIndex = 0,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  works: GalleryWork[];
+  startIndex?: number;
+}) {
+  const [index, setIndex] = useState(startIndex);
+  const [paused, setPaused] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [controlsVisible, setControlsVisible] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [speed, setSpeed] = useState(5000); // default 5s
+
+  // Hydrate speed from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(SLIDESHOW_SPEED_KEY);
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (SLIDESHOW_SPEEDS.some((s) => s.value === parsed)) setSpeed(parsed);
+      }
+    } catch {}
+  }, []);
+
+  // Persist speed to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(SLIDESHOW_SPEED_KEY, String(speed));
+    } catch {}
+  }, [speed]);
+
+  // Reset index when slideshow opens
+  useEffect(() => {
+    if (isOpen) {
+      setIndex(Math.min(startIndex, works.length - 1));
+      setPaused(false);
+      setProgress(0);
+      setControlsVisible(true);
+    }
+  }, [isOpen, startIndex, works.length]);
+
+  // Auto-advance timer with progress tracking
+  useEffect(() => {
+    if (!isOpen || paused || works.length === 0) return;
+    const tickMs = 50;
+    const ticks = speed / tickMs;
+    let current = 0;
+    const interval = setInterval(() => {
+      current++;
+      setProgress((current / ticks) * 100);
+      if (current >= ticks) {
+        current = 0;
+        setProgress(0);
+        setIndex((i) => (i + 1) % works.length);
+      }
+    }, tickMs);
+    return () => clearInterval(interval);
+  }, [isOpen, paused, speed, works.length]);
+
+  // Auto-hide controls after 2.5s of no mouse movement
+  useEffect(() => {
+    if (!isOpen) return;
+    let timeout: ReturnType<typeof setTimeout>;
+    const onMouseMove = () => {
+      setControlsVisible(true);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        if (!paused && !settingsOpen) setControlsVisible(false);
+      }, 2500);
+    };
+    window.addEventListener("mousemove", onMouseMove);
+    onMouseMove(); // initial show
+    return () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      clearTimeout(timeout);
+    };
+  }, [isOpen, paused, settingsOpen]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e: KeyboardEvent) {
+      switch (e.key) {
+        case "Escape":
+          if (settingsOpen) setSettingsOpen(false);
+          else onClose();
+          break;
+        case " ":
+          e.preventDefault();
+          setPaused((p) => !p);
+          break;
+        case "ArrowRight":
+          setProgress(0);
+          setIndex((i) => (i + 1) % works.length);
+          break;
+        case "ArrowLeft":
+          setProgress(0);
+          setIndex((i) => (i - 1 + works.length) % works.length);
+          break;
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose, works.length, settingsOpen]);
+
+  // Touch swipe navigation
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
+
+  if (!isOpen || works.length === 0) return null;
+
+  const work = works[index];
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="slideshow-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.4 }}
+        onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={(e) => {
+          touchEndX.current = e.changedTouches[0].clientX;
+          const diff = touchStartX.current - touchEndX.current;
+          if (Math.abs(diff) > 60) {
+            setProgress(0);
+            if (diff > 0) setIndex((i) => (i + 1) % works.length);
+            else setIndex((i) => (i - 1 + works.length) % works.length);
+          }
+        }}
+      >
+        {/* Cross-fading image with Ken Burns effect */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={work.id}
+            className="slideshow-image-wrap"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+          >
+            <img
+              src={work.imageUrl}
+              alt={work.title}
+              className="slideshow-image"
+            />
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Progress bar at bottom */}
+        <div className="slideshow-progress-track">
+          <div
+            className="slideshow-progress-fill"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {/* Caption — bottom-left, fades with controls */}
+        <motion.div
+          className="slideshow-caption"
+          animate={{ opacity: controlsVisible ? 1 : 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="slideshow-caption-gallery">{work.galleryName}</div>
+          <div className="slideshow-caption-title">{work.title}</div>
+          <div className="slideshow-caption-pos">
+            {index + 1} / {works.length}
+          </div>
+        </motion.div>
+
+        {/* Controls bar — top-center, fades with controls */}
+        <motion.div
+          className="slideshow-controls"
+          animate={{ opacity: controlsVisible ? 1 : 0, y: controlsVisible ? 0 : -10 }}
+          transition={{ duration: 0.3 }}
+        >
+          <button
+            className="slideshow-btn"
+            onClick={() => { setProgress(0); setIndex((i) => (i - 1 + works.length) % works.length); }}
+            aria-label="Previous"
+            title="Previous (←)"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            className="slideshow-btn slideshow-btn-primary"
+            onClick={() => setPaused((p) => !p)}
+            aria-label={paused ? "Play" : "Pause"}
+            title={paused ? "Play (Space)" : "Pause (Space)"}
+          >
+            {paused ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
+          </button>
+          <button
+            className="slideshow-btn"
+            onClick={() => { setProgress(0); setIndex((i) => (i + 1) % works.length); }}
+            aria-label="Next"
+            title="Next (→)"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+
+          <div className="slideshow-controls-divider" />
+
+          <button
+            className={`slideshow-btn ${settingsOpen ? "slideshow-btn-active" : ""}`}
+            onClick={() => setSettingsOpen((p) => !p)}
+            aria-label="Settings"
+            title="Slideshow speed"
+          >
+            <span className="slideshow-speed-label">{(speed / 1000).toFixed(0)}s</span>
+          </button>
+
+          <div className="slideshow-controls-divider" />
+
+          <button
+            className="slideshow-btn"
+            onClick={onClose}
+            aria-label="Exit slideshow"
+            title="Exit (Esc)"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </motion.div>
+
+        {/* Settings popover */}
+        <AnimatePresence>
+          {settingsOpen && (
+            <motion.div
+              className="slideshow-settings"
+              initial={{ opacity: 0, y: -10, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="slideshow-settings-label">Slide Duration</div>
+              <div className="slideshow-settings-options">
+                {SLIDESHOW_SPEEDS.map((s) => (
+                  <button
+                    key={s.value}
+                    className={`slideshow-speed-option ${speed === s.value ? "active" : ""}`}
+                    onClick={() => { setSpeed(s.value); setProgress(0); }}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 /* ── Main Page ────────────────────────────────────────────── */
 export default function Home() {
   const [data, setData] = useState<GalleryResponse | null>(null);
@@ -1131,6 +1400,7 @@ export default function Home() {
   const [showScrollHint, setShowScrollHint] = useState(false);
   const [immersiveToolbarVisible, setImmersiveToolbarVisible] = useState(true);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const [slideshowModeOpen, setSlideshowModeOpen] = useState(false);
 
   const { favs, toggleFav, isFav, favCount } = useFavourites();
   const { dark, toggle: toggleTheme, mounted: themeMounted } = useTheme();
@@ -1405,6 +1675,11 @@ export default function Home() {
       if (e.key === "t" || e.key === "T") toggleTheme();
       if (e.key === "v" || e.key === "V") cycleView();
       if (e.key === "i" || e.key === "I") setImmersiveMode((prev) => !prev);
+      // Shift+S opens fullscreen slideshow mode (S alone is the in-lightbox slideshow toggle)
+      if ((e.key === "s" || e.key === "S") && e.shiftKey) {
+        e.preventDefault();
+        setSlideshowModeOpen(true);
+      }
     }
 
     window.addEventListener("keydown", handleKey);
@@ -1733,6 +2008,15 @@ export default function Home() {
                     <Expand className="w-4 h-4" />
                     <span>Immersive Mode</span>
                     <kbd>I</kbd>
+                  </button>
+                  <button
+                    className="nav-tools-item"
+                    role="menuitem"
+                    onClick={() => { setSlideshowModeOpen(true); setToolsOpen(false); }}
+                  >
+                    <Play className="w-4 h-4" />
+                    <span>Slideshow Mode</span>
+                    <kbd>⇧S</kbd>
                   </button>
                   <button
                     className="nav-tools-item"
@@ -2316,6 +2600,14 @@ export default function Home() {
 
       {/* Toast */}
       <Toast message={toastMessage} visible={toastVisible} />
+
+      {/* Fullscreen Slideshow Mode */}
+      <SlideshowMode
+        isOpen={slideshowModeOpen}
+        onClose={() => setSlideshowModeOpen(false)}
+        works={visibleWorks}
+        startIndex={0}
+      />
 
       {/* Scroll to top */}
       <ScrollToTop />

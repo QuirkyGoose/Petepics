@@ -4080,6 +4080,245 @@ body {
   margin-left: 0.3em;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   FULLSCREEN SLIDESHOW MODE
+   Black takeover, Ken Burns effect, auto-advancing cross-fades
+   ═══════════════════════════════════════════════════════════ */
+.slideshow-overlay {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  cursor: default;
+}
+
+.slideshow-image-wrap {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slideshow-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+  /* Ken Burns effect — slow zoom + pan over 20s, synced with longer slide durations */
+  animation: kenBurns 20s ease-in-out infinite;
+  filter: drop-shadow(0 8px 40px rgba(0,0,0,0.8));
+}
+
+/* When paused, freeze the Ken Burns animation */
+.slideshow-overlay:has(.slideshow-paused-indicator) .slideshow-image {
+  animation-play-state: paused;
+}
+
+/* Progress bar at bottom */
+.slideshow-progress-track {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.08);
+  z-index: 10;
+}
+.slideshow-progress-fill {
+  height: 100%;
+  background: var(--vault-amber);
+  transition: width 0.05s linear;
+  box-shadow: 0 0 12px rgba(212,168,83,0.5);
+}
+
+/* Caption — bottom-left */
+.slideshow-caption {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 2.5rem;
+  z-index: 10;
+  pointer-events: none;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  max-width: 60%;
+}
+.slideshow-caption-gallery {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-amber);
+  margin-bottom: 0.4rem;
+}
+.slideshow-caption-title {
+  font-family: 'Newsreader', serif;
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+.slideshow-caption-pos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.08em;
+}
+
+/* Controls bar — top-center */
+.slideshow-controls {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(26, 24, 20, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(212,168,83,0.2);
+  border-radius: 999px;
+  padding: 0.35rem 0.5rem;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+.slideshow-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.75);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.slideshow-btn:hover {
+  background: rgba(212,168,83,0.15);
+  color: var(--vault-amber);
+}
+.slideshow-btn:active {
+  transform: scale(0.92);
+}
+.slideshow-btn-active {
+  background: rgba(212,168,83,0.2);
+  color: var(--vault-amber);
+}
+.slideshow-btn-primary {
+  width: 44px;
+  height: 44px;
+  background: var(--vault-amber);
+  color: var(--vault-dark);
+}
+.slideshow-btn-primary:hover {
+  background: var(--vault-cream);
+  color: var(--vault-dark);
+}
+.slideshow-speed-label {
+  font-size: 0.7rem;
+}
+
+.slideshow-controls-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255,255,255,0.15);
+  margin: 0 0.2rem;
+}
+
+/* Settings popover — drops below the controls bar */
+.slideshow-settings {
+  position: absolute;
+  top: 5.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 25;
+  background: rgba(26, 24, 20, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--vault-border);
+  border-top: 2px solid var(--vault-amber);
+  padding: 1rem 1.2rem;
+  min-width: 220px;
+  box-shadow: 0 16px 40px -10px rgba(0,0,0,0.7);
+  border-radius: 4px;
+}
+.slideshow-settings-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--vault-muted);
+  margin-bottom: 0.6rem;
+  text-align: center;
+}
+.slideshow-settings-options {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: center;
+}
+.slideshow-speed-option {
+  flex: 1;
+  padding: 0.45rem 0.6rem;
+  background: transparent;
+  border: 1px solid var(--vault-border);
+  color: var(--vault-cream);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border-radius: 2px;
+}
+.slideshow-speed-option:hover {
+  border-color: var(--vault-amber);
+  color: var(--vault-amber);
+}
+.slideshow-speed-option.active {
+  background: var(--vault-amber);
+  color: var(--vault-dark);
+  border-color: var(--vault-amber);
+}
+
+/* Mobile: shrink controls, move caption higher */
+@media (max-width: 640px) {
+  .slideshow-caption {
+    bottom: 1.5rem;
+    left: 1rem;
+    max-width: 80%;
+  }
+  .slideshow-caption-title {
+    font-size: 1.1rem;
+  }
+  .slideshow-controls {
+    top: 1rem;
+    padding: 0.25rem 0.4rem;
+  }
+  .slideshow-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .slideshow-btn-primary {
+    width: 38px;
+    height: 38px;
+  }
+  .slideshow-settings {
+    top: 4rem;
+    min-width: 180px;
+  }
+}
+
 /* Room header — subtle entrance animation */
 .room-eyebrow,
 .room-title,
